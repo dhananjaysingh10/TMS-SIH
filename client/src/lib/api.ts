@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api";
 
 interface ApiError {
   message: string;
@@ -35,28 +35,27 @@ async function fetchApi<T>(
 }
 
 export interface Ticket {
-  id: string;
-  ticket_number: string;
+  _id:string,
+  ticketId: string;
+  department: "IT" | "dev-ops" | "software" | "networking" | "cyber-security"|"NA";
   subject: string;
   description: string;
-  status: "open" | "in_progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high" | "urgent";
-  category: "network" | "software" | "hardware" | "access" | "other";
-  requester: {
+  type: string;
+  status: "open" | "in-progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high";
+  createdBy: {
     id: string;
-    full_name: string;
+    name: string;
     email: string;
   };
-  assigned_to?: {
+  assignedTo?: {
     id: string;
-    full_name: string;
+    name: string;
     email: string;
   };
   accepted: boolean;
-  created_at: string;
-  updated_at: string;
-  resolved_at?: string;
-  closed_at?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Comment {
@@ -85,30 +84,52 @@ export type TicketStats = {
   inProgress: number;
   closed: number;
 };
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
 
+export interface NewTicketData {
+  description: string;
+  department: string;
+  priority: string;
+  useremail: string; // This should come from your authenticated user session.
+  assignedemail?: string;
+}
 export const ticketsApi = {
-  getAll: () => fetchApi<Ticket[]>("/tickets"),
-
-  getById: (id: string) => fetchApi<Ticket>(`/tickets/${id}`),
+  getAll: () => fetchApi<Ticket[]>(`/ticket`),
+  getAllDepartment: (department: string) =>
+    fetchApi<Ticket[]>(`/ticket/department/${department}`),
+  getById: async (id: string): Promise<Ticket> => {
+    const endpoint = `/ticket/${id}`;
+    const response = await fetchApi<ApiResponse<Ticket>>(endpoint);
+    return response.data;
+  },
 
   getMyTickets: (userId: string) =>
-    fetchApi<Ticket[]>(`/tickets/assigned/${userId}`),
-
+    fetchApi<Ticket[]>(`/ticket/assigned/${userId}`),
+  create: async (ticketData: NewTicketData): Promise<Ticket> => {
+    const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {
+      method: "POST",
+      body: JSON.stringify(ticketData),
+    });
+    return response.data;
+  },
   getStats: () => fetchApi<TicketStats>("/tickets/stats"),
-
   acceptTicket: (ticketId: string, userId: string) =>
-    fetchApi<Ticket>(`/tickets/${ticketId}/accept`, {
+    fetchApi<Ticket>(`/ticket/accept/${ticketId}`, {
       method: "POST",
       body: JSON.stringify({ userId }),
     }),
 
   resolveTicket: (ticketId: string) =>
-    fetchApi<Ticket>(`/tickets/${ticketId}/resolve`, {
+    fetchApi<Ticket>(`/ticket/resolve/${ticketId}`, {
       method: "POST",
     }),
   ticketStats: () => fetchApi<TicketStats>("/tickets/stats"),
   updateStatus: (ticketId: string, status: string) =>
-    fetchApi<Ticket>(`/tickets/${ticketId}/status`, {
+    fetchApi<Ticket>(`/ticket/${ticketId}/status`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
@@ -116,10 +137,10 @@ export const ticketsApi = {
 
 export const commentsApi = {
   getByTicket: (ticketId: string) =>
-    fetchApi<Comment[]>(`/tickets/${ticketId}/comments`),
+    fetchApi<Comment[]>(`/ticket/${ticketId}/comments`),
 
   create: (ticketId: string, content: string, userId: string) =>
-    fetchApi<Comment>(`/tickets/${ticketId}/comments`, {
+    fetchApi<Comment>(`/ticket/${ticketId}/comments`, {
       method: "POST",
       body: JSON.stringify({ content, userId }),
     }),

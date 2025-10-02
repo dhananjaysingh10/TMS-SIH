@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import Ticket from "../models/ticket.model.js";
 import crypto from "crypto";
-
+import User from "../models/user.model.js";
 const paginateTickets = async (query, page, limit, res) => {
   try {
     const pageNum = parseInt(page) || 1;
@@ -19,7 +19,7 @@ const paginateTickets = async (query, page, limit, res) => {
     const tickets = await Ticket.find(query)
       .populate("assignedTo", "name email")
       .populate("createdBy", "name email")
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum);
 
@@ -42,10 +42,22 @@ const paginateTickets = async (query, page, limit, res) => {
 
 export const createTicket = async (req, res) => {
   try {
-    const { ticketId, department, type, description, createdBy, assignedTo, status } = req.body;
-
+    
+    const {
+      ticketId,
+      department,
+      type,
+      description,
+      useremail,
+      assignedemail,
+      status,
+      priority,
+    } = req.body;
+    
     const finalTicketId = ticketId || crypto.randomUUID();
-
+    const createdBy = await User.findOne({ email: useremail });
+    const assignedTo = await User.findOne({ email: assignedemail });
+    
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department,
@@ -54,10 +66,11 @@ export const createTicket = async (req, res) => {
       createdBy,
       assignedTo,
       status,
+      priority,
     });
-
+    
     const savedTicket = await newTicket.save();
-
+    console.log("enter");
     res.status(201).json({
       success: true,
       message: "Ticket created successfully",
@@ -76,7 +89,7 @@ export const getAllTickets = async (req, res) => {
   const { page, limit } = req.query;
   const result = await paginateTickets({}, page, limit, res);
 
-  res.status(result.success ? 200 : 500).json(result);
+  res.status(result.success ? 200 : 500).json(result.data);
 };
 
 export const getTicketsByDepartment = async (req, res) => {
@@ -84,11 +97,20 @@ export const getTicketsByDepartment = async (req, res) => {
     const { department } = req.params;
     const { page, limit } = req.query;
 
-    const validDepartments = ["IT", "dev-ops", "software", "networking", "cyber-security", "NA"];
+    const validDepartments = [
+      "IT",
+      "dev-ops",
+      "software",
+      "networking",
+      "cyber-security",
+      "NA",
+    ];
     if (!validDepartments.includes(department)) {
       return res.status(400).json({
         success: false,
-        message: `Invalid department. Must be one of: ${validDepartments.join(", ")}`,
+        message: `Invalid department. Must be one of: ${validDepartments.join(
+          ", "
+        )}`,
       });
     }
 
@@ -115,7 +137,12 @@ export const getTicketsByCreatedBy = async (req, res) => {
       });
     }
 
-    const result = await paginateTickets({ createdBy: userId }, page, limit, res);
+    const result = await paginateTickets(
+      { createdBy: userId },
+      page,
+      limit,
+      res
+    );
     res.status(result.success ? 200 : 500).json(result);
   } catch (error) {
     res.status(500).json({
@@ -128,7 +155,7 @@ export const getTicketsByCreatedBy = async (req, res) => {
 
 export const getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id).populate("assignedTo", "name email").populate("createdBy", "name email");
+    const ticket = await Ticket.findById(req.params.id)
     if (!ticket) {
       return res.status(404).json({
         success: false,
@@ -167,7 +194,9 @@ export const updateTicket = async (req, res) => {
     const ticket = await Ticket.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
-    }).populate("assignedTo", "name email").populate("createdBy", "name email");
+    })
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email");
 
     if (!ticket) {
       return res.status(404).json({
@@ -185,6 +214,83 @@ export const updateTicket = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error updating ticket",
+      error: error.message,
+    });
+  }
+};
+
+export const acceptTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params; 
+    const { userId: userEmail } = req.body; 
+    const userToAssign = await User.findOne({ email: userEmail });
+    if (!userToAssign) {
+      return res.status(404).json({
+        success: false,
+        message: "User to assign not found.",
+      });
+    }
+
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      {
+        assignedTo: userToAssign._id, 
+        accepted: true,
+        status: "in-progress",
+      },
+      { new: true, runValidators: true }
+    ).populate("assignedTo createdBy", "name email");
+
+    if (!updatedTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket accepted and assigned successfully.",
+      data: updatedTicket,
+    });
+  } catch (error) {
+    console.error("Error accepting ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while accepting ticket.",
+      error: error.message,
+    });
+  }
+};
+
+export const resolveTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      {
+        status: "resolved",
+      },
+      { new: true, runValidators: true }
+    ).populate("assignedTo createdBy", "name email");
+
+    if (!updatedTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket resolved successfully.",
+      data: updatedTicket,
+    });
+  } catch (error) {
+    console.error("Error resolving ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while resolving ticket.",
       error: error.message,
     });
   }

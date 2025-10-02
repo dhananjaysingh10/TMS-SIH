@@ -29,7 +29,7 @@ const priorityColors = {
 
 const statusColors = {
   open: "bg-green-100 text-green-700",
-  in_progress: "bg-blue-100 text-blue-700",
+  "in-progress": "bg-blue-100 text-blue-700",
   resolved: "bg-purple-100 text-purple-700",
   closed: "bg-gray-100 text-gray-600",
 };
@@ -43,13 +43,13 @@ export default function TicketDetail() {
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const currentUserId = "current-user-id";
+  const currentUserId = "arpantomar2018@gmail.com";
 
   useEffect(() => {
     if (id) {
       fetchTicketDetails();
-      fetchComments();
-      fetchActivities();
+      // fetchComments();
+      // fetchActivities();
     }
   }, [id]);
 
@@ -89,9 +89,9 @@ export default function TicketDetail() {
     if (!ticket) return;
 
     try {
-      await ticketsApi.acceptTicket(ticket.id, currentUserId);
+      await ticketsApi.acceptTicket(ticket._id, currentUserId);
       fetchTicketDetails();
-      fetchActivities();
+      // fetchActivities();
     } catch (error) {
       console.error("Error accepting ticket:", error);
     }
@@ -101,9 +101,9 @@ export default function TicketDetail() {
     if (!ticket) return;
 
     try {
-      await ticketsApi.resolveTicket(ticket.id);
+      await ticketsApi.resolveTicket(ticket._id);
       fetchTicketDetails();
-      fetchActivities();
+      // fetchActivities();
     } catch (error) {
       console.error("Error resolving ticket:", error);
     }
@@ -114,10 +114,10 @@ export default function TicketDetail() {
 
     setSubmitting(true);
     try {
-      await commentsApi.create(ticket.id, newComment, currentUserId);
+      // await commentsApi.create(ticket._id, newComment, currentUserId);
       setNewComment("");
-      fetchComments();
-      fetchActivities();
+      // fetchComments();
+      // fetchActivities();
     } catch (error) {
       console.error("Error adding comment:", error);
     } finally {
@@ -172,7 +172,7 @@ export default function TicketDetail() {
   }
 
   return (
-    <Layout pageTitle={`Ticket ${ticket.ticket_number}`}>
+    <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
       <div className="max-w-5xl mx-auto">
         <button
           onClick={() => navigate(-1)}
@@ -187,7 +187,7 @@ export default function TicketDetail() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-lg font-bold text-blue-600">
-                  #{ticket.ticket_number}
+                  #{ticket.ticketId}
                 </span>
                 <span
                   className={`text-sm px-3 py-1 rounded-full font-medium ${
@@ -216,24 +216,24 @@ export default function TicketDetail() {
               <div>
                 <p className="text-sm text-gray-600">Requester</p>
                 <p className="font-medium text-gray-900">
-                  {ticket.requester.full_name}
+                  {ticket.createdBy.name}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {ticket.requester.email}
+                  {ticket.createdBy.email}
                 </p>
               </div>
             </div>
 
-            {ticket.assigned_to && (
+            {ticket.assignedTo && (
               <div className="flex items-start gap-3">
                 <User className="text-gray-400 mt-1" size={18} />
                 <div>
                   <p className="text-sm text-gray-600">Assigned To</p>
                   <p className="font-medium text-gray-900">
-                    {ticket.assigned_to.full_name}
+                    {ticket.assignedTo.name}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {ticket.assigned_to.email}
+                    {ticket.assignedTo.email}
                   </p>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function TicketDetail() {
               <div>
                 <p className="text-sm text-gray-600">Category</p>
                 <p className="font-medium text-gray-900 capitalize">
-                  {ticket.category}
+                  {ticket.type}
                 </p>
               </div>
             </div>
@@ -254,7 +254,7 @@ export default function TicketDetail() {
               <div>
                 <p className="text-sm text-gray-600">Created</p>
                 <p className="font-medium text-gray-900">
-                  {formatDateTime(ticket.created_at)}
+                  {formatDateTime(ticket.createdAt)}
                 </p>
               </div>
             </div>

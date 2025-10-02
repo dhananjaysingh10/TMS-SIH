@@ -5,8 +5,9 @@ import Layout from "../components/Layout";
 import { ticketsApi, type TicketStats } from "../lib/api";
 import { Activity, AlertCircle, CheckCircle, Ticket } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import CreateTicketModal from "../components/createticket";
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [stats, setStats] = useState<TicketStats>({
     total: 0,
     open: 0,
@@ -29,7 +30,10 @@ export default function Home() {
       setLoading(false);
     }
   }
-
+  const handleTicketCreated = () => {
+    setIsModalOpen(false);
+    fetchStats();
+  };
   const statCards = [
     {
       title: "Total Tickets",
@@ -67,12 +71,12 @@ export default function Home() {
 
   return (
     <Layout pageTitle="Dashboard">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+        <div className="mb-8 rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 via-white to-gray-100 p-6 md:p-8">
+          <h1 className="text-balance text-4xl md:text-5xl font-semibold tracking-tight text-gray-900 mb-3">
             Welcome to POWERGRID Ticketing
           </h1>
-          <p className="text-gray-600">
+          <p className="text-pretty text-base md:text-lg text-gray-600">
             Manage and track IT support tickets efficiently
           </p>
         </div>
@@ -82,10 +86,10 @@ export default function Home() {
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse"
+                className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse"
               >
                 <div className="h-12 w-12 bg-gray-200 rounded-lg mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-28 mb-2" />
                 <div className="h-8 bg-gray-200 rounded w-16" />
               </div>
             ))}
@@ -97,46 +101,53 @@ export default function Home() {
               return (
                 <div
                   key={card.title}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                  className="relative overflow-hidden bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
                 >
-                  <div
-                    className={`inline-flex p-3 rounded-lg ${card.bgColor} mb-4`}
-                  >
-                    <Icon className={card.textColor} size={24} />
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 ring-1 ring-inset ring-gray-200 mb-4">
+                    <Icon className="text-gray-700" size={24} />
                   </div>
                   <p className="text-sm text-gray-600 mb-1">{card.title}</p>
-                  <p className="text-3xl font-bold text-gray-900">
+                  <p className="text-4xl font-semibold tracking-tight text-gray-900">
                     {card.value}
                   </p>
+                  <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-gray-50" />
                 </div>
               );
             })}
           </div>
         )}
 
-        <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               to="/tickets"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors font-medium border border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
             >
               <Ticket size={20} />
               View All Tickets
             </Link>
             <Link
               to="/my-tickets"
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-500 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-white text-gray-900 border-2 border-gray-300 hover:bg-gray-50 transition-colors font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
             >
               <Activity size={20} />
               My Assigned Tickets
             </Link>
-            <button className="flex items-center justify-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors font-medium border border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+            >
               <AlertCircle size={20} />
               Create New Ticket
             </button>
+            <CreateTicketModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onTicketCreated={handleTicketCreated}
+            />
           </div>
         </div>
       </div>

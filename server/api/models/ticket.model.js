@@ -8,8 +8,8 @@ const ticketSchema = new mongoose.Schema(
       enum: ["IT", "dev-ops", "software", "networking", "cyber-security", "NA"],
       default: "NA",
     },
-    type: { type: String, required: true },
-    description: {type: String, required: true},
+    type: { type: String, default: "test" },
+    description: { type: String, required: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -25,6 +25,15 @@ const ticketSchema = new mongoose.Schema(
       enum: ["open", "in-progress", "resolved", "closed"],
       default: "open",
     },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
+    },
+    accepted: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );

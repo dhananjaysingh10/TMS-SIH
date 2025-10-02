@@ -38,7 +38,7 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors shadow-md"
+            className="w-10 h-10 rounded-full bg-white text-white flex items-center justify-center hover:bg-gray transition-colors shadow-md"
           >
             <User size={20} />
           </button>

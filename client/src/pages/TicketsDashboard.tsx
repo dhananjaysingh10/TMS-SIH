@@ -7,15 +7,16 @@ import { AlertCircle } from "lucide-react";
 export default function TicketsDashboard() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [department, setDepartment] = useState("software");
   useEffect(() => {
     fetchTickets();
   }, []);
 
   async function fetchTickets() {
     try {
-      const data = await ticketsApi.getAll();
-      setTickets(data);
+      const res = await ticketsApi.getAll();
+      console.log(res);
+      setTickets(res);
     } catch (error) {
       console.error("Error fetching tickets:", error);
     } finally {
@@ -23,15 +24,13 @@ export default function TicketsDashboard() {
     }
   }
 
-  const assignedAndAccepted = tickets.filter(
-    (t) => t.assigned_to && t.accepted && t.status !== "closed"
+  const open = tickets.filter((t) => !t.accepted && t.status !== "resolved");
+
+  const assigned = tickets.filter(
+    (t) => t.assignedTo && t.status !== "resolved"
   );
 
-  const assignedNotAccepted = tickets.filter(
-    (t) => t.assigned_to && !t.accepted && t.status !== "closed"
-  );
-
-  const closedTickets = tickets.filter((t) => t.status === "closed");
+  const closedTickets = tickets.filter((t) => t.status === "resolved");
 
   const renderSection = (
     title: string,
@@ -58,23 +57,16 @@ export default function TicketsDashboard() {
         <div className="grid grid-cols-1 gap-4">
           {sectionTickets.map((ticket) => (
             <TicketCard
-              key={ticket.id}
-              id={ticket.id}
-              ticketNumber={ticket.ticket_number}
-              subject={ticket.subject}
+              key={ticket._id}
+              _id={ticket._id}
+              ticketId={ticket.ticketId}
+              description={ticket.description}
               status={ticket.status}
               priority={ticket.priority}
-              category={ticket.category}
-              requester={{
-                name: ticket.requester.full_name,
-                email: ticket.requester.email,
-              }}
-              assignedTo={
-                ticket.assigned_to
-                  ? { name: ticket.assigned_to.full_name }
-                  : undefined
-              }
-              createdAt={ticket.created_at}
+              department={ticket.department}
+              createdBy={ticket.createdBy}
+              assignedTo={ticket.assignedTo}
+              createdAt={ticket.createdAt}
               accepted={ticket.accepted}
             />
           ))}
@@ -116,14 +108,14 @@ export default function TicketsDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {renderSection(
-            "Assigned & Accepted",
-            assignedAndAccepted,
-            "Tickets claimed by team members"
+            "Open Tickets",
+            open,
+            "Tickets waiting to be accepted"
           )}
           {renderSection(
-            "Assigned & Unclaimed",
-            assignedNotAccepted,
-            "Available tickets waiting to be claimed"
+            "Assigned Tickets",
+            assigned,
+            "Tickets accepted by a team member"
           )}
           {renderSection(
             "Closed Tickets",
