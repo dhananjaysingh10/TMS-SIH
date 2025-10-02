@@ -5,6 +5,8 @@ import express from 'express';
 import connectDB from './config/connectDB.js';
 
 import authRoutes from './routes/auth.route.js';
+import userRoutes from "./routes/user.route.js";
+import ticketRoute from "./routes/ticket.route.js"
 
 dotenv.config();
 connectDB();
@@ -33,6 +35,8 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 10000;
 
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/ticket', ticketRoute);
 
 app.use((err, req, res, next) => {
 	console.error('Server error:', err);
