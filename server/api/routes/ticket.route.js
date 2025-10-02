@@ -14,11 +14,12 @@ import {
 const router = express.Router();
 
 router.post("/", createTicket);
-router.get("/", getAllTickets);
+router.get("/", getFilteredTickets);
+router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
 router.get("/createdBy/:userId", getTicketsByCreatedBy);
-router.get("/:id", getTicketById);
 router.put("/:id", updateTicket);
+router.post("/:id/progress", addProgressUpdate);
 router.delete("/:id", deleteTicket);
 router.post("/accept/:id", acceptTicket);
 router.post("/resolve/:id", resolveTicket);
