@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      enum: ["IT", "dev-ops", "software", "networking", "cyber-security", "NA"],
+      enum: ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"],
       default: "NA",
     }
   },

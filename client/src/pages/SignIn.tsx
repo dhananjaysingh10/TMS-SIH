@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToastContainer, toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 
@@ -12,19 +14,22 @@ const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/signin', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
         email,
         password,
       });
       toast.success('Signin successful!');
-      navigate('/dashboard'); // Redirect to dashboard or home
+      dispatch(signInSuccess(response.data.user));
+      navigate('/'); // Redirect to dashboard or home
     } catch (error: any) {
+      dispatch(signInFailure(error.response?.data?.message || 'Signin failed'));
       toast.error(error.response?.data?.message || 'Signin failed');
     } finally {
       setLoading(false);

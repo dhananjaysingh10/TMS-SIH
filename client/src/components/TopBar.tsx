@@ -1,5 +1,7 @@
 import { Menu, Search, User } from "lucide-react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 interface TopBarProps {
   onMenuClick: () => void;
@@ -8,6 +10,7 @@ interface TopBarProps {
 
 export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const currentUser = useSelector(selectCurrentUser);
 
   return (
     <header className="bg-white border-b border-gray-200 h-16 flex items-center px-4 lg:px-6 sticky top-0 z-30">
@@ -36,12 +39,33 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
         </div>
 
         <div className="relative">
-          <button
+          <div
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="w-10 h-10 rounded-full bg-white text-white flex items-center justify-center hover:bg-gray transition-colors shadow-md"
+            className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-gray-100 transition-colors overflow-hidden cursor-pointer"
+            aria-label="User menu"
           >
-            <User size={20} />
-          </button>
+            {currentUser?.profilePicture ? (
+              <img
+                src={currentUser.profilePicture}
+                alt="Profile"
+                className="w-10 h-10 min-w-10 min-h-10 rounded-full object-cover"
+                style={{ width: "40px", height: "40px" }}
+                onError={(e) => {
+                  console.error("Profile picture failed to load:", currentUser?.profilePicture);
+                  e.currentTarget.style.display = "none";
+                }}
+                onLoad={(e) => {
+                  console.log("Profile picture loaded successfully");
+                  console.log("Natural dimensions:", {
+                    width: e.currentTarget.naturalWidth,
+                    height: e.currentTarget.naturalHeight,
+                  });
+                }}
+              />
+            ) : (
+              <User size={20} className="text-gray-600" />
+            )}
+          </div>
 
           {showUserMenu && (
             <>
@@ -50,21 +74,25 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
                 onClick={() => setShowUserMenu(false)}
               />
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                <div className="px-4 py-2 text-gray-800 font-semibold">
+                  Hi, {currentUser?.name || "User"}
+                </div>
+                <hr className="my-1 border-gray-200" />
                 <a
-                  href="#"
+                  href="/profile"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   Profile
                 </a>
                 <a
-                  href="#"
+                  href="/settings"
                   className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
                 >
                   Settings
                 </a>
                 <hr className="my-2 border-gray-200" />
                 <a
-                  href="#"
+                  href="/logout"
                   className="block px-4 py-2 text-red-600 hover:bg-red-50 transition-colors"
                 >
                   Logout

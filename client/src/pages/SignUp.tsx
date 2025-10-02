@@ -22,7 +22,7 @@ const SignUp: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('/api/auth/signup', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
         name,
         email,
         password,
@@ -30,7 +30,7 @@ const SignUp: React.FC = () => {
         primaryPhone,
       });
       toast.success('Signup successful!');
-      navigate('/dashboard'); // Redirect to dashboard or home
+      navigate('/signin'); 
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Signup failed');
     } finally {
@@ -67,11 +67,11 @@ const SignUp: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="IT">IT</SelectItem>
-                  <SelectItem value="dev-ops">DevOps</SelectItem>
-                  <SelectItem value="software">Software</SelectItem>
-                  <SelectItem value="networking">Networking</SelectItem>
-                  <SelectItem value="cyber-security">Cyber Security</SelectItem>
-                  <SelectItem value="NA">N/A</SelectItem>
+                  <SelectItem value="DevOps">DevOps</SelectItem>
+                  <SelectItem value="Software">Software</SelectItem>
+                  <SelectItem value="Networking">Networking</SelectItem>
+                  <SelectItem value="Cybersecurity">Cyber Security</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
