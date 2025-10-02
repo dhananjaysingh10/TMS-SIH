@@ -42,7 +42,7 @@ const paginateTickets = async (query, page, limit, res) => {
 
 export const createTicket = async (req, res) => {
   try {
-    const { ticketId, department, type, description, createdBy, assignedTo, status } = req.body;
+    const { ticketId, title, department, priority, type, description, createdBy, assignedTo } = req.body;
 
     const finalTicketId = ticketId || crypto.randomUUID();
 
@@ -53,7 +53,8 @@ export const createTicket = async (req, res) => {
       description,
       createdBy,
       assignedTo,
-      status,
+      title,
+      priority
     });
 
     const savedTicket = await newTicket.save();
@@ -84,7 +85,7 @@ export const getTicketsByDepartment = async (req, res) => {
     const { department } = req.params;
     const { page, limit } = req.query;
 
-    const validDepartments = ["IT", "dev-ops", "software", "networking", "cyber-security", "NA"];
+    const validDepartments = ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"];
     if (!validDepartments.includes(department)) {
       return res.status(400).json({
         success: false,
@@ -209,5 +210,61 @@ export const deleteTicket = async (req, res) => {
       message: "Error deleting ticket",
       error: error.message,
     });
+  }
+};
+
+export const getFilteredTickets = async (req, res) => {
+  try {
+    const { department, createdBy, priority, type, status, sortBy, limit = 10, page = 1 } = req.query;
+    
+    const filter = {};
+    if (department) filter.department = department;
+    if (createdBy) filter.createdBy = createdBy;
+    if (priority) filter.priority = priority;
+    if (type) filter.type = type;
+    if (status) filter.status = status;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const sort = {};
+    if (sortBy) {
+      const [field, order] = sortBy.split(":");
+      sort[field] = order === "desc" ? -1 : 1;
+    } else {
+      sort.createdAt = -1; 
+    }
+
+    const tickets = await Ticket.find(filter)
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .sort(sort)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const total = await Ticket.countDocuments(filter);
+
+    res.status(200).json({
+      tickets,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const addProgressUpdate = async (req, res) => {
+  try {
+    const { status, remark, createdBy } = req.body;
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+
+    ticket.progress.push({ status, remark, createdBy });
+    await ticket.save();
+    res.status(200).json(ticket);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 };
