@@ -19,6 +19,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.3",
+    "nodemailer": "^7.0.6",
+    "socket.io": "^4.8.1",
     "uuid": "^13.0.0"
   }
 }

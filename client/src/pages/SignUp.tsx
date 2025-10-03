@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useDispatch } from 'react-redux';
+import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice';
 import axios from 'axios';
 
 const SignUp: React.FC = () => {
@@ -16,6 +18,7 @@ const SignUp: React.FC = () => {
   const [department, setDepartment] = useState<string>('NA');
   const [primaryPhone, setPrimaryPhone] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,8 +33,10 @@ const SignUp: React.FC = () => {
         primaryPhone,
       });
       toast.success('Signup successful!');
-      navigate('/signin'); 
+      dispatch(signInSuccess(response.data.user));
+      navigate('/'); 
     } catch (error: any) {
+      dispatch(signInFailure(error.response?.data?.message || 'Signup failed'));
       toast.error(error.response?.data?.message || 'Signup failed');
     } finally {
       setLoading(false);

@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import Ticket from "../models/ticket.model.js";
 import crypto from "crypto";
 import User from "../models/user.model.js";
+import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
+
 const paginateTickets = async (query, page, limit, res) => {
   try {
     const pageNum = parseInt(page) || 1;
@@ -51,6 +53,7 @@ export const createTicket = async (req, res) => {
       assignedemail,
       status,
       priority,
+      title,
     } = req.body;
 
     const finalTicketId = ticketId || crypto.randomUUID();
@@ -66,6 +69,7 @@ export const createTicket = async (req, res) => {
       assignedTo,
       status,
       priority,
+      title,
     });
 
     const savedTicket = await newTicket.save();
@@ -97,12 +101,7 @@ export const getTicketsByDepartment = async (req, res) => {
     const { page, limit } = req.query;
 
     const validDepartments = [
-      "IT",
-      "dev-ops",
-      "software",
-      "networking",
-      "cyber-security",
-      "NA",
+      "IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"
     ];
     if (!validDepartments.includes(department)) {
       return res.status(400).json({
@@ -391,6 +390,7 @@ export const addProgressUpdate = async (req, res) => {
   }
 };
 
+
 export const createMessage = async (req, res) => {
   try {
     const ticketId = req.params.id;
@@ -494,3 +494,55 @@ export const getTicketsByAssignedTo = async (req, res) => {
   }
 };
 
+
+export const updateTicketStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, remark } = req.body;
+    
+    const validStatuses = ["open", "in-progress", "resolved", "closed"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const ticket = await Ticket.findById(id).populate('createdBy');
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+    const progressUpdate = {
+      status,
+      remark,
+      createdAt: new Date(),
+      createdBy: req.user.userId 
+    };
+
+    ticket.status = status;
+    ticket.progress.push(progressUpdate);
+    await ticket.save();
+
+    try {
+      await sendTicketStatusUpdateEmail(
+        ticket.createdBy.email,
+        ticket.ticketId,
+        status,
+        remark,
+        progressUpdate.createdAt
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
+
+    res.status(200).json({
+      message: "Ticket status updated successfully",
+      ticket: {
+        _id: ticket._id,
+        ticketId: ticket.ticketId,
+        status: ticket.status,
+        progress: ticket.progress
+      }
+    });
+  } catch (error) {
+    console.error("Error updating ticket status:", error);
+    res.status(500).json({ message: "Server error while updating ticket status" });
+  }
+};
