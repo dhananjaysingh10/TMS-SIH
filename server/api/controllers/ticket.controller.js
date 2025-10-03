@@ -424,3 +424,32 @@ export const updateTicketStatus = async (req, res) => {
     res.status(500).json({ message: "Server error while updating ticket status" });
   }
 };
+
+export const addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const userId = req.user.userId;
+
+    if (!content) {
+      return res.status(400).json({ message: "Comment content is required" });
+    }
+
+    const ticket = await Ticket.findById(id);
+    if (!ticket) {
+      return res.status(404).json({ message: "Ticket not found" });
+    }
+
+    ticket.comments.push({
+      content,
+      by: userId,
+      createdAt: new Date(),
+    });
+
+    await ticket.save();
+
+    res.status(200).json({ message: "Comment added successfully", ticket });
+  } catch (error) {
+    res.status(500).json({ message: "Error adding comment", error: error.message });
+  }
+};

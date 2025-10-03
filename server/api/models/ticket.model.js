@@ -42,7 +42,22 @@ const messageSchema = new mongoose.Schema({
   },
 });
 
-
+const commentSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  by: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const ticketSchema = new mongoose.Schema(
   {
@@ -90,6 +105,10 @@ const ticketSchema = new mongoose.Schema(
     },
     chat: {
       type: [messageSchema], // it contain chats between assigned_to and created_by , it is array of message which is like {userId, content, img_url, time}
+      default: []
+    },
+    comments: {
+      type: [commentSchema],
       default: []
     },
     rating: {
