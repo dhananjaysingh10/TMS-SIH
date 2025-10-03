@@ -13,14 +13,17 @@ import {
   addProgressUpdate,
   getMessage,
   createMessage,
-  getTicketsByAssignedTo
+  getTicketsByAssignedTo,
+  updateTicketStatus
 
 } from "../controllers/ticket.controller.js";
+import { authMiddleware } from "../utils/verifyUser.js";
 
 const router = express.Router();
 
 router.post("/", createTicket);
 router.get("/", getAllTickets);
+router.get("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
 router.get("/createdBy/:userId", getTicketsByCreatedBy);
@@ -32,4 +35,5 @@ router.post("/accept/:id", acceptTicket);
 router.post("/resolve/:id", resolveTicket);
 router.post("/message/:id",createMessage);
 router.get("/getmessage/:id",getMessage);
+router.post("/status/:id", authMiddleware, updateTicketStatus);
 export default router;
