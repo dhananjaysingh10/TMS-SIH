@@ -52,8 +52,23 @@ const ticketSchema = new mongoose.Schema(
       enum: ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"],
       default: "Other",
     },
-    type: { type: String, default: "test" },
-    description: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ["bug", "feature", "task", "improvement", "support"],
+      required: true,
+      default: "test"
+    },
+    description: { type: String, required: true, trim: true },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high", "urgent"],
+      default: "medium",
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -69,10 +84,23 @@ const ticketSchema = new mongoose.Schema(
       enum: ["open", "in-progress", "resolved", "closed"],
       default: "open",
     },
-    priority: {
-      type: String,
-      enum: ["low", "medium", "high"],
-      default: "medium",
+    progress: {
+      type: [progressSchema], // it contain array of progress in json format {status, remark, time and date}
+      default: []
+    },
+    chat: {
+      type: [messageSchema], // it contain chats between assigned_to and created_by , it is array of message which is like {userId, content, img_url, time}
+      default: []
+    },
+    rating: {
+      type: Number,
+      min: [0, "Rating cannot be less than 0"],
+      max: [5, "Rating cannot be more than 5"],
+      default: 0,
+    },
+    dueDate: {
+      type: Date,
+      required: false,
     },
     accepted: {
       type: Boolean,
