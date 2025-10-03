@@ -6,6 +6,8 @@ import { X } from "lucide-react";
 import { ticketsApi } from "../lib/api";
 import type { NewTicketData } from "../lib/api";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 interface CreateTicketModalProps {
   isOpen: boolean;
@@ -13,18 +15,12 @@ interface CreateTicketModalProps {
   onTicketCreated: () => void;
 }
 
-// This is a placeholder for your authentication context.
-// You MUST get the logged-in user's email from your auth system.
-const useAuth = () => ({
-  user: { email: "arpantomar2018@gmail.com" },
-});
-
 export default function CreateTicketModal({
   isOpen,
   onClose,
   onTicketCreated,
 }: CreateTicketModalProps) {
-  const { user } = useAuth();
+  const user = useSelector(selectCurrentUser);
   const [formData, setFormData] = useState({
     description: "",
     department: "IT",
@@ -47,10 +43,10 @@ export default function CreateTicketModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    const useremail=user?user.email:"test-user@gmail.com";
     const ticketData: NewTicketData = {
       ...formData,
-      useremail: user.email,
+      useremail,
     };
 
     try {

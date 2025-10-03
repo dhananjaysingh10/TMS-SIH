@@ -3,19 +3,24 @@ import Layout from "../components/Layout";
 import TicketCard from "../components/TicketCard";
 import { ticketsApi, type Ticket } from "../lib/api";
 import { AlertCircle } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 export default function MyTickets() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const currentUserId = "current-user-id";
+  const currentUser = useSelector(selectCurrentUser);
 
   useEffect(() => {
-    fetchMyTickets();
+    if (currentUser) {
+      fetchMyTickets();
+    }
   }, []);
 
   async function fetchMyTickets() {
     try {
-      const data = await ticketsApi.getMyTickets(currentUserId);
+      const email = currentUser ? currentUser.email : "test";
+      const data = await ticketsApi.getMyTickets(email);
       setTickets(data);
     } catch (error) {
       console.error("Error fetching my tickets:", error);
@@ -24,8 +29,8 @@ export default function MyTickets() {
     }
   }
 
-  const openTickets = tickets.filter((t) => t.status !== "closed");
-  const closedTickets = tickets.filter((t) => t.status === "closed");
+  const openTickets = tickets.filter((t) => t.status !== "resolved");
+  const closedTickets = tickets.filter((t) => t.status === "resolved");
 
   const renderSection = (title: string, sectionTickets: Ticket[]) => (
     <div>
@@ -45,23 +50,16 @@ export default function MyTickets() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {sectionTickets.map((ticket) => (
             <TicketCard
-              key={ticket.id}
-              id={ticket.id}
-              ticketNumber={ticket.ticket_number}
-              subject={ticket.subject}
+              key={ticket._id}
+              _id={ticket._id}
+              ticketId={ticket.ticketId}
+              description={ticket.description}
               status={ticket.status}
               priority={ticket.priority}
-              category={ticket.category}
-              requester={{
-                name: ticket.requester.full_name,
-                email: ticket.requester.email,
-              }}
-              assignedTo={
-                ticket.assigned_to
-                  ? { name: ticket.assigned_to.full_name }
-                  : undefined
-              }
-              createdAt={ticket.created_at}
+              department={ticket.department}
+              createdBy={ticket.createdBy}
+              assignedTo={ticket.assignedTo}
+              createdAt={ticket.createdAt}
               accepted={ticket.accepted}
             />
           ))}

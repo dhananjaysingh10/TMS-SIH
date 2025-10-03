@@ -42,7 +42,6 @@ const paginateTickets = async (query, page, limit, res) => {
 
 export const createTicket = async (req, res) => {
   try {
-    
     const {
       ticketId,
       department,
@@ -53,11 +52,11 @@ export const createTicket = async (req, res) => {
       status,
       priority,
     } = req.body;
-    
+
     const finalTicketId = ticketId || crypto.randomUUID();
     const createdBy = await User.findOne({ email: useremail });
     const assignedTo = await User.findOne({ email: assignedemail });
-    
+
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department,
@@ -68,7 +67,7 @@ export const createTicket = async (req, res) => {
       status,
       priority,
     });
-    
+
     const savedTicket = await newTicket.save();
     console.log("enter");
     res.status(201).json({
@@ -155,7 +154,16 @@ export const getTicketsByCreatedBy = async (req, res) => {
 
 export const getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id)
+    const ticket = await Ticket.findById(req.params.id).populate([
+      {
+        path: "createdBy",
+        select: "name email",
+      },
+      {
+        path: "assignedTo",
+        select: "name email",
+      },
+    ]);
     if (!ticket) {
       return res.status(404).json({
         success: false,
@@ -221,8 +229,8 @@ export const updateTicket = async (req, res) => {
 
 export const acceptTicket = async (req, res) => {
   try {
-    const { id: ticketId } = req.params; 
-    const { userId: userEmail } = req.body; 
+    const { id: ticketId } = req.params;
+    const { userId: userEmail } = req.body;
     const userToAssign = await User.findOne({ email: userEmail });
     if (!userToAssign) {
       return res.status(404).json({
@@ -234,7 +242,7 @@ export const acceptTicket = async (req, res) => {
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
-        assignedTo: userToAssign._id, 
+        assignedTo: userToAssign._id,
         accepted: true,
         status: "in-progress",
       },
@@ -320,8 +328,17 @@ export const deleteTicket = async (req, res) => {
 
 export const getFilteredTickets = async (req, res) => {
   try {
-    const { department, createdBy, priority, type, status, sortBy, limit = 10, page = 1 } = req.query;
-    
+    const {
+      department,
+      createdBy,
+      priority,
+      type,
+      status,
+      sortBy,
+      limit = 10,
+      page = 1,
+    } = req.query;
+
     const filter = {};
     if (department) filter.department = department;
     if (createdBy) filter.createdBy = createdBy;
@@ -336,7 +353,7 @@ export const getFilteredTickets = async (req, res) => {
       const [field, order] = sortBy.split(":");
       sort[field] = order === "desc" ? -1 : 1;
     } else {
-      sort.createdAt = -1; 
+      sort.createdAt = -1;
     }
 
     const tickets = await Ticket.find(filter)
@@ -373,3 +390,107 @@ export const addProgressUpdate = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
+export const createMessage = async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+    const { useremail, content, attachment } = req.body;
+    const postingUser = await User.findOne({ email: useremail });
+
+    if (!postingUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found." });
+    }
+    const newMessage = {
+      user: postingUser._id,
+      content,
+      attachment,
+    };
+
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      { $push: { messages: newMessage } },
+      { new: true, runValidators: true }
+    ).populate({
+      path: "messages.user",
+      select: "name email",
+    });
+
+    if (!updatedTicket) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Ticket not found." });
+    }
+    const createdMessage =
+      updatedTicket.messages[updatedTicket.messages.length - 1];
+
+    res.status(201).json({
+      success: true,
+      message: "Message added successfully.",
+      data: createdMessage,
+    });
+  } catch (error) {
+    console.error("Error adding message to ticket:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+export const getMessage = async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+
+    const ticket = await Ticket.findById(ticketId).select("messages").populate({
+      path: "messages.user",
+      select: "name email profilePicture",
+    });
+
+    if (!ticket) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Ticket not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: ticket.messages,
+    });
+  } catch (error) {
+    console.error("Error fetching ticket messages:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+export const getTicketsByAssignedTo = async (req, res) => {
+  try {
+    const {email} = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User with that email not found.",
+      });
+    }
+
+    const tickets = await Ticket.find({ assignedTo: user._id })
+      .populate("createdBy", "name email").populate("assignedTo","name email") 
+      .sort({ createdAt: -1 }); 
+
+    res.status(200).json({
+      success: true,
+      data: tickets,
+    });
+  } catch (error) {
+    console.error("Error fetching assigned tickets:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching assigned tickets.",
+      error: error.message,
+    });
+  }
+};
+

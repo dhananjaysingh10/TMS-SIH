@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
+
 import {
   ticketsApi,
   commentsApi,
   activitiesApi,
   type Ticket,
-  type Comment,
+  type Message,
   type Activity,
+  type NewMessageData,
 } from "../lib/api";
 import {
   ArrowLeft,
@@ -38,17 +42,16 @@ export default function TicketDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Message[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const currentUserId = "arpantomar2018@gmail.com";
-
+  const currentUser = useSelector(selectCurrentUser);
   useEffect(() => {
     if (id) {
       fetchTicketDetails();
-      // fetchComments();
+      fetchComments();
       // fetchActivities();
     }
   }, [id]);
@@ -89,7 +92,10 @@ export default function TicketDetail() {
     if (!ticket) return;
 
     try {
-      await ticketsApi.acceptTicket(ticket._id, currentUserId);
+      await ticketsApi.acceptTicket(
+        ticket._id,
+        currentUser ? currentUser.email : "test-user@gmail.com"
+      );
       fetchTicketDetails();
       // fetchActivities();
     } catch (error) {
@@ -109,21 +115,25 @@ export default function TicketDetail() {
     }
   }
 
-  async function handleAddComment() {
-    if (!newComment.trim() || !ticket) return;
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return; // Do nothing if the message is empty
 
     setSubmitting(true);
     try {
-      // await commentsApi.create(ticket._id, newComment, currentUserId);
+      const messageData = {
+        useremail: currentUser ? currentUser.email : "test-user@gmail.com",
+        content: newComment,
+      };
+
+      await commentsApi.create(ticket ? ticket._id : "", messageData);
+      fetchComments();
       setNewComment("");
-      // fetchComments();
-      // fetchActivities();
     } catch (error) {
-      console.error("Error adding comment:", error);
+      console.error("Failed to add message:", error);
     } finally {
       setSubmitting(false);
     }
-  }
+  };
 
   function formatDateTime(dateString: string): string {
     return new Date(dateString).toLocaleString("en-US", {
@@ -302,15 +312,15 @@ export default function TicketDetail() {
               ) : (
                 comments.map((comment) => (
                   <div
-                    key={comment.id}
+                    key={comment._id}
                     className="border-l-2 border-blue-500 pl-4"
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-medium text-sm text-gray-900">
-                        {comment.user.full_name}
+                        {comment.user.name}
                       </span>
                       <span className="text-xs text-gray-500">
-                        {formatDateTime(comment.created_at)}
+                        {formatDateTime(comment.createdAt)}
                       </span>
                     </div>
                     <p className="text-gray-700 text-sm">{comment.content}</p>
@@ -319,21 +329,28 @@ export default function TicketDetail() {
               )}
             </div>
 
-            <div className="flex gap-2">
-              <input
-                type="text"
+            <div className="flex items-start gap-2">
+              <textarea
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-                placeholder="Add a comment..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onKeyDown={(e) => {
+                  // Submit on Enter, but allow new lines with Shift+Enter
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // Prevents adding a newline before submitting
+                    if (newComment.trim()) handleAddComment();
+                  }
+                }}
+                placeholder="Add a message..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 disabled={submitting}
+                rows={1} // Start with a single row, can be expanded with CSS or JS if needed
               />
               <button
                 onClick={handleAddComment}
                 disabled={submitting || !newComment.trim()}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
+                {/* I'm assuming you have Send imported from lucide-react */}
                 <Send size={18} />
               </button>
             </div>

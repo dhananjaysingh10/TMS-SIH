@@ -35,9 +35,15 @@ async function fetchApi<T>(
 }
 
 export interface Ticket {
-  _id:string,
+  _id: string;
   ticketId: string;
-  department: "IT" | "dev-ops" | "software" | "networking" | "cyber-security"|"NA";
+  department:
+    | "IT"
+    | "dev-ops"
+    | "software"
+    | "networking"
+    | "cyber-security"
+    | "NA";
   subject: string;
   description: string;
   type: string;
@@ -58,16 +64,23 @@ export interface Ticket {
   updatedAt: string;
 }
 
-export interface Comment {
-  id: string;
-  ticket_id: string;
+export interface Message {
+  _id: string;
   user: {
-    id: string;
-    full_name: string;
+    _id: string;
+    name: string;
+    email: string;
+    profilePicture?: string;
   };
   content: string;
-  is_internal: boolean;
-  created_at: string;
+  attachment?: string;
+  createdAt: string;
+}
+
+export interface NewMessageData {
+  useremail: string;
+  content: string;
+  attachment?: string;
 }
 
 export interface Activity {
@@ -107,8 +120,18 @@ export const ticketsApi = {
     return response.data;
   },
 
-  getMyTickets: (userId: string) =>
-    fetchApi<Ticket[]>(`/ticket/assigned/${userId}`),
+  getMyTickets: async (email: string): Promise<Ticket[]> => {
+    const payload={email}
+    const response = await fetchApi<ApiResponse<Ticket[]>>(
+      "/ticket/assignedto",
+      {
+        method: "POST", 
+        body: JSON.stringify(payload),
+      }
+    );
+
+    return response.data;
+  },
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
     const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {
       method: "POST",
@@ -136,17 +159,34 @@ export const ticketsApi = {
 };
 
 export const commentsApi = {
-  getByTicket: (ticketId: string) =>
-    fetchApi<Comment[]>(`/ticket/${ticketId}/comments`),
+  getByTicket: async (ticketId: string): Promise<Message[]> => {
+    const response = await fetchApi<ApiResponse<Message[]>>(
+      `/ticket/getmessage/${ticketId}`
+    );
+    return response.data;
+  },
 
-  create: (ticketId: string, content: string, userId: string) =>
-    fetchApi<Comment>(`/ticket/${ticketId}/comments`, {
-      method: "POST",
-      body: JSON.stringify({ content, userId }),
-    }),
+  /**
+   * Creates a new message and adds it to a ticket.
+   * @param ticketId The ID of the ticket to add the message to.
+   * @param messageData The payload containing the message details.
+   */
+  create: async (
+    ticketId: string,
+    messageData: NewMessageData
+  ): Promise<Message> => {
+    const response = await fetchApi<ApiResponse<Message>>(
+      `/ticket/message/${ticketId}`,
+      {
+        method: "POST",
+        body: JSON.stringify(messageData),
+      }
+    );
+    return response.data;
+  },
 };
 
 export const activitiesApi = {
   getByTicket: (ticketId: string) =>
-    fetchApi<Activity[]>(`/tickets/${ticketId}/activities`),
+    fetchApi<Activity[]>(`/ticket/${ticketId}/activities`),
 };

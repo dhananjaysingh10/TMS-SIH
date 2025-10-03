@@ -23,7 +23,7 @@ const progressSchema = new mongoose.Schema({
 });
 
 const messageSchema = new mongoose.Schema({
-  userId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
@@ -35,6 +35,7 @@ const messageSchema = new mongoose.Schema({
   },
   attachment: {
     type: String,
+    required:false
   },
   createdAt: {
     type: Date,
@@ -49,7 +50,14 @@ const ticketSchema = new mongoose.Schema(
     ticketId: { type: String, required: true, unique: true },
     department: {
       type: String,
-      enum: ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"],
+      enum: [
+        "IT",
+        "DevOps",
+        "Software",
+        "Networking",
+        "Cybersecurity",
+        "Other",
+      ],
       default: "Other",
     },
     type: { type: String, default: "test" },
@@ -77,7 +85,8 @@ const ticketSchema = new mongoose.Schema(
     accepted: {
       type: Boolean,
       default: false,
-    }
+    },
+    messages: [messageSchema],
   },
   { timestamps: true }
 );
