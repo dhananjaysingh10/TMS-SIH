@@ -9,6 +9,7 @@ import connectDB from './config/connectDB.js';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from "./routes/user.route.js";
 import ticketRoute from "./routes/ticket.route.js"
+import statsRoute from "./routes/stats.route.js";
 import Ticket from './models/ticket.model.js';
 
 dotenv.config();
@@ -50,6 +51,7 @@ const PORT = process.env.PORT || 10000;
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/ticket', ticketRoute);
+app.use('/api/stats', statsRoute);
 
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);

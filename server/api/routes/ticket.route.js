@@ -14,7 +14,8 @@ import {
   getMessage,
   createMessage,
   getTicketsByAssignedTo,
-  updateTicketStatus
+  updateTicketStatus,
+  addComment
 
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
@@ -36,4 +37,5 @@ router.post("/resolve/:id", resolveTicket);
 router.post("/message/:id",createMessage);
 router.get("/getmessage/:id",getMessage);
 router.post("/status/:id", authMiddleware, updateTicketStatus);
+router.post("/:id/comment", authMiddleware, addComment);
 export default router;
