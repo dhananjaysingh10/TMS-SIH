@@ -34,6 +34,21 @@ async function fetchApi<T>(
   }
 }
 
+// export type ChatUser = {
+//   _id: string;
+//   username?: string;
+//   name?: string;
+//   email?: string;
+// };
+
+// export type ChatMessage = {
+//   _id?: string;
+//   userId: ChatUser;
+//   content: string;
+//   attachments?: string[];
+//   createdAt: string;
+// };
+
 export interface Ticket {
   _id: string;
   ticketId: string;
@@ -125,6 +140,18 @@ export const ticketsApi = {
     return response.data;
   },
 
+  getCreatedBy: async (userId: string): Promise<Ticket[]> => {
+    console.log("API: getCreatedBy called with userId:", userId);
+    try {
+      const response = await fetchApi<any>(`/ticket/createdBy/${userId}`);
+      console.log("API: getCreatedBy response:", response);
+      return response.data || [];
+    } catch (error) {
+      console.error("API: getCreatedBy error:", error);
+      throw error;
+    }
+  },
+
   getMyTickets: async (email: string): Promise<Ticket[]> => {
     const payload = { email };
     const response = await fetchApi<ApiResponse<Ticket[]>>(
@@ -175,6 +202,21 @@ export const ticketsApi = {
       body: JSON.stringify({ status }),
     }),
 };
+
+// export const chatApi = {
+//   getByTicketId: async (ticketId: string): Promise<ChatMessage[]> => {
+//     return fetchApi(`/ticket/${ticketId}/messages`);
+//   },
+//   send: async (
+//     ticketId: string,
+//     body: { content: string; attachments?: string[] }
+//   ) => {
+//     return fetchApi(`/ticket/${ticketId}/messages`, {
+//       method: "POST",
+//       body: JSON.stringify(body),
+//     });
+//   },
+// };
 
 export const commentsApi = {
   getByTicket: async (ticketId: string): Promise<Message[]> => {

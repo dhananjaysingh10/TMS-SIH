@@ -31,6 +31,7 @@
     "react-router-dom": "^7.9.3",
     "react-toastify": "^11.0.5",
     "redux-persist": "^6.0.0",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.14"
   },

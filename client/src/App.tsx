@@ -6,6 +6,7 @@ import TicketsDashboard from "./pages/TicketsDashboard";
 import MyTickets from "./pages/MyTicket";
 import TicketDetail from "./pages/TicketDetail";
 import Users from "./pages/User";
+import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const App: React.FC = () => {
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/ticket/:id" element={<TicketDetail />} />
         <Route path="/users" element={<Users />} />
+        <Route path="/created-by-me" element={<TicketsCreatedByMe />} />
         {/* Add dashboard route later */}
       </Routes>
     </Router>

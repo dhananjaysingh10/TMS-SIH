@@ -21,14 +21,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  const navItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/tickets", icon: Ticket, label: "Tickets" },
-    { path: "/my-tickets", icon: User, label: "Tickets Assigned to Me" },
-    ...(currentUser?.role === "super-admin"
-      ? [{ path: "/users", icon: Users, label: "User Management" }]
-      : []),
-  ];
+const navItems = [
+  { path: "/", icon: Home, label: "Home" },
+  { path: "/tickets", icon: Ticket, label: "Tickets" },
+  { path: "/my-tickets", icon: User, label: "Tickets Assigned to Me" },
+  { path: "/created-by-me", icon: User, label: "Tickets Created by Me" },
+  ...(currentUser?.role === "super-admin"
+    ? [{ path: "/users", icon: Users, label: "User Management" }]
+    : []),
+];
 
   return (
     <>
