@@ -1,24 +1,18 @@
 import mongoose from "mongoose";
 
 const progressSchema = new mongoose.Schema({
-  status: {
-    type: String,
-    enum: ["open", "in-progress", "resolved", "closed"],
-    required: true,
-  },
-  remark: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  createdBy: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
   },
 });
 
@@ -79,12 +73,12 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       enum: ["bug", "feature", "task", "improvement", "support"],
       required: true,
-      default: "test"
+      default: "task",
     },
     description: { type: String, required: true, trim: true },
     title: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
     priority: {
@@ -107,17 +101,14 @@ const ticketSchema = new mongoose.Schema(
       enum: ["open", "in-progress", "resolved", "closed"],
       default: "open",
     },
-    progress: {
-      type: [progressSchema], // it contain array of progress in json format {status, remark, time and date}
-      default: []
-    },
+    progress: [progressSchema],
     chat: {
       type: [messageSchema], // it contain chats between assigned_to and created_by , it is array of message which is like {userId, content, img_url, time}
-      default: []
+      default: [],
     },
     comments: {
       type: [commentSchema],
-      default: []
+      default: [],
     },
     rating: {
       type: Number,

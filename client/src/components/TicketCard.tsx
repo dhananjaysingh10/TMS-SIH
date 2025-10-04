@@ -84,12 +84,15 @@ export default function TicketCard({
   accepted,
 }: TicketCardProps) {
   const isUnaccepted = !accepted;
-
+  const progress = status === "in-progress";
+  const isResolved = status === "resolved";
   return (
     <Link
       to={`/ticket/${_id}`} // Link now uses _id
       className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${
         isUnaccepted ? "border-l-4 border-l-orange-400" : ""
+      } ${isResolved ? "border-l-4 border-l-blue-400" : ""}${
+        progress ? "border-l-4 border-l-green-400" : ""
       }`}
     >
       <div className="flex items-start justify-between mb-3">

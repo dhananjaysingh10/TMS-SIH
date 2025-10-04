@@ -29,7 +29,7 @@ export default function MyTickets() {
     }
   }
 
-  const openTickets = tickets.filter((t) => t.status !== "resolved");
+  const openTickets = tickets.filter((t) => t.status === "in-progress");
   const closedTickets = tickets.filter((t) => t.status === "resolved");
 
   const renderSection = (title: string, sectionTickets: Ticket[]) => (
@@ -47,7 +47,7 @@ export default function MyTickets() {
           <p className="text-gray-500">No tickets found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {sectionTickets.map((ticket) => (
             <TicketCard
               key={ticket._id}
@@ -101,9 +101,9 @@ export default function MyTickets() {
           </p>
         </div>
 
-        <div className="space-y-8">
-          {renderSection("My Open Tickets", openTickets)}
-          {renderSection("My Closed Tickets", closedTickets)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {renderSection("In-progress Tickets", openTickets)}
+          {renderSection("Closed by me", closedTickets)}
         </div>
       </div>
     </Layout>

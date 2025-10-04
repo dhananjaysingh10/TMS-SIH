@@ -24,10 +24,10 @@ export default function TicketsDashboard() {
     }
   }
 
-  const open = tickets.filter((t) => !t.accepted && t.status !== "resolved");
+  const open = tickets.filter((t) => !t.accepted );
 
   const assigned = tickets.filter(
-    (t) => t.assignedTo && t.status !== "resolved"
+    (t) => t.accepted && t.status !== "resolved"
   );
 
   const closedTickets = tickets.filter((t) => t.status === "resolved");

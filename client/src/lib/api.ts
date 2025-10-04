@@ -84,11 +84,14 @@ export interface NewMessageData {
 }
 
 export interface Activity {
-  id: string;
-  ticket_id: string;
-  activity_type: string;
+  _id: string;
+  user: {
+    _id: string;
+    name: string;
+    email?: string;
+  };
   description: string;
-  created_at: string;
+  timestamp: string;
 }
 
 export type TicketStats = {
@@ -97,6 +100,7 @@ export type TicketStats = {
   inProgress: number;
   closed: number;
 };
+
 interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -107,9 +111,10 @@ export interface NewTicketData {
   description: string;
   department: string;
   priority: string;
-  useremail: string; // This should come from your authenticated user session.
+  useremail: string;
   assignedemail?: string;
 }
+
 export const ticketsApi = {
   getAll: () => fetchApi<Ticket[]>(`/ticket`),
   getAllDepartment: (department: string) =>
@@ -121,11 +126,11 @@ export const ticketsApi = {
   },
 
   getMyTickets: async (email: string): Promise<Ticket[]> => {
-    const payload={email}
+    const payload = { email };
     const response = await fetchApi<ApiResponse<Ticket[]>>(
       "/ticket/assignedto",
       {
-        method: "POST", 
+        method: "POST",
         body: JSON.stringify(payload),
       }
     );
@@ -146,9 +151,22 @@ export const ticketsApi = {
       body: JSON.stringify({ userId }),
     }),
 
-  resolveTicket: (ticketId: string) =>
+  unacceptTicket: (ticketId: string, useremail: string) =>
+    fetchApi<Ticket>(`/ticket/unaccept/${ticketId}`, {
+      method: "POST",
+      body: JSON.stringify({ useremail }),
+    }),
+
+  openTicket: (ticketId: string, useremail: string) =>
+    fetchApi<Ticket>(`/ticket/open/${ticketId}`, {
+      method: "POST",
+      body: JSON.stringify({ useremail }),
+    }),
+
+  resolveTicket: (ticketId: string, useremail: string) =>
     fetchApi<Ticket>(`/ticket/resolve/${ticketId}`, {
       method: "POST",
+      body: JSON.stringify({ useremail }),
     }),
   ticketStats: () => fetchApi<TicketStats>("/tickets/stats"),
   updateStatus: (ticketId: string, status: string) =>
@@ -187,6 +205,10 @@ export const commentsApi = {
 };
 
 export const activitiesApi = {
-  getByTicket: (ticketId: string) =>
-    fetchApi<Activity[]>(`/ticket/${ticketId}/activities`),
+  getByTicket: async (ticketId: string): Promise<Activity[]> => {
+    const response = await fetchApi<ApiResponse<Activity[]>>(
+      `/ticket/activities/${ticketId}`
+    );
+    return response.data;
+  },
 };

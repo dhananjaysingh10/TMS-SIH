@@ -59,7 +59,6 @@ export const createTicket = async (req, res) => {
     const finalTicketId = ticketId || crypto.randomUUID();
     const createdBy = await User.findOne({ email: useremail });
     const assignedTo = await User.findOne({ email: assignedemail });
-
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department,
@@ -73,7 +72,7 @@ export const createTicket = async (req, res) => {
     });
 
     const savedTicket = await newTicket.save();
-    console.log("enter");
+    await logProgress(ticketId, useremail, "Employee created ticket");
     res.status(201).json({
       success: true,
       message: "Ticket created successfully",
@@ -101,7 +100,12 @@ export const getTicketsByDepartment = async (req, res) => {
     const { page, limit } = req.query;
 
     const validDepartments = [
-      "IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"
+      "IT",
+      "DevOps",
+      "Software",
+      "Networking",
+      "Cybersecurity",
+      "Other",
     ];
     if (!validDepartments.includes(department)) {
       return res.status(400).json({
@@ -229,8 +233,8 @@ export const updateTicket = async (req, res) => {
 export const acceptTicket = async (req, res) => {
   try {
     const { id: ticketId } = req.params;
-    const { userId: userEmail } = req.body;
-    const userToAssign = await User.findOne({ email: userEmail });
+    const { userId: useremail } = req.body;
+    const userToAssign = await User.findOne({ email: useremail });
     if (!userToAssign) {
       return res.status(404).json({
         success: false,
@@ -254,7 +258,77 @@ export const acceptTicket = async (req, res) => {
         message: "Ticket not found.",
       });
     }
+    await logProgress(ticketId, useremail, "Employee accepted ticket");
+    res.status(200).json({
+      success: true,
+      message: "Ticket accepted and assigned successfully.",
+      data: updatedTicket,
+    });
+  } catch (error) {
+    console.error("Error accepting ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while accepting ticket.",
+      error: error.message,
+    });
+  }
+};
 
+export const unacceptTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { useremail } = req.body;
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      {
+        accepted: false,
+        status: "open",
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+    await logProgress(ticketId, useremail, "Employee unclaimed ticket");
+    res.status(200).json({
+      success: true,
+      message: "Ticket accepted and assigned successfully.",
+      data: updatedTicket,
+    });
+  } catch (error) {
+    console.error("Error accepting ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while accepting ticket.",
+      error: error.message,
+    });
+  }
+};
+
+export const openTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { useremail } = req.body;
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      {
+        accepted: false,
+        status: "open",
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+    await logProgress(ticketId, useremail, "Ticket opened again");
     res.status(200).json({
       success: true,
       message: "Ticket accepted and assigned successfully.",
@@ -273,6 +347,7 @@ export const acceptTicket = async (req, res) => {
 export const resolveTicket = async (req, res) => {
   try {
     const { id: ticketId } = req.params;
+    const { useremail } = req.body;
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
@@ -287,7 +362,7 @@ export const resolveTicket = async (req, res) => {
         message: "Ticket not found.",
       });
     }
-
+    await logProgress(ticketId, useremail, "Ticket Resolved");
     res.status(200).json({
       success: true,
       message: "Ticket resolved successfully.",
@@ -376,21 +451,6 @@ export const getFilteredTickets = async (req, res) => {
   }
 };
 
-export const addProgressUpdate = async (req, res) => {
-  try {
-    const { status, remark, createdBy } = req.body;
-    const ticket = await Ticket.findById(req.params.id);
-    if (!ticket) return res.status(404).json({ message: "Ticket not found" });
-
-    ticket.progress.push({ status, remark, createdBy });
-    await ticket.save();
-    res.status(200).json(ticket);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-
 export const createMessage = async (req, res) => {
   try {
     const ticketId = req.params.id;
@@ -467,7 +527,7 @@ export const getMessage = async (req, res) => {
 
 export const getTicketsByAssignedTo = async (req, res) => {
   try {
-    const {email} = req.body;
+    const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -477,8 +537,9 @@ export const getTicketsByAssignedTo = async (req, res) => {
     }
 
     const tickets = await Ticket.find({ assignedTo: user._id })
-      .populate("createdBy", "name email").populate("assignedTo","name email") 
-      .sort({ createdAt: -1 }); 
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -494,18 +555,17 @@ export const getTicketsByAssignedTo = async (req, res) => {
   }
 };
 
-
 export const updateTicketStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status, remark } = req.body;
-    
+
     const validStatuses = ["open", "in-progress", "resolved", "closed"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const ticket = await Ticket.findById(id).populate('createdBy');
+    const ticket = await Ticket.findById(id).populate("createdBy");
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
     }
@@ -513,7 +573,7 @@ export const updateTicketStatus = async (req, res) => {
       status,
       remark,
       createdAt: new Date(),
-      createdBy: req.user.userId 
+      createdBy: req.user.userId,
     };
 
     ticket.status = status;
@@ -538,15 +598,16 @@ export const updateTicketStatus = async (req, res) => {
         _id: ticket._id,
         ticketId: ticket.ticketId,
         status: ticket.status,
-        progress: ticket.progress
-      }
+        progress: ticket.progress,
+      },
     });
   } catch (error) {
     console.error("Error updating ticket status:", error);
-    res.status(500).json({ message: "Server error while updating ticket status" });
+    res
+      .status(500)
+      .json({ message: "Server error while updating ticket status" });
   }
 };
-
 
 export const addComment = async (req, res) => {
   try {
@@ -573,6 +634,64 @@ export const addComment = async (req, res) => {
 
     res.status(200).json({ message: "Comment added successfully", ticket });
   } catch (error) {
-    res.status(500).json({ message: "Error adding comment", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error adding comment", error: error.message });
+  }
+};
+
+export const logProgress = async (ticketId, useremail, description) => {
+  try {
+    const user = await User.findOne({ email: useremail });
+    console.log(useremail);
+    if (!user) {
+      console.error(
+        `Failed to log progress: User with email ${useremail} not found.`
+      );
+      return;
+    }
+
+    const progressEntry = {
+      user: user._id,
+      description: description,
+    };
+
+    await Ticket.findByIdAndUpdate(ticketId, {
+      $push: {
+        progress: {
+          $each: [progressEntry],
+          $sort: { timestamp: -1 },
+        },
+      },
+    });
+  } catch (error) {
+    console.error(`Failed to log progress for ticket ${ticketId}:`, error);
+  }
+};
+
+export const getActivites = async (req, res) => {
+  try {
+    const ticketId = req.params.id;
+
+    const ticket = await Ticket.findById(ticketId).select("progress").populate({
+      path: "progress.user",
+      select: "name email profilePicture",
+    });
+
+    if (!ticket) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Ticket not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: ticket.progress,
+    });
+  } catch (error) {
+    console.error("Error fetching ticket progress:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Server error.", error: error.message });
   }
 };

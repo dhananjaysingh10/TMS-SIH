@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
-
+import ActivityTimeline from "@/components/activity";
 import {
   ticketsApi,
   commentsApi,
@@ -48,11 +48,13 @@ export default function TicketDetail() {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const currentUser = useSelector(selectCurrentUser);
+  const useremail = currentUser ? currentUser.email : "";
+  const userId = currentUser ? currentUser._id : "";
   useEffect(() => {
     if (id) {
       fetchTicketDetails();
       fetchComments();
-      // fetchActivities();
+      fetchActivities();
     }
   }, [id]);
 
@@ -92,24 +94,42 @@ export default function TicketDetail() {
     if (!ticket) return;
 
     try {
-      await ticketsApi.acceptTicket(
-        ticket._id,
-        currentUser ? currentUser.email : "test-user@gmail.com"
-      );
+      await ticketsApi.acceptTicket(ticket._id, useremail);
       fetchTicketDetails();
-      // fetchActivities();
+      fetchActivities();
     } catch (error) {
-      console.error("Error accepting ticket:", error);
+      console.error("Error unaccepting ticket:", error);
+    }
+  }
+  async function handleOpenTicket() {
+    if (!ticket) return;
+
+    try {
+      await ticketsApi.openTicket(ticket._id, useremail);
+      fetchTicketDetails();
+      fetchActivities();
+    } catch (error) {
+      console.error("Error opening ticket:", error);
+    }
+  }
+  async function handleUnacceptTicket() {
+    if (!ticket) return;
+
+    try {
+      await ticketsApi.unacceptTicket(ticket._id, useremail);
+      fetchTicketDetails();
+      fetchActivities();
+    } catch (error) {
+      console.error("Error unaccepting ticket:", error);
     }
   }
 
   async function handleResolveTicket() {
     if (!ticket) return;
-
     try {
-      await ticketsApi.resolveTicket(ticket._id);
+      await ticketsApi.resolveTicket(ticket._id, useremail);
       fetchTicketDetails();
-      // fetchActivities();
+      fetchActivities();
     } catch (error) {
       console.error("Error resolving ticket:", error);
     }
@@ -287,13 +307,31 @@ export default function TicketDetail() {
                 Accept Ticket
               </button>
             )}
-            {ticket.status !== "resolved" && ticket.status !== "closed" && (
+            {ticket.accepted && ticket.status !== "resolved" && (
+              <button
+                onClick={handleUnacceptTicket}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+              >
+                <CheckCircle size={18} />
+                Unclaim
+              </button>
+            )}
+            {ticket.accepted && ticket.status !== "resolved" && (
               <button
                 onClick={handleResolveTicket}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
               >
                 <CheckCircle size={18} />
                 Resolve Ticket
+              </button>
+            )}
+            {ticket.status === "resolved" && (
+              <button
+                onClick={handleOpenTicket}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+              >
+                <CheckCircle size={18} />
+                Open Again
               </button>
             )}
           </div>
@@ -362,25 +400,7 @@ export default function TicketDetail() {
               Activity Log
             </h2>
 
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {activities.length === 0 ? (
-                <p className="text-gray-500 text-sm">No activities yet</p>
-              ) : (
-                activities.map((activity) => (
-                  <div key={activity.id} className="flex gap-3">
-                    <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2" />
-                    <div>
-                      <p className="text-sm text-gray-900">
-                        {activity.description}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {formatDateTime(activity.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            <ActivityTimeline activities={activities} />
           </div>
         </div>
       </div>

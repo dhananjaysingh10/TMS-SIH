@@ -120,10 +120,11 @@ export default function CreateTicketModal({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option>IT</option>
-                <option>dev-ops</option>
-                <option>software</option>
-                <option>networking</option>
-                <option>cyber-security</option>
+                <option>DevOps</option>
+                <option>Software</option>
+                <option>Networking</option>
+                <option>Cybersecurity</option>
+                <option>Other</option>
               </select>
             </div>
             <div>

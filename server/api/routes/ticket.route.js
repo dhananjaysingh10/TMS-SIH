@@ -10,13 +10,14 @@ import {
   getTicketsByDepartment,
   getTicketsByCreatedBy,
   getFilteredTickets,
-  addProgressUpdate,
   getMessage,
   createMessage,
   getTicketsByAssignedTo,
   updateTicketStatus,
-  addComment
-
+  addComment,
+  unacceptTicket,
+  openTicket,
+  getActivites,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
 
@@ -30,12 +31,14 @@ router.get("/department/:department", getTicketsByDepartment);
 router.get("/createdBy/:userId", getTicketsByCreatedBy);
 router.post("/assignedto", getTicketsByAssignedTo);
 router.put("/:id", updateTicket);
-router.post("/:id/progress", addProgressUpdate);
 router.delete("/:id", deleteTicket);
 router.post("/accept/:id", acceptTicket);
+router.post("/unaccept/:id", unacceptTicket);
+router.post("/open/:id", openTicket);
 router.post("/resolve/:id", resolveTicket);
-router.post("/message/:id",createMessage);
-router.get("/getmessage/:id",getMessage);
+router.post("/message/:id", createMessage);
+router.get("/getmessage/:id", getMessage);
+router.get("/activities/:id", getActivites);
 router.post("/status/:id", authMiddleware, updateTicketStatus);
 router.post("/:id/comment", authMiddleware, addComment);
 export default router;
