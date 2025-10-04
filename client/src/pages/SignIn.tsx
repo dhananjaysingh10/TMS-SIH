@@ -24,7 +24,11 @@ const SignIn: React.FC = () => {
       const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
         email,
         password,
-      });
+      },
+        { 
+          withCredentials: true, 
+          headers: { 'Content-Type': 'application/json' },
+        });
       toast.success('Signin successful!');
       dispatch(signInSuccess(response.data.user));
       navigate('/'); // Redirect to dashboard or home

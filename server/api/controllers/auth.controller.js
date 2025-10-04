@@ -1,10 +1,9 @@
-import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import User from '../models/user.model.js';
 
 export const signup = async (req, res) => {
   try {
-    console.log("signup");
     const { name, email, password, department, primaryPhone } = req.body;
 
     if (!name || !email || !password || !department) {
@@ -29,13 +28,15 @@ export const signup = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+      path: '/', 
       maxAge: 24 * 60 * 60 * 1000, 
     });
 
@@ -50,6 +51,7 @@ export const signup = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -72,13 +74,15 @@ export const signin = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user._id, role: user.role, department: user.department }, process.env.JWT_SECRET, {
       expiresIn: '1d',
     });
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+      path: '/', 
       maxAge: 24 * 60 * 60 * 1000, 
     });
 
@@ -90,10 +94,11 @@ export const signin = async (req, res) => {
         email: user.email,
         role: user.role,
         department: user.department,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
       },
     });
   } catch (error) {
+    console.error('Signin error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

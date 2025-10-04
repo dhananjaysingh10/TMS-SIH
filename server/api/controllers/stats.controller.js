@@ -58,6 +58,7 @@ export const getMyStats = async (req, res) => {
         year,
         stats: result,
       },
+      message: 'done'
     });
   } catch (error) {
     console.error('Error in getMyStats:', error);
@@ -136,6 +137,7 @@ export const getDepStats = async (req, res) => {
         year,
         stats: responseData,
       },
+      message: 'done'
     });
   } catch (error) {
     console.error('Error in getDepStats:', error);
