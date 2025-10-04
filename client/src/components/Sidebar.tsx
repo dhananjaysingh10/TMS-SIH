@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { Home, Ticket, User, X } from "lucide-react";
+import { Home, Ticket, User, X, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
-
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const currentUser = useSelector(selectCurrentUser);
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -23,6 +25,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { path: "/", icon: Home, label: "Home" },
     { path: "/tickets", icon: Ticket, label: "Tickets" },
     { path: "/my-tickets", icon: User, label: "Tickets Assigned to Me" },
+    ...(currentUser?.role === "super-admin"
+      ? [{ path: "/users", icon: Users, label: "User Management" }]
+      : []),
   ];
 
   return (

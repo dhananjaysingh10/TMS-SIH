@@ -31,7 +31,11 @@ const SignUp: React.FC = () => {
         password,
         department,
         primaryPhone,
-      });
+      },
+        { 
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' },
+        });
       toast.success('Signup successful!');
       dispatch(signInSuccess(response.data.user));
       navigate('/'); 
