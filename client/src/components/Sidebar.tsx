@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { path: "/", icon: Home, label: "Home" },
     { path: "/tickets", icon: Ticket, label: "Tickets" },
     { path: "/my-tickets", icon: User, label: "Tickets Assigned to Me" },
+    { path: "/ticketsbyme", icon: User, label: "Tickets created by Me" },
     ...(currentUser?.role === "super-admin"
       ? [{ path: "/users", icon: Users, label: "User Management" }]
       : []),

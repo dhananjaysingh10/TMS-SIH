@@ -4,42 +4,33 @@ import crypto from "crypto";
 import User from "../models/user.model.js";
 import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
-const paginateTickets = async (query, page, limit, res) => {
-  try {
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 10;
+const paginateTickets = async (query, page, limit, sortOptions) => {
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 10;
+  const skip = (pageNum - 1) * limitNum;
+  if (pageNum < 1 || limitNum < 1) {
+    throw new Error("Page and limit must be positive integers");
+  }
 
-    if (pageNum < 1 || limitNum < 1) {
-      return res.status(400).json({
-        success: false,
-        message: "Page and limit must be positive integers",
-      });
-    }
-
-    const skip = (pageNum - 1) * limitNum;
-    const total = await Ticket.countDocuments(query);
-    const tickets = await Ticket.find(query)
+  const [total, tickets] = await Promise.all([
+    Ticket.countDocuments(query),
+    Ticket.find(query)
       .populate("assignedTo", "name email")
       .populate("createdBy", "name email")
-      .sort({ createdAt: -1 })
+      .sort(sortOptions)
       .skip(skip)
-      .limit(limitNum);
+      .limit(limitNum),
+  ]);
 
-    return {
-      success: true,
-      count: tickets.length,
+  return {
+    tickets,
+    pagination: {
       total,
       page: pageNum,
+      limit: limitNum,
       totalPages: Math.ceil(total / limitNum),
-      data: tickets,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: "Error fetching tickets",
-      error: error.message,
-    };
-  }
+    },
+  };
 };
 
 export const createTicket = async (req, res) => {
@@ -88,10 +79,27 @@ export const createTicket = async (req, res) => {
 };
 
 export const getAllTickets = async (req, res) => {
-  const { page, limit } = req.query;
-  const result = await paginateTickets({}, page, limit, res);
+  try {
+    const { search, page, limit } = req.query;
+    const query = {};
+    let sortOptions = { createdAt: -1 };
+    if (typeof search === "string" && search.trim().length > 0) {
+      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = terms.map(escapeRegex).join("|");
+      const rx = new RegExp(pattern, "i");
+      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
+    }
 
-  res.status(result.success ? 200 : 500).json(result.data);
+    const { tickets } = await paginateTickets(query, page, limit, sortOptions);
+    res.status(200).json(tickets);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching tickets",
+      error: error.message,
+    });
+  }
 };
 
 export const getTicketsByDepartment = async (req, res) => {
@@ -116,40 +124,14 @@ export const getTicketsByDepartment = async (req, res) => {
       });
     }
 
-    const result = await paginateTickets({ department }, page, limit, res);
-    res.status(result.success ? 200 : 500).json(result);
+    const { tickets } = await paginateTickets({ department }, page, limit, {
+      createdAt: -1,
+    });
+    res.status(200).json(tickets);
   } catch (error) {
     res.status(500).json({
       success: false,
       message: "Error fetching tickets by department",
-      error: error.message,
-    });
-  }
-};
-
-export const getTicketsByCreatedBy = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { page, limit } = req.query;
-
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user ID format",
-      });
-    }
-
-    const result = await paginateTickets(
-      { createdBy: userId },
-      page,
-      limit,
-      res
-    );
-    res.status(result.success ? 200 : 500).json(result);
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error fetching tickets by creator",
       error: error.message,
     });
   }
@@ -284,6 +266,7 @@ export const unacceptTicket = async (req, res) => {
       {
         accepted: false,
         status: "open",
+        assignedTo: null,
       },
       { new: true, runValidators: true }
     );
@@ -319,6 +302,7 @@ export const openTicket = async (req, res) => {
       {
         accepted: false,
         status: "open",
+        assignedTo: null,
       },
       { new: true, runValidators: true }
     );
@@ -420,7 +404,7 @@ export const getFilteredTickets = async (req, res) => {
     if (priority) filter.priority = priority;
     if (type) filter.type = type;
     if (status) filter.status = status;
-
+    console.log(createdBy);
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const sort = {};
@@ -529,6 +513,16 @@ export const getMessage = async (req, res) => {
 export const getTicketsByAssignedTo = async (req, res) => {
   try {
     const { email } = req.body;
+    const { search, page, limit } = req.query;
+    const query = {};
+    let sortOptions = { createdAt: -1 };
+    if (typeof search === "string" && search.trim().length > 0) {
+      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = terms.map(escapeRegex).join("|");
+      const rx = new RegExp(pattern, "i");
+      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
+    }
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({
@@ -537,10 +531,59 @@ export const getTicketsByAssignedTo = async (req, res) => {
       });
     }
 
-    const tickets = await Ticket.find({ assignedTo: user._id })
+    const filter = {
+      assignedTo: user._id,
+      ...(query.$or ? { $or: query.$or } : {}),
+    };
+    const tickets = await Ticket.find(filter)
       .populate("createdBy", "name email")
       .populate("assignedTo", "name email")
-      .sort({ createdAt: -1 });
+      .sort(sortOptions);
+
+    res.status(200).json({
+      success: true,
+      data: tickets,
+    });
+  } catch (error) {
+    console.error("Error fetching assigned tickets:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching assigned tickets.",
+      error: error.message,
+    });
+  }
+};
+
+export const getTicketsCreatedBy = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { search } = req.query;
+    const query = {};
+    let sortOptions = { createdAt: -1 };
+    if (typeof search === "string" && search.trim().length > 0) {
+      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = terms.map(escapeRegex).join("|");
+      const rx = new RegExp(pattern, "i");
+      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User with that email not found.",
+      });
+    }
+
+    const filter = {
+      assignedTo: user._id,
+      ...(query.$or ? { $or: query.$or } : {}),
+    };
+
+    const tickets = await Ticket.find(filter)
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .sort(sortOptions);
 
     res.status(200).json({
       success: true,

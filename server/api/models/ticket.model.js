@@ -29,7 +29,7 @@ const messageSchema = new mongoose.Schema({
   },
   attachment: {
     type: String,
-    required:false
+    required: false,
   },
   createdAt: {
     type: Date,
@@ -80,6 +80,8 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: false,
       trim: true,
+      default: "Test Title ",
+      text: true,
     },
     priority: {
       type: String,

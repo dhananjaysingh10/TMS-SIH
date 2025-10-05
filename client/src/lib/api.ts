@@ -46,6 +46,7 @@ export interface Ticket {
     | "NA";
   subject: string;
   description: string;
+  title: string;
   type: string;
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
@@ -109,6 +110,7 @@ interface ApiResponse<T> {
 
 export interface NewTicketData {
   description: string;
+  title: string;
   department: string;
   priority: string;
   useremail: string;
@@ -116,7 +118,13 @@ export interface NewTicketData {
 }
 
 export const ticketsApi = {
-  getAll: () => fetchApi<Ticket[]>(`/ticket`),
+  getAll: async (searchTerm: string = "") => {
+    const endpoint = searchTerm
+      ? `/ticket?search=${encodeURIComponent(searchTerm)}&limit=1000`
+      : `/ticket?search=&limit=1000`;
+    const response = await fetchApi<Ticket[]>(endpoint);
+    return response;
+  },
   getAllDepartment: (department: string) =>
     fetchApi<Ticket[]>(`/ticket/department/${department}`),
   getById: async (id: string): Promise<Ticket> => {
@@ -124,17 +132,29 @@ export const ticketsApi = {
     const response = await fetchApi<ApiResponse<Ticket>>(endpoint);
     return response.data;
   },
-
-  getMyTickets: async (email: string): Promise<Ticket[]> => {
+  createdByMe: async (email: string, searchTerm: string = "") => {
     const payload = { email };
-    const response = await fetchApi<ApiResponse<Ticket[]>>(
-      "/ticket/assignedto",
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }
-    );
-
+    const endpoint = searchTerm
+      ? `/ticket/createdby?search=${encodeURIComponent(searchTerm)}&limit=1000`
+      : `/ticket/createdby?search=&limit=1000`;
+    const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return response.data;
+  },
+  getMyTickets: async (
+    email: string,
+    searchTerm: string = ""
+  ): Promise<Ticket[]> => {
+    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(
+      searchTerm
+    )}&limit=1000`;
+    const payload = { email };
+    const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
     return response.data;
   },
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
