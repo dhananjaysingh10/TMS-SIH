@@ -88,7 +88,7 @@ export default function TicketCard({
   const isResolved = status === "resolved";
   return (
     <Link
-      to={`/ticket/${_id}`} // Link now uses _id
+      to={`/ticket/${ticketId}`} // Link now uses _id
       className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${
         isUnaccepted ? "border-l-4 border-l-orange-400" : ""
       } ${isResolved ? "border-l-4 border-l-blue-400" : ""}${
