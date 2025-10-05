@@ -1,0 +1,13 @@
+{
+  "sessions": [
+    {
+      "id": "1972791893:1972791893",
+      "data": {
+        "waitingForTicketId": false,
+        "waitingForEmail": false,
+        "waitingForTicketIdForComment": false,
+        "commentTicketId": "8741294a-ef9f-4be8-ae24-ed064bf57584"
+      }
+    }
+  ]
+}

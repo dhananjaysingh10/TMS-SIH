@@ -24,6 +24,7 @@ import { authMiddleware } from "../utils/verifyUser.js";
 const router = express.Router();
 
 router.post("/", createTicket);
+router.get("/:id", getTicketById);
 router.get("/", getAllTickets);
 router.post("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
