@@ -168,7 +168,7 @@ export const getTicketsByCreatedBy = async (req, res) => {
     console.error("Error fetching tickets by creator:", error);
     res.status(500).json({
       success: false,
-      message: "Error fetching tickets by creator",
+      message: "Error fetching tickets by department",
       error: error.message,
     });
   }
