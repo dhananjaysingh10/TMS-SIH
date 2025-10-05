@@ -157,7 +157,8 @@ export const getTicketsByCreatedBy = async (req, res) => {
 
 export const getTicketById = async (req, res) => {
   try {
-    const ticket = await Ticket.findById(req.params.id).populate([
+
+    const ticket = await Ticket.findOne({ticketId:req.params.id}).populate([
       {
         path: "createdBy",
         select: "name email",

@@ -20,7 +20,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"],
       default: "NA",
-    }
+    },
+    telegramId: { type: String, required: false, unique: true },
   },
   { timestamps: true }
 );

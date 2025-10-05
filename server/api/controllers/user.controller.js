@@ -41,7 +41,7 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { name, primaryPhone, email, role, department, profilePicture } = req.body;
+    const { name, primaryPhone, email, role, department, profilePicture, telegram } = req.body;
 
     const updateData = {
       name,
@@ -50,6 +50,7 @@ export const updateUser = async (req, res) => {
       role,
       department,
       profilePicture,
+      telegramId:telegram
     };
 
     Object.keys(updateData).forEach(
@@ -111,3 +112,34 @@ export const signOut = (req, res) => {
     console.log(error.message);
   }
 }
+
+export const linkTelegramAccount = async (req, res) => {
+  try {
+    const { email, telegramId } = req.body;
+    const user = await User.findOneAndUpdate(
+      { email },
+      { telegramId },
+      { new: true, runValidators: true }
+    );
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.status(200).json({ success: true, message: 'Telegram account linked successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error linking account', error: error.message });
+  }
+};
+
+export const getUserByTelegramId = async (req, res) => {
+  try {
+    const { telegramId } = req.params;
+    const user = await User.findOne({ telegramId });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching user', error: error.message });
+  }
+};
