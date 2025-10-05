@@ -162,21 +162,21 @@ export const ticketsApi = {
     }
   },
 
-  getMyTickets: async (
+    getMyTickets: async (
     email: string,
     searchTerm: string = ""
   ): Promise<Ticket[]> => {
-    const endpoint =
-      searchTerm && searchTerm.trim().length > 0
-        ? `/ticket/assignedto?search=${encodeURIComponent(searchTerm)}`
-        : "/ticket/assignedto";
+    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(
+      searchTerm
+    )}&limit=1000`;
     const payload = { email };
     const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    return response.data || [];
+    return response.data;
   },
+  
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
     const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {
       method: "POST",
