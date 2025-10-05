@@ -30,7 +30,9 @@ interface StatsResponse {
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [myStats, setMyStats] = useState<Stats | null>(null);
-  const [depStats, setDepStats] = useState<{ [department: string]: Stats } | null>(null);
+  const [depStats, setDepStats] = useState<{
+    [department: string]: Stats;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
@@ -39,7 +41,6 @@ export default function Home() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const currentUser = useSelector(selectCurrentUser);
 
-  // Set default department for admin
   useEffect(() => {
     if (currentUser?.role === "admin" && currentUser?.department) {
       setSelectedDepartment(currentUser.department);
@@ -57,7 +58,9 @@ export default function Home() {
     setLoading(true);
     setError(null);
     try {
-      const url = `${import.meta.env.VITE_API_URL}/api/stats/mystats?month=${month}&year=${year}`;
+      const url = `${
+        import.meta.env.VITE_API_URL
+      }/api/stats/mystats?month=${month}&year=${year}`;
       console.log("Fetching my stats from:", url);
       const response = await fetch(url, {
         credentials: "include",
@@ -72,7 +75,9 @@ export default function Home() {
         if (response.status === 401) {
           setError("Unauthorized: Please log in again.");
         } else {
-          setError(`Failed to fetch my stats: ${response.status} ${response.statusText}`);
+          setError(
+            `Failed to fetch my stats: ${response.status} ${response.statusText}`
+          );
         }
         return;
       }
@@ -87,7 +92,9 @@ export default function Home() {
       }
     } catch (error: any) {
       console.error("Error fetching my stats:", error.message);
-      setError("Network error: Unable to fetch my stats. Check if the backend is running.");
+      setError(
+        "Network error: Unable to fetch my stats. Check if the backend is running."
+      );
     } finally {
       setLoading(false);
     }
@@ -95,7 +102,9 @@ export default function Home() {
 
   async function fetchDepStats() {
     try {
-      const url = `${import.meta.env.VITE_API_URL}/api/stats/depstats?month=${month}&year=${year}`;
+      const url = `${
+        import.meta.env.VITE_API_URL
+      }/api/stats/depstats?month=${month}&year=${year}`;
       console.log("Fetching department stats from:", url);
       const response = await fetch(url, {
         credentials: "include",
@@ -107,7 +116,9 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        console.log(`Failed to fetch department stats: ${response.status} ${response.statusText}`);
+        console.log(
+          `Failed to fetch department stats: ${response.status} ${response.statusText}`
+        );
         return;
       }
 
@@ -126,7 +137,10 @@ export default function Home() {
     setIsModalOpen(false);
     ticketsApi.getStats().then((data) => {
       setMyStats((prev) => ({ ...prev, ...data.data?.stats }));
-      if (currentUser?.role === "admin" || currentUser?.role === "super-admin") {
+      if (
+        currentUser?.role === "admin" ||
+        currentUser?.role === "super-admin"
+      ) {
         setDepStats((prev) => ({ ...prev, ...data.data?.stats }));
       }
     });
@@ -136,7 +150,14 @@ export default function Home() {
     }
   };
 
-  const availableDepartments = ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"];
+  const availableDepartments = [
+    "IT",
+    "DevOps",
+    "Software",
+    "Networking",
+    "Cybersecurity",
+    "Other",
+  ];
   const months = [
     { value: 1, label: "January" },
     { value: 2, label: "February" },
@@ -151,7 +172,10 @@ export default function Home() {
     { value: 11, label: "November" },
     { value: 12, label: "December" },
   ];
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+  const years = Array.from(
+    { length: 5 },
+    (_, i) => new Date().getFullYear() - i
+  );
 
   const statCards = (statsData: Stats, department?: string) => [
     {
@@ -191,19 +215,22 @@ export default function Home() {
   return (
     <Layout pageTitle="Dashboard">
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
-        {/* Welcome and Filters Section */}
         <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Welcome to POWERGRID Ticketing</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
+            Welcome to POWERGRID Ticketing
+          </h1>
           <p className="text-base sm:text-lg text-gray-600 mb-6">
             Manage and track IT support tickets with ease
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Month
+              </label>
               <select
                 value={month}
                 onChange={(e) => setMonth(Number(e.target.value))}
-                className="block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
+                className="block w-48 h-10 p-2 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
               >
                 {months.map((m) => (
                   <option key={m.value} value={m.value}>
@@ -213,11 +240,13 @@ export default function Home() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Year
+              </label>
               <select
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
-                className="block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
+                className="block w-48 h-10 p-2 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
               >
                 {years.map((y) => (
                   <option key={y} value={y}>
@@ -241,7 +270,8 @@ export default function Home() {
               >
                 My Stats
               </button>
-              {(currentUser?.role === "admin" || currentUser?.role === "super-admin") && (
+              {(currentUser?.role === "admin" ||
+                currentUser?.role === "super-admin") && (
                 <button
                   className={`px-4 py-2 text-sm font-semibold rounded-t-md transition-colors ${
                     activeTab === "depStats"
@@ -262,7 +292,10 @@ export default function Home() {
                     <AlertCircle size={24} />
                     <p>{error}</p>
                     {error.includes("Unauthorized") && (
-                      <Link to="/login" className="ml-2 text-blue-600 hover:underline font-medium">
+                      <Link
+                        to="/login"
+                        className="ml-2 text-blue-600 hover:underline font-medium"
+                      >
                         Go to Login
                       </Link>
                     )}
@@ -294,12 +327,22 @@ export default function Home() {
                           key={card.title}
                           className="relative bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden"
                         >
-                          <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}>
+                          <div
+                            className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}
+                          >
                             <Icon className={card.textColor} size={24} />
                           </div>
-                          <p className={`text-sm font-medium ${card.textColor} mb-1`}>{card.title}</p>
-                          <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                          <div className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`} />
+                          <p
+                            className={`text-sm font-medium ${card.textColor} mb-1`}
+                          >
+                            {card.title}
+                          </p>
+                          <p className="text-3xl font-bold text-gray-900">
+                            {card.value}
+                          </p>
+                          <div
+                            className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`}
+                          />
                         </div>
                       );
                     })}
@@ -308,85 +351,121 @@ export default function Home() {
               </div>
             )}
 
-            {activeTab === "depStats" && (currentUser?.role === "admin" || currentUser?.role === "super-admin") && (
-              <div className="mt-4">
-                {currentUser?.role === "super-admin" && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                    <select
-                      value={selectedDepartment}
-                      onChange={(e) => setSelectedDepartment(e.target.value)}
-                      className="block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
-                    >
-                      <option value="all">All Departments</option>
-                      {availableDepartments.map((dept) => (
-                        <option key={dept} value={dept}>
-                          {dept}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-                {depStats && selectedDepartment !== "all" ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {statCards(
-                      depStats[selectedDepartment] || { total: 0, open: 0, inProgress: 0, resolved: 0, closed: 0 },
-                      currentUser?.role === "admin" ? currentUser.department : selectedDepartment
-                    ).map((card) => {
-                      const Icon = card.icon;
-                      return (
-                        <div
-                          key={card.title}
-                          className="relative bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden"
-                        >
-                          <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}>
-                            <Icon className={card.textColor} size={24} />
-                          </div>
-                          <p className={`text-sm font-medium ${card.textColor} mb-1`}>{card.title}</p>
-                          <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                          <div className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : depStats && selectedDepartment === "all" ? (
-                  Object.entries(depStats).map(([dept, deptStats]) => (
-                    <div key={dept} className="col-span-full mb-6">
-                      <h2 className="text-xl font-semibold text-gray-900 mb-4">{dept}</h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {statCards(deptStats, dept).map((card) => {
-                          const Icon = card.icon;
-                          return (
-                            <div
-                              key={card.title}
-                              className="relative bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden"
-                            >
-                              <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}>
-                                <Icon className={card.textColor} size={24} />
-                              </div>
-                              <p className={`text-sm font-medium ${card.textColor} mb-1`}>{card.title}</p>
-                              <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                              <div className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`} />
-                            </div>
-                          );
-                        })}
-                      </div>
+            {activeTab === "depStats" &&
+              (currentUser?.role === "admin" ||
+                currentUser?.role === "super-admin") && (
+                <div className="mt-4">
+                  {currentUser?.role === "super-admin" && (
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Department
+                      </label>
+                      <select
+                        value={selectedDepartment}
+                        onChange={(e) => setSelectedDepartment(e.target.value)}
+                        className="block w-48 rounded-lg border-gray-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 transition-colors"
+                      >
+                        <option value="all">All Departments</option>
+                        {availableDepartments.map((dept) => (
+                          <option key={dept} value={dept}>
+                            {dept}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  ))
-                ) : (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center text-yellow-700 flex items-center justify-center gap-2">
-                    <AlertCircle size={24} />
-                    <p>No department stats available</p>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                  {depStats && selectedDepartment !== "all" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {statCards(
+                        depStats[selectedDepartment] || {
+                          total: 0,
+                          open: 0,
+                          inProgress: 0,
+                          resolved: 0,
+                          closed: 0,
+                        },
+                        currentUser?.role === "admin"
+                          ? currentUser.department
+                          : selectedDepartment
+                      ).map((card) => {
+                        const Icon = card.icon;
+                        return (
+                          <div
+                            key={card.title}
+                            className="relative bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden"
+                          >
+                            <div
+                              className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}
+                            >
+                              <Icon className={card.textColor} size={24} />
+                            </div>
+                            <p
+                              className={`text-sm font-medium ${card.textColor} mb-1`}
+                            >
+                              {card.title}
+                            </p>
+                            <p className="text-3xl font-bold text-gray-900">
+                              {card.value}
+                            </p>
+                            <div
+                              className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : depStats && selectedDepartment === "all" ? (
+                    Object.entries(depStats).map(([dept, deptStats]) => (
+                      <div key={dept} className="col-span-full mb-6">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                          {dept}
+                        </h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                          {statCards(deptStats, dept).map((card) => {
+                            const Icon = card.icon;
+                            return (
+                              <div
+                                key={card.title}
+                                className="relative bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-all duration-200 hover:-translate-y-1 overflow-hidden"
+                              >
+                                <div
+                                  className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${card.bgColor} mb-4`}
+                                >
+                                  <Icon className={card.textColor} size={24} />
+                                </div>
+                                <p
+                                  className={`text-sm font-medium ${card.textColor} mb-1`}
+                                >
+                                  {card.title}
+                                </p>
+                                <p className="text-3xl font-bold text-gray-900">
+                                  {card.value}
+                                </p>
+                                <div
+                                  className={`absolute -right-8 -top-8 h-16 w-16 rounded-full ${card.color} opacity-10`}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center text-yellow-700 flex items-center justify-center gap-2">
+                      <AlertCircle size={24} />
+                      <p>No department stats available</p>
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            Quick Actions
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
               to="/tickets"

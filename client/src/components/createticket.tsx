@@ -22,6 +22,7 @@ export default function CreateTicketModal({
 }: CreateTicketModalProps) {
   const user = useSelector(selectCurrentUser);
   const [formData, setFormData] = useState({
+    title: "",
     description: "",
     department: "IT",
     priority: "medium",
@@ -43,7 +44,7 @@ export default function CreateTicketModal({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const useremail=user?user.email:"test-user@gmail.com";
+    const useremail = user ? user.email : "test-user@gmail.com";
     const ticketData: NewTicketData = {
       ...formData,
       useremail,
@@ -52,7 +53,7 @@ export default function CreateTicketModal({
     try {
       console.log(ticketData);
       await ticketsApi.create(ticketData);
-      
+
       toast.success("Ticket created successfully!");
       onTicketCreated();
     } catch (error) {
@@ -84,7 +85,21 @@ export default function CreateTicketModal({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            {/* CORRECTED TYPO: 'text-black-700' is not a valid Tailwind class. Changed to 'text-gray-700'. */}
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Title
+            </label>
+            <textarea
+              id="title"
+              name="title"
+              rows={4}
+              required
+              value={formData.title}
+              onChange={handleInputChange}
+              className="w-full min-h-[50px] px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            />
             <label
               htmlFor="description"
               className="block text-sm font-medium text-gray-700 mb-1"
@@ -98,7 +113,6 @@ export default function CreateTicketModal({
               required
               value={formData.description}
               onChange={handleInputChange}
-              // FIX: Explicitly set the text color to ensure it's visible.
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             />
           </div>
@@ -116,7 +130,6 @@ export default function CreateTicketModal({
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
-                // FIX: Explicitly set the text color.
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
               >
                 <option>IT</option>
