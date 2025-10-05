@@ -1,3 +1,4 @@
+//api.ts
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api";
 
@@ -62,6 +63,7 @@ export interface Ticket {
     | "NA";
   subject: string;
   description: string;
+  title: string;
   type: string;
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
@@ -125,6 +127,7 @@ interface ApiResponse<T> {
 
 export interface NewTicketData {
   description: string;
+  title: string;
   department: string;
   priority: string;
   useremail: string;
@@ -132,7 +135,13 @@ export interface NewTicketData {
 }
 
 export const ticketsApi = {
-  getAll: () => fetchApi<Ticket[]>(`/ticket`),
+  getAll: async (searchTerm: string = "") => {
+    const endpoint = searchTerm
+      ? `/ticket?search=${encodeURIComponent(searchTerm)}&limit=1000`
+      : `/ticket?search=&limit=1000`;
+    const response = await fetchApi<Ticket[]>(endpoint);
+    return response;
+  },
   getAllDepartment: (department: string) =>
     fetchApi<Ticket[]>(`/ticket/department/${department}`),
   getById: async (id: string): Promise<Ticket> => {
@@ -153,17 +162,20 @@ export const ticketsApi = {
     }
   },
 
-  getMyTickets: async (email: string): Promise<Ticket[]> => {
+  getMyTickets: async (
+    email: string,
+    searchTerm: string = ""
+  ): Promise<Ticket[]> => {
+    const endpoint =
+      searchTerm && searchTerm.trim().length > 0
+        ? `/ticket/assignedto?search=${encodeURIComponent(searchTerm)}`
+        : "/ticket/assignedto";
     const payload = { email };
-    const response = await fetchApi<ApiResponse<Ticket[]>>(
-      "/ticket/assignedto",
-      {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }
-    );
-
-    return response.data;
+    const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return response.data || [];
   },
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
     const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {

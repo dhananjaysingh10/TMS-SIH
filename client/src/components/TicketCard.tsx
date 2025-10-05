@@ -1,18 +1,14 @@
 import { Clock, User } from "lucide-react";
 import { Link } from "react-router-dom";
-
-// The props are now a 1:1 match with your Mongoose schema.
-// This is the correct way to ensure front-end/back-end consistency.
 interface TicketCardProps {
-  _id: string; // Changed from 'id' to '_id' for clarity
-  ticketId: string; // Changed from 'ticketNumber'
-  description: string; // Changed from 'subject'
+  _id: string; 
+  ticketId: string;
+  title: string; 
   status: "open" | "in-progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high"; // 'urgent' was removed as it's not in the schema
-  department: // Changed from 'category'
+  priority: "low" | "medium" | "high";
+  department: 
   "IT" | "dev-ops" | "software" | "networking" | "cyber-security" | "NA";
   createdBy: {
-    // Changed from 'requester' to represent the populated field
     name: string;
     email: string;
   };
@@ -21,6 +17,7 @@ interface TicketCardProps {
   };
   createdAt: string;
   accepted?: boolean;
+  userTicket?: boolean;
 }
 
 const priorityColors = {
@@ -31,12 +28,11 @@ const priorityColors = {
 
 const statusColors = {
   open: "bg-green-100 text-green-700",
-  "in-progress": "bg-blue-100 text-blue-700", // Key updated to match schema
+  "in-progress": "bg-blue-100 text-blue-700", 
   resolved: "bg-purple-100 text-purple-700",
   closed: "bg-gray-100 text-gray-600",
 };
 
-// Renamed from 'categoryColors' and updated to match the 'department' enum
 const departmentColors = {
   IT: "bg-cyan-100 text-cyan-700",
   "dev-ops": "bg-indigo-100 text-indigo-700",
@@ -74,7 +70,7 @@ function formatDate(dateString: string): string {
 export default function TicketCard({
   _id,
   ticketId,
-  description,
+  title,
   status,
   priority,
   department,
@@ -82,13 +78,14 @@ export default function TicketCard({
   assignedTo,
   createdAt,
   accepted,
+  userTicket,
 }: TicketCardProps) {
   const isUnaccepted = !accepted;
   const progress = status === "in-progress";
   const isResolved = status === "resolved";
   return (
     <Link
-      to={`/ticket/${_id}`} // Link now uses _id
+      to={userTicket === true ? `/userticket/${ticketId}` : `/ticket/${ticketId}`}
       className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${
         isUnaccepted ? "border-l-4 border-l-orange-400" : ""
       } ${isResolved ? "border-l-4 border-l-blue-400" : ""}${
@@ -106,7 +103,7 @@ export default function TicketCard({
             )}
           </div>
           <h3 className="font-semibold text-gray-900 leading-snug">
-            {description}
+            {title}
           </h3>
         </div>
       </div>

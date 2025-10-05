@@ -19,18 +19,21 @@ import {
   unacceptTicket,
   openTicket,
   getActivites,
+ // getTicketsCreatedBy,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
 
 const router = express.Router();
 
 router.post("/", createTicket);
+router.get("/:id", getTicketById);
 router.get("/", getAllTickets);
-router.get("/filter", getFilteredTickets);
+router.post("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
 router.get("/createdBy/:userId", getTicketsByCreatedBy);
 router.post("/assignedto", getTicketsByAssignedTo);
+// router.post("/createdby", getTicketsCreatedBy);
 router.put("/:id", updateTicket);
 router.delete("/:id", deleteTicket);
 router.post("/accept/:id", acceptTicket);

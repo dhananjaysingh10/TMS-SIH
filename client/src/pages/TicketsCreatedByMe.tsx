@@ -5,39 +5,60 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
 import { ticketsApi, type Ticket } from "../lib/api";
 import {
-  Calendar,
-  Tag,
-  User,
   AlertCircle,
   Clock,
-  CheckCircle,
+  User,
+  Search,
 } from "lucide-react";
+import useDebounce from "../hooks/debounce";
 
 const priorityColors = {
-  low: "bg-gray-100 text-gray-700 border-gray-300",
-  medium: "bg-blue-100 text-blue-700 border-blue-300",
-  high: "bg-orange-100 text-orange-700 border-orange-300",
-  urgent: "bg-red-100 text-red-700 border-red-300",
+  low: "bg-gray-100 text-gray-700",
+  medium: "bg-blue-100 text-blue-700",
+  high: "bg-orange-100 text-orange-700",
+  urgent: "bg-red-100 text-red-700",
 };
 
-const statusConfig = {
-  open: {
-    color: "bg-green-100 text-green-700 border-green-300",
-    icon: AlertCircle,
-  },
-  "in-progress": {
-    color: "bg-blue-100 text-blue-700 border-blue-300",
-    icon: Clock,
-  },
-  resolved: {
-    color: "bg-purple-100 text-purple-700 border-purple-300",
-    icon: CheckCircle,
-  },
-  closed: {
-    color: "bg-gray-100 text-gray-600 border-gray-300",
-    icon: CheckCircle,
-  },
+const statusColors = {
+  open: "bg-green-100 text-green-700",
+  "in-progress": "bg-blue-100 text-blue-700",
+  resolved: "bg-purple-100 text-purple-700",
+  closed: "bg-gray-100 text-gray-600",
 };
+
+const departmentColors = {
+  IT: "bg-cyan-100 text-cyan-700",
+  DevOps: "bg-indigo-100 text-indigo-700",
+  Software: "bg-purple-100 text-purple-700",
+  Networking: "bg-amber-100 text-amber-700",
+  Cybersecurity: "bg-red-100 text-red-700",
+  Other: "bg-slate-100 text-slate-700",
+};
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) {
+    return "just now";
+  } else if (diffMins < 60) {
+    return `${diffMins} minute${diffMins !== 1 ? "s" : ""} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+  } else {
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+}
 
 export default function TicketsCreatedByMe() {
   const navigate = useNavigate();
@@ -45,6 +66,8 @@ export default function TicketsCreatedByMe() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     console.log("TicketsCreatedByMe useEffect - currentUser:", currentUser);
@@ -77,27 +100,139 @@ export default function TicketsCreatedByMe() {
     }
   }
 
-  function formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
+  const filteredTickets = debouncedSearchTerm
+    ? tickets.filter((ticket) =>
+        ticket.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        ticket.description?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        ticket.ticketId?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+      )
+    : tickets;
+
+  const openTickets = filteredTickets.filter(
+    (t) => t.status === "in-progress" || t.status === "open"
+  );
+  const closedTickets = filteredTickets.filter((t) => t.status === "resolved");
+
+  const renderSection = (title: string, sectionTickets: Ticket[]) => (
+    <div>
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <div className="mt-2 text-sm text-gray-500">
+          {sectionTickets.length} ticket{sectionTickets.length !== 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {sectionTickets.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
+          <p className="text-gray-500">No tickets found</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {sectionTickets.map((ticket) => {
+            const isUnaccepted = !ticket.accepted;
+            const progress = ticket.status === "in-progress";
+            const isResolved = ticket.status === "resolved";
+            
+            return (
+              <div
+                key={ticket._id}
+                onClick={() => navigate(`/ticket/${ticket.ticketId}`)}
+                className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer ${
+                  isUnaccepted ? "border-l-4 border-l-orange-400" : ""
+                } ${isResolved ? "border-l-4 border-l-blue-400" : ""} ${
+                  progress ? "border-l-4 border-l-green-400" : ""
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-blue-600">
+                        #{ticket.ticketId}
+                      </span>
+                      {isUnaccepted && (
+                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                          Unclaimed
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-gray-900 leading-snug">
+                      {ticket.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      statusColors[ticket.status]
+                    }`}
+                  >
+                    {ticket.status.replace("-", " ").toUpperCase()}
+                  </span>
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      priorityColors[ticket.priority]
+                    }`}
+                  >
+                    {ticket.priority.toUpperCase()}
+                  </span>
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      departmentColors[ticket.department]
+                    }`}
+                  >
+                    {ticket.department.replace("-", " ").toUpperCase()}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
+                    <User size={14} className="text-gray-400" />
+                    <span className="text-xs">
+                      Requester:{" "}
+                      <span className="font-medium">{ticket.createdBy.name}</span>
+                    </span>
+                  </div>
+
+                  {ticket.assignedTo && (
+                    <div className="flex items-center gap-2">
+                      <User size={14} className="text-gray-400" />
+                      <span className="text-xs">
+                        Assigned to:{" "}
+                        <span className="font-medium">{ticket.assignedTo.name}</span>
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2">
+                    <Clock size={14} className="text-gray-400" />
+                    <span className="text-xs text-gray-500">
+                      {formatDate(ticket.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) {
     return (
-      <Layout pageTitle="Tickets Created by Me">
+      <Layout pageTitle="My Created Tickets">
         <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="bg-white rounded-lg border border-gray-200 p-6"
+                className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse"
               >
-                <div className="h-6 bg-gray-200 rounded w-1/4 mb-4" />
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div className="h-4 bg-gray-200 rounded w-32 mb-4" />
+                <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
               </div>
             ))}
           </div>
@@ -108,7 +243,7 @@ export default function TicketsCreatedByMe() {
 
   if (error) {
     return (
-      <Layout pageTitle="Tickets Created by Me">
+      <Layout pageTitle="My Created Tickets">
         <div className="max-w-7xl mx-auto text-center py-12">
           <AlertCircle className="mx-auto text-red-400 mb-4" size={48} />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -127,110 +262,34 @@ export default function TicketsCreatedByMe() {
   }
 
   return (
-    <Layout pageTitle="Tickets Created by Me">
+    <Layout pageTitle="My Created Tickets">
       <div className="max-w-7xl mx-auto">
-        {/* Debug info - remove this later */}
-        {/* <div className="bg-yellow-100 p-4 mb-4 rounded">
-          <h3>Debug Info:</h3>
-          <p>Current User: {JSON.stringify(currentUser, null, 2)}</p>
-          <p>Loading: {loading.toString()}</p>
-          <p>Error: {error}</p>
-          <p>Tickets Count: {tickets.length}</p>
-        </div>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Tickets Created by Me
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            My Created Tickets
           </h1>
-          <p className="text-gray-600">
-            You have created {tickets.length} ticket{tickets.length !== 1 ? "s" : ""}
-          </p>
-        </div> */}
+          <p className="text-gray-600">Tickets that are created by me</p>
+        </div>
 
-        {tickets.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-            <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              No Tickets Yet
-            </h2>
-            <p className="text-gray-600 mb-6">
-              You haven't created any tickets yet.
-            </p>
-            <button
-              onClick={() => navigate("/tickets")}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              View All Tickets
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {tickets.map((ticket) => {
-              const StatusIcon = statusConfig[ticket.status].icon;
-              return (
-                <div
-                  key={ticket._id}
-                  onClick={() => navigate(`/ticket/${ticket._id}`)}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-lg font-bold text-blue-600">
-                          #{ticket.ticketId}
-                        </span>
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full font-medium border ${
-                            statusConfig[ticket.status].color
-                          }`}
-                        >
-                          <StatusIcon size={14} />
-                          {ticket.status.replace("-", " ").toUpperCase()}
-                        </span>
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full font-medium border ${
-                            priorityColors[ticket.priority]
-                          }`}
-                        >
-                          {ticket.priority.toUpperCase()}
-                        </span>
-                          <span className="text-xs px-3 py-1 rounded-full font-medium border bg-indigo-100 text-indigo-700 border-indigo-300">
-                           {ticket.department}
-                          </span>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {ticket.subject}
-                      </h3>
-                      <p className="text-gray-600 line-clamp-2">
-                        {ticket.description}
-                      </p>
-                    </div>
-                  </div>
+        <div className="relative mb-6">
+          <Search
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Search by title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Tag size={16} className="text-gray-400" />
-                      <span className="capitalize">{ticket.type}</span>
-                    </div>
-
-                    {ticket.assignedTo && (
-                      <div className="flex items-center gap-2">
-                        <User size={16} className="text-gray-400" />
-                        <span>Assigned to: {ticket.assignedTo.name}</span>
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-gray-400" />
-                      <span>Created {formatDate(ticket.createdAt)}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {renderSection("In-progress Tickets", openTickets)}
+          {renderSection("Closed Tickets", closedTickets)}
+        </div>
       </div>
     </Layout>
   );
 }
-

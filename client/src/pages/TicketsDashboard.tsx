@@ -1,35 +1,33 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import { Search } from "lucide-react";
 import TicketCard from "../components/TicketCard";
 import { ticketsApi, type Ticket } from "../lib/api";
 import { AlertCircle } from "lucide-react";
-
+import useDebounce from "../hooks/debounce";
 export default function TicketsDashboard() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [department, setDepartment] = useState("software");
+  const [searchTerm, setSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  async function fetchTickets() {
-    try {
-      const res = await ticketsApi.getAll();
-      console.log(res);
-      setTickets(res);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    } finally {
-      setLoading(false);
+    async function fetchTickets() {
+      try {
+        setLoading(true);
+        const res = await ticketsApi.getAll(debouncedSearchTerm);
+        setTickets(res);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+        setTickets([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+    fetchTickets();
+  }, [debouncedSearchTerm]);
 
-  const open = tickets.filter((t) => !t.accepted );
-
-  const assigned = tickets.filter(
-    (t) => t.accepted && t.status !== "resolved"
-  );
-
+  const open = tickets.filter((t) => !t.accepted);
+  const assigned = tickets.filter((t) => t.accepted && t.status !== "resolved");
   const closedTickets = tickets.filter((t) => t.status === "resolved");
 
   const renderSection = (
@@ -60,7 +58,7 @@ export default function TicketsDashboard() {
               key={ticket._id}
               _id={ticket._id}
               ticketId={ticket.ticketId}
-              description={ticket.description}
+              title={ticket.title}
               status={ticket.status}
               priority={ticket.priority}
               department={ticket.department}
@@ -105,7 +103,19 @@ export default function TicketsDashboard() {
             View and manage all support tickets across different states
           </p>
         </div>
-
+        <div className="relative mb-6">
+          <Search
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            size={20}
+          />
+          <input
+            type="text"
+            placeholder="Search by title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {renderSection(
             "Open Tickets",

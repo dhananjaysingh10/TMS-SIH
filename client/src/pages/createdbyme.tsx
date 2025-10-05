@@ -1,18 +1,19 @@
+//createdbyme.tsx
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import TicketCard from "../components/TicketCard";
-
-import useDebounce from "../hooks/debounce";
-import { Search } from "lucide-react";
 import { ticketsApi, type Ticket } from "../lib/api";
 import { AlertCircle } from "lucide-react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
+import TicketCard from "@/components/TicketCard";
 
-export default function MyTickets() {
+import useDebounce from "../hooks/debounce";
+import { Search } from "lucide-react";
+export default function CreatedByMe() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const currentUser = useSelector(selectCurrentUser);
+
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   useEffect(() => {
@@ -24,7 +25,8 @@ export default function MyTickets() {
   async function fetchMyTickets() {
     try {
       const email = currentUser ? currentUser.email : "test";
-      const data = await ticketsApi.getMyTickets(email,debouncedSearchTerm);
+      const data = await ticketsApi.createdByMe(email, debouncedSearchTerm);
+      console.log(data);
       setTickets(data);
     } catch (error) {
       console.error("Error fetching my tickets:", error);
@@ -33,7 +35,9 @@ export default function MyTickets() {
     }
   }
 
-  const openTickets = tickets.filter((t) => t.status === "in-progress");
+  const openTickets = tickets.filter(
+    (t) => t.status === "in-progress" || t.status === "open"
+  );
   const closedTickets = tickets.filter((t) => t.status === "resolved");
 
   const renderSection = (title: string, sectionTickets: Ticket[]) => (
@@ -65,6 +69,7 @@ export default function MyTickets() {
               assignedTo={ticket.assignedTo}
               createdAt={ticket.createdAt}
               accepted={ticket.accepted}
+              userTicket={true}
             />
           ))}
         </div>
@@ -98,11 +103,9 @@ export default function MyTickets() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            My Assigned Tickets
+            My Created Tickets
           </h1>
-          <p className="text-gray-600">
-            Tickets that are currently assigned to you
-          </p>
+          <p className="text-gray-600">Tickets that are created by me</p>
         </div>
         <div className="relative mb-6">
           <Search
@@ -117,10 +120,9 @@ export default function MyTickets() {
             className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {renderSection("In-progress Tickets", openTickets)}
-          {renderSection("Closed by me", closedTickets)}
+          {renderSection("Closed Tickets", closedTickets)}
         </div>
       </div>
     </Layout>
