@@ -1,3 +1,4 @@
+//ticket.controller.js
 import mongoose from "mongoose";
 import Ticket from "../models/ticket.model.js";
 import crypto from "crypto";

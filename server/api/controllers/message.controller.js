@@ -1,27 +1,28 @@
-import Ticket from "../models/ticket.model";
-import asyncHandler from "express-async-handler"
+//message.controller.js
+import Ticket from "../models/ticket.model.js";
 
 export const getTicketMessages = async (req, res) => {
     try {
         const { ticketId } = req.params;
-        const ticket = await Ticket.findOne({ ticketId }).select("chat").populate("chat.userId", "username");
+        const ticket = await Ticket.findOne({ ticketId })
+          .select("chat")
+          .populate("chat.user", "name email profilePicture");  
 
         if (!ticket) {
-            res.status(404);
-            throw new Error("Ticket not found");
+            return res.status(404).json({ message: "Ticket not found" });
         }
 
         res.status(200).json(ticket.chat);
     } catch (err) {
         console.log(err.message);
+        res.status(500).json({ message: err.message });
     }
-
 };
 
 export const sendMessage = async (req, res) => {
     try {
         const { ticketId } = req.params;
-        const { content, attachments } = req.body;
+        const { content, attachment } = req.body;
         const userId = req.user.userId;
 
         const ticket = await Ticket.findOne({ ticketId });
@@ -31,9 +32,9 @@ export const sendMessage = async (req, res) => {
         }
 
         const message = {
-            userId,
+            user:userId,
             content,
-            attachments: attachments || [],
+            attachment: attachment || "",
             createdAt: new Date(),
         };
 
@@ -42,7 +43,7 @@ export const sendMessage = async (req, res) => {
 
         req.io.to(ticketId).emit("newMessage", {
             ticketId,
-            message: { ...message, userId: { _id: userId, username: req.user.username } },
+            message: { ...message, user: { _id: userId, username: req.user.username } }, // Change userId to user
         });
 
         res.status(201).json(message);

@@ -13,6 +13,7 @@ async function fetchApi<T>(
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options?.headers,
@@ -203,20 +204,20 @@ export const ticketsApi = {
     }),
 };
 
-// export const chatApi = {
-//   getByTicketId: async (ticketId: string): Promise<ChatMessage[]> => {
-//     return fetchApi(`/ticket/${ticketId}/messages`);
-//   },
-//   send: async (
-//     ticketId: string,
-//     body: { content: string; attachments?: string[] }
-//   ) => {
-//     return fetchApi(`/ticket/${ticketId}/messages`, {
-//       method: "POST",
-//       body: JSON.stringify(body),
-//     });
-//   },
-// };
+export const chatApi = {
+  getByTicketId: async (ticketId: string): Promise<Message[]> => {
+    return fetchApi(`/messages/${ticketId}/messages`);
+  },
+  send: async (
+    ticketId: string,
+    body: { content: string; attachment?: string }
+  ) => {
+    return fetchApi(`/messages/${ticketId}/messages`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+};
 
 export const commentsApi = {
   getByTicket: async (ticketId: string): Promise<Message[]> => {
