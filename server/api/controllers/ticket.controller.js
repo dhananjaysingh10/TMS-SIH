@@ -487,7 +487,7 @@ export const getMessage = async (req, res) => {
   try {
     const ticketId = req.params.id;
 
-    const ticket = await Ticket.findById(ticketId).select("messages").populate({
+    const ticket = await Ticket.findOne({ticketId}).select("messages").populate({
       path: "messages.user",
       select: "name email profilePicture",
     });
@@ -717,7 +717,7 @@ export const getActivites = async (req, res) => {
   try {
     const ticketId = req.params.id;
 
-    const ticket = await Ticket.findById(ticketId).select("progress").populate({
+    const ticket = await Ticket.findOne({ticketId}).select("progress").populate({
       path: "progress.user",
       select: "name email profilePicture",
     });
