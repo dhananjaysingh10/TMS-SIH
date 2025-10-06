@@ -12,7 +12,6 @@ import {
   type Ticket,
   type Message,
   type Activity,
-  type NewMessageData,
 } from "../lib/api";
 import {
   ArrowLeft,
@@ -52,6 +51,22 @@ interface ChatMessage {
   createdAt: string | Date;
 }
 
+function canViewCommentsAndActivity(ticket: Ticket | null, currentUser: any): boolean {
+   if (!ticket || !currentUser) return false;
+  
+   if (ticket.createdBy.email === currentUser.email) return false;
+
+   return true;
+}
+
+function canAcceptTicket(ticket: Ticket | null, currentUser: any): boolean {
+  if (!ticket || !currentUser) return false;
+  
+  if (ticket.createdBy.email === currentUser.email) return false;
+  
+  return true;
+}
+
 export default function TicketDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -73,10 +88,10 @@ export default function TicketDetail() {
 
   // Initialize Socket.IO connection
   useEffect(() => {
-  socketRef.current = io("http://localhost:10000", {
-    transports: ['websocket'],
-    withCredentials: true,
-  });
+    socketRef.current = io("http://localhost:10000", {
+      transports: ['websocket'],
+      withCredentials: true,
+    });
 
 
     socketRef.current.on("connect", () => {
@@ -118,10 +133,10 @@ export default function TicketDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchTicketDetails();
-      fetchComments();
-      fetchActivities();
-      //fetchChatMessages();
+        fetchTicketDetails();
+        fetchComments();
+        fetchActivities();
+
     }
   }, [id]);
 
@@ -158,25 +173,25 @@ export default function TicketDetail() {
     }
   }
 
-async function fetchChatMessages(ticketId?: string) {  
-  try {
-    const ticketIdToUse = ticketId || ticket?.ticketId;  
-    if (!ticketIdToUse) return;
-    
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
-      {
-        credentials: "include",
+  async function fetchChatMessages(ticketId?: string) {  
+    try {
+      const ticketIdToUse = ticketId || ticket?.ticketId;  
+      if (!ticketIdToUse) return;
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
+        {
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setChatMessages(data);
       }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      setChatMessages(data);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
     }
-  } catch (error) {
-    console.error("Error fetching chat messages:", error);
   }
-}
 
   async function handleAcceptTicket() {
     if (!ticket) return;
@@ -245,27 +260,27 @@ async function fetchChatMessages(ticketId?: string) {
     }
   };
 
-const handleSendChatMessage = async () => {
-  if (!newChatMessage.trim() || !ticket?.ticketId) return;
-  setSendingChat(true);
-  try {
-    await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticket.ticketId}/messages`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newChatMessage, attachment: "" }),
-      }
-    );
-    // Do not push to state here; wait for "newMessage" from server
-    setNewChatMessage("");
-  } catch (e) {
-    console.error("Send chat failed:", e);
-  } finally {
-    setSendingChat(false);
-  }
-};
+  const handleSendChatMessage = async () => {
+    if (!newChatMessage.trim() || !ticket?.ticketId) return;
+    setSendingChat(true);
+    try {
+      await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticket.ticketId}/messages`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: newChatMessage, attachment: "" }),
+        }
+      );
+      
+      setNewChatMessage("");
+    } catch (e) {
+      console.error("Send chat failed:", e);
+    } finally {
+      setSendingChat(false);
+    }
+  };
 
 
   function formatDateTime(dateString: string): string {
@@ -434,7 +449,7 @@ const handleSendChatMessage = async () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {!ticket.accepted && (
+                {canAcceptTicket(ticket, currentUser) && !ticket.accepted && (
                   <button
                     onClick={handleAcceptTicket}
                     className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
@@ -443,7 +458,7 @@ const handleSendChatMessage = async () => {
                     Accept Ticket
                   </button>
                 )}
-                {ticket.accepted && ticket.status !== "resolved" && (
+                {canAcceptTicket(ticket, currentUser) && ticket.accepted && ticket.status !== "resolved" && (
                   <button
                     onClick={handleUnacceptTicket}
                     className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
@@ -473,69 +488,73 @@ const handleSendChatMessage = async () => {
               </div>
             </div>
 
-            {/* Comments Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MessageSquare size={20} />
-                Comments
-              </h2>
+            {/* Comments Section - Only for assigned user and admins (NOT creator) */}
+            {canViewCommentsAndActivity(ticket, currentUser) && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <MessageSquare size={20} />
+                  Comments
+                </h2>
 
-              <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                {comments.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No comments yet</p>
-                ) : (
-                  comments.map((comment) => (
-                    <div
-                      key={comment._id}
-                      className="border-l-2 border-blue-500 pl-4"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm text-gray-900">
-                          {comment.user.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDateTime(comment.createdAt)}
-                        </span>
+                <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
+                  {comments.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No comments yet</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="border-l-2 border-blue-500 pl-4"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm text-gray-900">
+                            {comment.user.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatDateTime(comment.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm">{comment.content}</p>
                       </div>
-                      <p className="text-gray-700 text-sm">{comment.content}</p>
-                    </div>
-                  ))
-                )}
-              </div>
+                    ))
+                  )}
+                </div>
 
-              <div className="flex items-start gap-2">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (newComment.trim()) handleAddComment();
-                    }
-                  }}
-                  placeholder="Add a comment..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={submitting}
-                  rows={1}
-                />
-                <button
-                  onClick={handleAddComment}
-                  disabled={submitting || !newComment.trim()}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  <Send size={18} />
-                </button>
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (newComment.trim()) handleAddComment();
+                      }
+                    }}
+                    placeholder="Add a comment..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={submitting}
+                    rows={1}
+                  />
+                  <button
+                    onClick={handleAddComment}
+                    disabled={submitting || !newComment.trim()}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Activity Log */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock size={20} />
-                Activity Log
-              </h2>
-              <ActivityTimeline activities={activities} />
-            </div>
+            {/* Activity Log - Only for assigned user and admins (NOT creator) */}
+            {canViewCommentsAndActivity(ticket, currentUser) && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Clock size={20} />
+                  Activity Log
+                </h2>
+                <ActivityTimeline activities={activities} />
+              </div>
+            )}
           </div>
 
           {/* Right Column - Real-time Chat */}
@@ -559,8 +578,6 @@ const handleSendChatMessage = async () => {
                   </div>
                 ) : (
                   chatMessages.map((msg, index) => {
-                      console.log('Message:', msg);
-                      console.log('msg.user._id:', msg.user._id, 'userId:', userId);
                     const isOwnMessage = msg.user._id === userId;
                     return (
                       <div
