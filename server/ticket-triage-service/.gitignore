@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Environment
+.env
+*.env
+
+# Qdrant data
+storage/
+*.tar.gz
+*.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Virtual environments
+venv/
+.env/
+snapshots/
+tests/
+qdrant/
+.qdrant-initialized
