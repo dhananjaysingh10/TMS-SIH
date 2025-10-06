@@ -1,3 +1,4 @@
+//ticket.route.js
 import express from "express";
 import {
   createTicket,
@@ -17,7 +18,7 @@ import {
   unacceptTicket,
   openTicket,
   getActivites,
-  getTicketsCreatedBy,
+ // getTicketsCreatedBy,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
 
@@ -30,7 +31,7 @@ router.post("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
 router.post("/assignedto", getTicketsByAssignedTo);
-router.post("/createdby", getTicketsCreatedBy);
+// router.post("/createdby", getTicketsCreatedBy);
 router.put("/:id", updateTicket);
 router.delete("/:id", deleteTicket);
 router.post("/accept/:id", acceptTicket);

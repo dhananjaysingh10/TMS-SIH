@@ -1,3 +1,4 @@
+//api.ts
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api";
 
@@ -13,6 +14,7 @@ async function fetchApi<T>(
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options?.headers,
@@ -33,6 +35,21 @@ async function fetchApi<T>(
     throw error;
   }
 }
+
+// export type ChatUser = {
+//   _id: string;
+//   username?: string;
+//   name?: string;
+//   email?: string;
+// };
+
+// export type ChatMessage = {
+//   _id?: string;
+//   userId: ChatUser;
+//   content: string;
+//   attachments?: string[];
+//   createdAt: string;
+// };
 
 export interface Ticket {
   _id: string;
@@ -132,18 +149,20 @@ export const ticketsApi = {
     const response = await fetchApi<ApiResponse<Ticket>>(endpoint);
     return response.data;
   },
-  createdByMe: async (email: string, searchTerm: string = "") => {
-    const payload = { email };
-    const endpoint = searchTerm
-      ? `/ticket/createdby?search=${encodeURIComponent(searchTerm)}&limit=1000`
-      : `/ticket/createdby?search=&limit=1000`;
-    const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    return response.data;
+
+  getCreatedBy: async (userId: string): Promise<Ticket[]> => {
+    console.log("API: getCreatedBy called with userId:", userId);
+    try {
+      const response = await fetchApi<any>(`/ticket/createdBy/${userId}`);
+      console.log("API: getCreatedBy response:", response);
+      return response.data || [];
+    } catch (error) {
+      console.error("API: getCreatedBy error:", error);
+      throw error;
+    }
   },
-  getMyTickets: async (
+
+    getMyTickets: async (
     email: string,
     searchTerm: string = ""
   ): Promise<Ticket[]> => {
@@ -157,6 +176,7 @@ export const ticketsApi = {
     });
     return response.data;
   },
+  
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
     const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {
       method: "POST",
@@ -194,6 +214,21 @@ export const ticketsApi = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+};
+
+export const chatApi = {
+  getByTicketId: async (ticketId: string): Promise<Message[]> => {
+    return fetchApi(`/messages/${ticketId}/messages`);
+  },
+  send: async (
+    ticketId: string,
+    body: { content: string; attachment?: string }
+  ) => {
+    return fetchApi(`/messages/${ticketId}/messages`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
 };
 
 export const commentsApi = {
