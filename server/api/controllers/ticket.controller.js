@@ -168,7 +168,7 @@ export const getTicketsByCreatedBy = async (req, res) => {
     console.error("Error fetching tickets by creator:", error);
     res.status(500).json({
       success: false,
-      message: "Error fetching tickets by department",
+      message: "Error fetching tickets by creator",
       error: error.message,
     });
   }
@@ -279,6 +279,17 @@ export const acceptTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Employee accepted ticket");
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        "",
+        updatedTicket.updatedAt
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket accepted and assigned successfully.",
@@ -385,6 +396,17 @@ export const resolveTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket Resolved");
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        "",
+        updatedTicket.updatedAt
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket resolved successfully.",
@@ -591,50 +613,50 @@ export const getTicketsByAssignedTo = async (req, res) => {
   }
 };
 
-// export const getTicketsCreatedBy = async (req, res) => {
-//   try {
-//     const { email } = req.body;
-//     const { search } = req.query;
-//     const query = {};
-//     let sortOptions = { createdAt: -1 };
-//     if (typeof search === "string" && search.trim().length > 0) {
-//       const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
-//       const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-//       const pattern = terms.map(escapeRegex).join("|");
-//       const rx = new RegExp(pattern, "i");
-//       query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
-//     }
-//     const user = await User.findOne({ email });
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User with that email not found.",
-//       });
-//     }
+export const getTicketsCreatedBy = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { search } = req.query;
+    const query = {};
+    let sortOptions = { createdAt: -1 };
+    if (typeof search === "string" && search.trim().length > 0) {
+      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = terms.map(escapeRegex).join("|");
+      const rx = new RegExp(pattern, "i");
+      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User with that email not found.",
+      });
+    }
 
-//     const filter = {
-//       assignedTo: user._id,
-//       ...(query.$or ? { $or: query.$or } : {}),
-//     };
+    const filter = {
+      createdBy: user._id,
+      ...(query.$or ? { $or: query.$or } : {}),
+    };
 
-//     const tickets = await Ticket.find(filter)
-//       .populate("createdBy", "name email")
-//       .populate("assignedTo", "name email")
-//       .sort(sortOptions);
+    const tickets = await Ticket.find(filter)
+      .populate("createdBy", "name email")
+      .populate("assignedTo", "name email")
+      .sort(sortOptions);
 
-//     res.status(200).json({
-//       success: true,
-//       data: tickets,
-//     });
-//   } catch (error) {
-//     console.error("Error fetching assigned tickets:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "Server error while fetching assigned tickets.",
-//       error: error.message,
-//     });
-//   }
-// };
+    res.status(200).json({
+      success: true,
+      data: tickets,
+    });
+  } catch (error) {
+    console.error("Error fetching assigned tickets:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while fetching assigned tickets.",
+      error: error.message,
+    });
+  }
+};
 
 export const updateTicketStatus = async (req, res) => {
   try {
@@ -731,7 +753,7 @@ export const logProgress = async (ticketId, useremail, description) => {
       );
       return;
     }
-
+    
     const progressEntry = {
       user: user._id,
       description: description,
