@@ -140,47 +140,29 @@ export const getTicketsByDepartment = async (req, res) => {
 
 export const getTicketsByCreatedBy = async (req, res) => {
   try {
-    const { email } = req.body;
-    const { search } = req.query;
+    const { userId } = req.params;
+    const { page, limit } = req.query;
 
-    if (!email) {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({
         success: false,
-        message: "Email is required",
+        message: "Invalid user ID format",
       });
     }
 
-    const query = {};
-    let sortOptions = { createdAt: -1 };
-    if (typeof search === "string" && search.trim().length > 0) {
-      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
-      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const pattern = terms.map(escapeRegex).join("|");
-      const rx = new RegExp(pattern, "i");
-      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
-    }
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const query = { createdBy: userObjectId };
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User with that email not found.",
-      });
-    }
-
-    const filter = {
-      createdBy: user._id,
-      ...(query.$or ? { $or: query.$or } : {}),
-    };
-
-    const tickets = await Ticket.find(filter)
-      .populate("createdBy", "name email")
-      .populate("assignedTo", "name email")
-      .sort(sortOptions);
-
+    const { tickets } = await paginateTickets(
+      query,
+      page,
+      limit,
+      { createdAt: -1 }
+    );
+    
     res.status(200).json({
       success: true,
-      data: tickets,
+      data: tickets
     });
   } catch (error) {
     console.error("Error fetching tickets by creator:", error);
