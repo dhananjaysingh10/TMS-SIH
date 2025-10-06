@@ -9,6 +9,7 @@ import {
   updateTicket,
   deleteTicket,
   getTicketsByDepartment,
+  getTicketsByCreatedBy,
   getFilteredTickets,
   getMessage,
   createMessage,
@@ -30,6 +31,7 @@ router.get("/", getAllTickets);
 router.post("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
+router.get("/createdBy/:userId", getTicketsByCreatedBy);
 router.post("/assignedto", getTicketsByAssignedTo);
 // router.post("/createdby", getTicketsCreatedBy);
 router.put("/:id", updateTicket);
