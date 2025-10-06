@@ -1,0 +1,55 @@
+{
+  "ticket": {
+    "ticketId": "TEST-001",
+    "department": "IT",
+    "type": "support",
+    "description": "My laptop is running slow, and I can't access the shared drive.",
+    "title": "Slow Laptop Performance",
+    "priority": "medium",
+    "createdBy": "testuser@example.com",
+    "assignedTo": null,
+    "status": "open",
+    "progress": [],
+    "chat": [],
+    "rating": 0,
+    "dueDate": null,
+    "accepted": false,
+    "messages": []
+  },
+  "classification": {
+    "department": "IT",
+    "type": "support",
+    "priority": "high",
+    "confidence": 0.94,
+    "suggested_actions": [
+      "Run a full system scan for malware",
+      "Check CPU and memory usage via Task Manager",
+      "Perform disk cleanup and defragmentation",
+      "Verify network connection and map the shared drive again",
+      "Update operating system and drivers",
+      "Contact IT if issue persists"
+    ]
+  },
+  "enrichment": {
+    "ticketId": "TEST-001",
+    "classification": {
+      "department": "IT",
+      "type": "support",
+      "priority": "high",
+      "confidence": 0.94,
+      "suggested_actions": [
+        "Run a full system scan for malware",
+        "Check CPU and memory usage via Task Manager",
+        "Perform disk cleanup and defragmentation",
+        "Verify network connection and map the shared drive again",
+        "Update operating system and drivers",
+        "Contact IT if issue persists"
+      ]
+    },
+    "assistant_reply": "**Ticket #:\u202f[Your Ticket ID] \u2013 Slow Laptop Performance & Inaccessible Shared Drive**  \n\n---\n\n## 1\ufe0f\u20e3 Quick \u201cFirst\u2011Aid\u201d Checklist (5\u201110\u202fmin)\n\n| Action | Why it helps | How to do it |\n|--------|--------------|--------------|\n| **Reboot the laptop** | Clears stuck processes & refreshes network adapters. | Click **Start \u2192 Power \u2192 Restart**. |\n| **Check for Windows updates** | Pending updates can throttle CPU/Disk. | **Settings \u2192 Update & Security \u2192 Windows Update \u2192 Check for updates**. Install any pending updates and reboot. |\n| **Run a quick virus scan** | Malware often causes high CPU/Disk and blocks network shares. | Open **Windows Security \u2192 Virus & threat protection \u2192 Quick scan**. |\n| **Verify network connection** | If the network is flaky you\u2019ll see both slowness and share errors. | Look at the Wi\u2011Fi/Ethernet icon \u2192 \u201cNetwork & Internet Settings \u2192 Status \u2192 View network properties\u201d. Ensure you have a stable connection (\u2265\u202f10\u202fMbps). |\n| **Disconnect & reconnect the shared drive** | Clears a stale SMB session. | Open **File Explorer \u2192 This PC \u2192 Right\u2011click the mapped drive \u2192 Disconnect**. Then **Map Network Drive** again (see step\u202f4). |\n\nIf the problem persists, move on to the deeper diagnostics below.\n\n---\n\n## 2\ufe0f\u20e3 Diagnose Laptop Slowness\n\n### A. Identify Resource Hogs\n1. Press **Ctrl\u202f+\u202fShift\u202f+\u202fEsc** \u2192 **Task Manager** \u2192 **Performance** tab.  \n   - **CPU** >\u202f80\u202f%?  \n   - **Memory** >\u202f80\u202f%?  \n   - **Disk** >\u202f80\u202f%?",
+    "citations": [],
+    "clarifying_questions": [],
+    "resolution_type": "needs_agent",
+    "automation_candidates": []
+  }
+}

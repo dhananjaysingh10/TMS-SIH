@@ -1,14 +1,13 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from pymongo import MongoClient
 from ..config import settings
 
-engine = create_engine(settings.POSTGRES_URL or '')
-SessionLocal = sessionmaker(bind=engine)
-Base = declarative_base()
+client = MongoClient(settings.MONGO_URL)
+assert settings.MONGO_DB_NAME is not None, "MONGO_DB_NAME must be set"
+db = client[settings.MONGO_DB_NAME]
+
+tickets_collection = db["tickets"]
+classifications_collection = db["classifications"]
+enriched_outputs_collection = db["enriched_outputs"]
 
 def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    return db

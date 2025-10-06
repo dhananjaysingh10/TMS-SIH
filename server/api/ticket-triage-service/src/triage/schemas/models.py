@@ -1,37 +1,47 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import datetime
 
-class EmailTicketInput(BaseModel):
-  
-    ticket_id: str
-    source: str = "email"
-    timestamp_received_utc: str
-    sender_email: str
-    subject: str
-    body: str
-    initial_category_suggestion: Optional[str] = None
-    initial_priority_suggestion: Optional[str] = None
-    status: str = "New"
+class Message(BaseModel):
+    user: str
+    content: str
+    attachment: Optional[str] = None
+    createdAt: datetime = Field(default_factory=datetime.now)
+
+class Progress(BaseModel):
+    user: str
+    description: str
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+class TicketInput(BaseModel):
+    ticketId: str
+    department: str = "Other"
+    type: str = "task"
+    description: str
+    title: Optional[str] = None
+    priority: str = "medium"
+    createdBy: str
+    assignedTo: Optional[str] = None
+    status: str = "open"
+    progress: List[Progress] = []
+    chat: List[Message] = []
+    rating: int = 0
+    dueDate: Optional[datetime] = None
+    accepted: bool = False
+    messages: List[Message] = []
 
 class ClassificationOutput(BaseModel):
-  
-    category: str
-    subcategory: Optional[str] = None 
-    service: Optional[str] = None      
-    intent: str
-    impact: str
-    urgency: str
+    department: str
+    type: str
     priority: str
     confidence: float = Field(ge=0.0, le=1.0)
-    routing_hints: List[str] = Field(default_factory=list)
     suggested_actions: List[str] = Field(default_factory=list)
-    
+
     class Config:
         extra = "forbid"
 
 class EnrichedTicketOutput(BaseModel):
-   
-    ticket_id: str
+    ticketId: str
     classification: dict
     assistant_reply: str
     citations: List[str]

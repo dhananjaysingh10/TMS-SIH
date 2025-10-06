@@ -1,27 +1,34 @@
-from sqlalchemy import Column, String, DateTime, JSON, Text
-from .database import Base
 from datetime import datetime
+from typing import List, Optional
 
-class Ticket(Base):
-    __tablename__ = "tickets"
-    
-    ticket_id = Column(String, primary_key=True)
-    source = Column(String)
-    sender_email = Column(String)
-    subject = Column(String)
-    body = Column(Text)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
-class Classification(Base):
-    __tablename__ = "classifications"
-    
-    ticket_id = Column(String, primary_key=True)
-    data = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
+progress_schema = {
+    "user": (str, ...),  
+    "description": (str, ...),
+    "timestamp": (datetime, lambda: datetime.now())
+}
 
-class EnrichedOutput(Base):
-    __tablename__ = "enriched_outputs"
-    
-    ticket_id = Column(String, primary_key=True)
-    data = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
+message_schema = {
+    "user": (str, ...),  
+    "content": (str, ...),
+    "attachment": (str, None),
+    "createdAt": (datetime, lambda: datetime.now())
+}
+
+ticket_schema = {
+    "ticketId": (str, ...),
+    "department": (str, "Other"),
+    "type": (str, "task"),
+    "description": (str, ...),
+    "title": (str, None),
+    "priority": (str, "medium"),
+    "createdBy": (str, ...),  
+    "assignedTo": (str, None),  
+    "status": (str, "open"),
+    "progress": (list, []),
+    "chat": (list, []),
+    "rating": (int, 0),
+    "dueDate": (datetime, None),
+    "accepted": (bool, False),
+    "messages": (list, [])
+}
