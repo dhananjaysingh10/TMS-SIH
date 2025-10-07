@@ -22,7 +22,10 @@ import {
   CheckCircle,
   MessageSquare,
   Send,
+  Loader2,
 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const priorityColors = {
   low: "bg-gray-100 text-gray-700",
@@ -42,7 +45,7 @@ interface ChatMessage {
   _id?: string;
   user: {
     _id: string;
-    name?: string;  
+    name?: string;
     email?: string;
     profilePicture?: string;
   };
@@ -79,20 +82,25 @@ export default function TicketDetail() {
   const [newChatMessage, setNewChatMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sendingChat, setSendingChat] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState({
+    accept: false,
+    unaccept: false,
+    resolve: false,
+    open: false,
+  });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
   const userId = currentUser ? currentUser.id : "";
-  
+
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize Socket.IO connection
   useEffect(() => {
     socketRef.current = io("http://localhost:10000", {
-      transports: ['websocket'],
+      transports: ["websocket"],
       withCredentials: true,
     });
-
 
     socketRef.current.on("connect", () => {
       console.log("Socket connected:", socketRef.current?.id);
@@ -148,6 +156,7 @@ export default function TicketDetail() {
       fetchChatMessages(data.ticketId);
     } catch (error) {
       console.error("Error fetching ticket:", error);
+      toast.error("Failed to fetch ticket details");
     } finally {
       setLoading(false);
     }
@@ -160,6 +169,7 @@ export default function TicketDetail() {
       setComments(data);
     } catch (error) {
       console.error("Error fetching comments:", error);
+      toast.error("Failed to fetch comments");
     }
   }
 
@@ -170,14 +180,15 @@ export default function TicketDetail() {
       setActivities(data);
     } catch (error) {
       console.error("Error fetching activities:", error);
+      toast.error("Failed to fetch activities");
     }
   }
 
-  async function fetchChatMessages(ticketId?: string) {  
+  async function fetchChatMessages(ticketId?: string) {
     try {
-      const ticketIdToUse = ticketId || ticket?.ticketId;  
+      const ticketIdToUse = ticketId || ticket?.ticketId;
       if (!ticketIdToUse) return;
-      
+
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
         {
@@ -190,53 +201,71 @@ export default function TicketDetail() {
       }
     } catch (error) {
       console.error("Error fetching chat messages:", error);
+      toast.error("Failed to fetch chat messages");
     }
   }
 
   async function handleAcceptTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, accept: true }));
     try {
       await ticketsApi.acceptTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket accepted successfully");
     } catch (error) {
       console.error("Error accepting ticket:", error);
+      toast.error("Failed to accept ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, accept: false }));
     }
   }
 
   async function handleOpenTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, open: true }));
     try {
       await ticketsApi.openTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket reopened successfully");
     } catch (error) {
       console.error("Error opening ticket:", error);
+      toast.error("Failed to reopen ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, open: false }));
     }
   }
 
   async function handleUnacceptTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, unaccept: true }));
     try {
       await ticketsApi.unacceptTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket unclaimed successfully");
     } catch (error) {
       console.error("Error unaccepting ticket:", error);
+      toast.error("Failed to unclaim ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, unaccept: false }));
     }
   }
 
   async function handleResolveTicket() {
     if (!ticket) return;
+    setButtonLoading((prev) => ({ ...prev, resolve: true }));
     try {
       await ticketsApi.resolveTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket resolved successfully");
     } catch (error) {
       console.error("Error resolving ticket:", error);
+      toast.error("Failed to resolve ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, resolve: false }));
     }
   }
 
@@ -249,12 +278,14 @@ export default function TicketDetail() {
         useremail: currentUser ? currentUser.email : "test-user@gmail.com",
         content: newComment,
       };
-      
+
       await commentsApi.create(ticket ? ticket._id : "", messageData);
       fetchComments();
       setNewComment("");
+      toast.success("Comment added successfully");
     } catch (error) {
       console.error("Failed to add message:", error);
+      toast.error("Failed to add comment");
     } finally {
       setSubmitting(false);
     }
@@ -273,15 +304,15 @@ export default function TicketDetail() {
           body: JSON.stringify({ content: newChatMessage, attachment: "" }),
         }
       );
-      
       setNewChatMessage("");
+      // toast.success("Message sent successfully");
     } catch (e) {
       console.error("Send chat failed:", e);
+      toast.error("Failed to send chat message");
     } finally {
       setSendingChat(false);
     }
   };
-
 
   function formatDateTime(dateString: string): string {
     return new Date(dateString).toLocaleString("en-US", {
@@ -301,10 +332,10 @@ export default function TicketDetail() {
 
     if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes}m ago`;
-    
+
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    
+
     return date.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
@@ -352,6 +383,16 @@ export default function TicketDetail() {
   return (
     <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
       <div className="max-w-7xl mx-auto">
+        {/* <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          limit={1}
+          hideProgressBar={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          closeButton
+        /> */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -452,37 +493,85 @@ export default function TicketDetail() {
                 {canAcceptTicket(ticket, currentUser) && !ticket.accepted && (
                   <button
                     onClick={handleAcceptTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                    disabled={buttonLoading.accept}
+                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
+                      buttonLoading.accept ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Accept Ticket
+                    {buttonLoading.accept ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Accepting...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Accept Ticket
+                      </>
+                    )}
                   </button>
                 )}
                 {canAcceptTicket(ticket, currentUser) && ticket.accepted && ticket.status !== "resolved" && (
                   <button
                     onClick={handleUnacceptTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                    disabled={buttonLoading.unaccept}
+                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
+                      buttonLoading.unaccept ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Unclaim
+                    {buttonLoading.unaccept ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Unclaiming...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Unclaim
+                      </>
+                    )}
                   </button>
                 )}
-                {ticket.accepted && ticket.status !== "resolved" && (
+                {ticket.accepted && ticket.status !== "resolved" && ticket.assignedTo?._id === userId && (
                   <button
                     onClick={handleResolveTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    disabled={buttonLoading.resolve}
+                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
+                      buttonLoading.resolve ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Resolve Ticket
+                    {buttonLoading.resolve ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Resolving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Resolve Ticket
+                      </>
+                    )}
                   </button>
                 )}
                 {ticket.status === "resolved" && (
                   <button
                     onClick={handleOpenTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    disabled={buttonLoading.open}
+                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
+                      buttonLoading.open ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Open Again
+                    {buttonLoading.open ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Reopening...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Open Again
+                      </>
+                    )}
                   </button>
                 )}
               </div>

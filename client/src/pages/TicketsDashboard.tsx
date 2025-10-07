@@ -5,11 +5,15 @@ import TicketCard from "../components/TicketCard";
 import { ticketsApi, type Ticket } from "../lib/api";
 import { AlertCircle } from "lucide-react";
 import useDebounce from "../hooks/debounce";
+import { useSelector } from "react-redux";
+import { selectCurrentUser } from "../redux/user/userSlice";
+
 export default function TicketsDashboard() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const currentUser = useSelector(selectCurrentUser);
   useEffect(() => {
     async function fetchTickets() {
       try {
@@ -53,21 +57,23 @@ export default function TicketsDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {sectionTickets.map((ticket) => (
-            <TicketCard
-              key={ticket._id}
-              _id={ticket._id}
-              ticketId={ticket.ticketId}
-              title={ticket.title}
-              status={ticket.status}
-              priority={ticket.priority}
-              department={ticket.department}
-              createdBy={ticket.createdBy}
-              assignedTo={ticket.assignedTo}
-              createdAt={ticket.createdAt}
-              accepted={ticket.accepted}
-            />
-          ))}
+          {sectionTickets
+            .filter((ticket) => ticket.department === currentUser.department)
+            .map((ticket) => (
+              <TicketCard
+                key={ticket._id}
+                _id={ticket._id}
+                ticketId={ticket.ticketId}
+                title={ticket.title}
+                status={ticket.status}
+                priority={ticket.priority}
+                department={ticket.department}
+                createdBy={ticket.createdBy}
+                assignedTo={ticket.assignedTo}
+                createdAt={ticket.createdAt}
+                accepted={ticket.accepted}
+              />
+            ))}
         </div>
       )}
     </div>

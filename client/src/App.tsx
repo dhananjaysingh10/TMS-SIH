@@ -11,9 +11,13 @@ import UserTicket from "./pages/userticket";
 import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
 
 import ProfilePage from "./pages/Profile";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const App: React.FC = () => {
   return (
     <Router>
+      <ToastContainer position="top-right" autoClose={3000} closeOnClick draggable pauseOnHover />
       <Routes>
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />

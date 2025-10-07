@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { type Activity } from "../lib/api";
 
-const getActivityIcon = (description: string) => {
+const getActivityIcon = (description:string = "") => {
   const desc = description.toLowerCase();
   if (desc.includes("created the ticket")) {
     return <FilePlus2 className="text-green-600" size={16} />;
