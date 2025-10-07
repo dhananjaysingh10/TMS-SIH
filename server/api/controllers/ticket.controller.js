@@ -47,10 +47,12 @@ export const createTicket = async (req, res) => {
       priority,
       title,
     } = req.body;
-
+    console.log(req.body);
     const finalTicketId = ticketId || crypto.randomUUID();
     const createdBy = await User.findOne({ email: useremail });
+    console.log(createdBy);
     const assignedTo = await User.findOne({ email: assignedemail });
+    console.log(assignedTo);
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department,
@@ -64,13 +66,15 @@ export const createTicket = async (req, res) => {
     });
 
     const savedTicket = await newTicket.save();
-    await logProgress(ticketId, useremail, "Employee created ticket");
+    console.log(savedTicket);
+    await logProgress(newTicket._id, useremail, "Employee created ticket");
     res.status(201).json({
       success: true,
       message: "Ticket created successfully",
       data: savedTicket,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({
       success: false,
       message: "Error creating ticket",

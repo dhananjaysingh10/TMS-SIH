@@ -7,5 +7,6 @@ const router = express.Router();
 
 router.get("/:ticketId/messages", authMiddleware, getTicketMessages);
 router.post("/:ticketId/messages", authMiddleware, sendMessage);
+router.post("/:ticketId/messagesAI", sendMessage);
 
 export default router;
