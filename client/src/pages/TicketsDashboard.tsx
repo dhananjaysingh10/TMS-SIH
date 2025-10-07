@@ -14,6 +14,7 @@ export default function TicketsDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const currentUser = useSelector(selectCurrentUser);
+
   useEffect(() => {
     async function fetchTickets() {
       try {
@@ -30,9 +31,11 @@ export default function TicketsDashboard() {
     fetchTickets();
   }, [debouncedSearchTerm]);
 
-  const open = tickets.filter((t) => !t.accepted);
-  const assigned = tickets.filter((t) => t.accepted && t.status !== "resolved");
-  const closedTickets = tickets.filter((t) => t.status === "resolved");
+  
+  const departmentTickets = tickets.filter((t) => t.department === currentUser.department);
+  const open = departmentTickets.filter((t) => !t.accepted);
+  const assigned = departmentTickets.filter((t) => t.accepted && t.status !== "resolved");
+  const closedTickets = departmentTickets.filter((t) => t.status === "resolved");
 
   const renderSection = (
     title: string,
