@@ -1,3 +1,4 @@
+// ticketdetail.tsx (Refactored)
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -26,6 +27,8 @@ import {
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { ChatMessage } from "@/components/chat/ChatMessage";
+import { ChatInput } from "@/components/chat/ChatInput";
 
 const priorityColors = {
   low: "bg-gray-100 text-gray-700",
@@ -41,7 +44,7 @@ const statusColors = {
   closed: "bg-gray-100 text-gray-600",
 };
 
-interface ChatMessage {
+interface ChatMessageType {
   _id?: string;
   user: {
     _id: string;
@@ -51,22 +54,23 @@ interface ChatMessage {
   };
   content: string;
   attachment?: string;
+  mimeType?: string;
   createdAt: string | Date;
 }
 
 function canViewCommentsAndActivity(ticket: Ticket | null, currentUser: any): boolean {
-   if (!ticket || !currentUser) return false;
-  
-   if (ticket.createdBy.email === currentUser.email) return false;
+  if (!ticket || !currentUser) return false;
 
-   return true;
+  if (ticket.createdBy.email === currentUser.email) return false;
+
+  return true;
 }
 
 function canAcceptTicket(ticket: Ticket | null, currentUser: any): boolean {
   if (!ticket || !currentUser) return false;
-  
+
   if (ticket.createdBy.email === currentUser.email) return false;
-  
+
   return true;
 }
 
@@ -76,12 +80,10 @@ export default function TicketDetail() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [comments, setComments] = useState<Message[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessageType[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
-  const [newChatMessage, setNewChatMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [sendingChat, setSendingChat] = useState(false);
   const [buttonLoading, setButtonLoading] = useState({
     accept: false,
     unaccept: false,
@@ -122,7 +124,7 @@ export default function TicketDetail() {
     if (ticket?.ticketId && socketRef.current) {
       socketRef.current.emit("joinTicket", ticket.ticketId);
 
-      socketRef.current.on("newMessage", (data: { ticketId: string; message: ChatMessage }) => {
+      socketRef.current.on("newMessage", (data: { ticketId: string; message: ChatMessageType }) => {
         if (data.ticketId === ticket.ticketId) {
           setChatMessages((prev) => [...prev, data.message]);
         }
@@ -141,9 +143,9 @@ export default function TicketDetail() {
 
   useEffect(() => {
     if (id) {
-        fetchTicketDetails();
-        fetchComments();
-        fetchActivities();
+      fetchTicketDetails();
+      fetchComments();
+      fetchActivities();
 
     }
   }, [id]);
@@ -291,54 +293,11 @@ export default function TicketDetail() {
     }
   };
 
-  const handleSendChatMessage = async () => {
-    if (!newChatMessage.trim() || !ticket?.ticketId) return;
-    setSendingChat(true);
-    try {
-      await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticket.ticketId}/messages`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: newChatMessage, attachment: "" }),
-        }
-      );
-      setNewChatMessage("");
-      // toast.success("Message sent successfully");
-    } catch (e) {
-      console.error("Send chat failed:", e);
-      toast.error("Failed to send chat message");
-    } finally {
-      setSendingChat(false);
-    }
-  };
-
   function formatDateTime(dateString: string): string {
     return new Date(dateString).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  function formatChatTime(dateString: string | Date): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const minutes = Math.floor(diff / 60000);
-
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes}m ago`;
-
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-
-    return date.toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -365,10 +324,10 @@ export default function TicketDetail() {
           <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Ticket Not Found
-          </h2>
+            </h2>
           <p className="text-gray-600 mb-6">
             The ticket you're looking for doesn't exist.
-          </p>
+            </p>
           <button
             onClick={() => navigate("/tickets")}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -383,16 +342,6 @@ export default function TicketDetail() {
   return (
     <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
       <div className="max-w-7xl mx-auto">
-        {/* <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          limit={1}
-          hideProgressBar={false}
-          closeOnClick
-          pauseOnHover
-          draggable
-          closeButton
-        /> */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -410,7 +359,7 @@ export default function TicketDetail() {
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-lg font-bold text-blue-600">
                       #{ticket.ticketId}
-                    </span>
+                      </span>
                     <span
                       className={`text-sm px-3 py-1 rounded-full font-medium ${
                         statusColors[ticket.status]
@@ -439,10 +388,10 @@ export default function TicketDetail() {
                     <p className="text-sm text-gray-600">Requester</p>
                     <p className="font-medium text-gray-900">
                       {ticket.createdBy.name}
-                    </p>
+                      </p>
                     <p className="text-sm text-gray-500">
                       {ticket.createdBy.email}
-                    </p>
+                      </p>
                   </div>
                 </div>
 
@@ -453,10 +402,10 @@ export default function TicketDetail() {
                       <p className="text-sm text-gray-600">Assigned To</p>
                       <p className="font-medium text-gray-900">
                         {ticket.assignedTo.name}
-                      </p>
+                        </p>
                       <p className="text-sm text-gray-500">
                         {ticket.assignedTo.email}
-                      </p>
+                        </p>
                     </div>
                   </div>
                 )}
@@ -467,7 +416,7 @@ export default function TicketDetail() {
                     <p className="text-sm text-gray-600">Category</p>
                     <p className="font-medium text-gray-900 capitalize">
                       {ticket.type}
-                    </p>
+                      </p>
                   </div>
                 </div>
 
@@ -477,7 +426,7 @@ export default function TicketDetail() {
                     <p className="text-sm text-gray-600">Created</p>
                     <p className="font-medium text-gray-900">
                       {formatDateTime(ticket.createdAt)}
-                    </p>
+                      </p>
                   </div>
                 </div>
               </div>
@@ -486,7 +435,7 @@ export default function TicketDetail() {
                 <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
                 <p className="text-gray-700 whitespace-pre-wrap">
                   {ticket.description}
-                </p>
+                  </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
@@ -512,47 +461,47 @@ export default function TicketDetail() {
                   </button>
                 )}
                 {canAcceptTicket(ticket, currentUser) && ticket.accepted && ticket.status !== "resolved" && (
-                  <button
-                    onClick={handleUnacceptTicket}
-                    disabled={buttonLoading.unaccept}
-                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
-                      buttonLoading.unaccept ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {buttonLoading.unaccept ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Unclaiming...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle size={18} />
-                        Unclaim
-                      </>
-                    )}
-                  </button>
-                )}
+                    <button
+                      onClick={handleUnacceptTicket}
+                      disabled={buttonLoading.unaccept}
+                      className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
+                        buttonLoading.unaccept ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {buttonLoading.unaccept ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          Unclaiming...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={18} />
+                          Unclaim
+                        </>
+                      )}
+                    </button>
+                  )}
                 {ticket.accepted && ticket.status !== "resolved" && ticket.assignedTo?._id === userId && (
-                  <button
-                    onClick={handleResolveTicket}
-                    disabled={buttonLoading.resolve}
-                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
-                      buttonLoading.resolve ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {buttonLoading.resolve ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Resolving...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle size={18} />
-                        Resolve Ticket
-                      </>
-                    )}
-                  </button>
-                )}
+                    <button
+                      onClick={handleResolveTicket}
+                      disabled={buttonLoading.resolve}
+                      className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
+                        buttonLoading.resolve ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                    >
+                      {buttonLoading.resolve ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          Resolving...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={18} />
+                          Resolve Ticket
+                        </>
+                      )}
+                    </button>
+                  )}
                 {ticket.status === "resolved" && (
                   <button
                     onClick={handleOpenTicket}
@@ -590,10 +539,10 @@ export default function TicketDetail() {
                     <p className="text-gray-500 text-sm">No comments yet</p>
                   ) : (
                     comments.map((comment) => (
-                      <div
-                        key={comment._id}
-                        className="border-l-2 border-blue-500 pl-4"
-                      >
+                      <div 
+                      key={comment._id}
+                       className="border-l-2 border-blue-500 pl-4"
+                       >
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-medium text-sm text-gray-900">
                             {comment.user.name}
@@ -656,7 +605,7 @@ export default function TicketDetail() {
                 </h2>
                 <p className="text-xs text-gray-500 mt-1">
                   Real-time conversation
-                </p>
+                  </p>
               </div>
 
               {/* Chat Messages */}
@@ -666,67 +615,26 @@ export default function TicketDetail() {
                     No messages yet. Start the conversation!
                   </div>
                 ) : (
-                  chatMessages.map((msg, index) => {
-                    const isOwnMessage = msg.user._id === userId;
-                    return (
-                      <div
-                        key={msg._id || index}
-                        className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-[75%] ${
-                            isOwnMessage
-                              ? "bg-blue-500 text-white"
-                              : "bg-gray-100 text-gray-900"
-                          } rounded-lg px-4 py-2`}
-                        >
-                          {!isOwnMessage && (
-                            <p className="text-xs font-semibold mb-1 opacity-75">
-                              {msg.user.name || "User"}
-                            </p>
-                          )}
-                          <p className="text-sm break-words">{msg.content}</p>
-                          <p
-                            className={`text-xs mt-1 ${
-                              isOwnMessage ? "text-blue-100" : "text-gray-500"
-                            }`}
-                          >
-                            {formatChatTime(msg.createdAt)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
+                  chatMessages.map((msg, index) => (
+                    <ChatMessage
+                      key={msg._id || index}
+                      message={msg}
+                      isOwnMessage={msg.user._id === userId}
+                    />
+                  ))
                 )}
                 <div ref={chatEndRef} />
               </div>
 
               {/* Chat Input */}
-              <div className="p-4 border-t border-gray-200">
-                <div className="flex items-end gap-2">
-                  <textarea
-                    value={newChatMessage}
-                    onChange={(e) => setNewChatMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (newChatMessage.trim()) handleSendChatMessage();
-                      }
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                    disabled={sendingChat}
-                    rows={2}
-                  />
-                  <button
-                    onClick={handleSendChatMessage}
-                    disabled={sendingChat || !newChatMessage.trim()}
-                    className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    <Send size={18} />
-                  </button>
-                </div>
-              </div>
+              {ticket?.ticketId && (
+                <ChatInput
+                  ticketId={ticket.ticketId}
+                  onMessageSent={() => {
+                    // Message already appears via socket
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>
