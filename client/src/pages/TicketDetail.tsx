@@ -12,7 +12,6 @@ import {
   type Ticket,
   type Message,
   type Activity,
-  type NewMessageData,
 } from "../lib/api";
 import {
   ArrowLeft,
@@ -23,7 +22,10 @@ import {
   CheckCircle,
   MessageSquare,
   Send,
+  Loader2,
 } from "lucide-react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const priorityColors = {
   low: "bg-gray-100 text-gray-700",
@@ -43,13 +45,29 @@ interface ChatMessage {
   _id?: string;
   user: {
     _id: string;
-    name?: string;  
+    name?: string;
     email?: string;
     profilePicture?: string;
   };
   content: string;
   attachment?: string;
   createdAt: string | Date;
+}
+
+function canViewCommentsAndActivity(ticket: Ticket | null, currentUser: any): boolean {
+   if (!ticket || !currentUser) return false;
+  
+   if (ticket.createdBy.email === currentUser.email) return false;
+
+   return true;
+}
+
+function canAcceptTicket(ticket: Ticket | null, currentUser: any): boolean {
+  if (!ticket || !currentUser) return false;
+  
+  if (ticket.createdBy.email === currentUser.email) return false;
+  
+  return true;
 }
 
 export default function TicketDetail() {
@@ -64,20 +82,25 @@ export default function TicketDetail() {
   const [newChatMessage, setNewChatMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sendingChat, setSendingChat] = useState(false);
+  const [buttonLoading, setButtonLoading] = useState({
+    accept: false,
+    unaccept: false,
+    resolve: false,
+    open: false,
+  });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
   const userId = currentUser ? currentUser.id : "";
-  
+
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize Socket.IO connection
   useEffect(() => {
-  socketRef.current = io("http://localhost:10000", {
-    transports: ['websocket'],
-    withCredentials: true,
-  });
-
+    socketRef.current = io("http://localhost:10000", {
+      transports: ["websocket"],
+      withCredentials: true,
+    });
 
     socketRef.current.on("connect", () => {
       console.log("Socket connected:", socketRef.current?.id);
@@ -118,10 +141,10 @@ export default function TicketDetail() {
 
   useEffect(() => {
     if (id) {
-      fetchTicketDetails();
-      fetchComments();
-      fetchActivities();
-      //fetchChatMessages();
+        fetchTicketDetails();
+        fetchComments();
+        fetchActivities();
+
     }
   }, [id]);
 
@@ -133,6 +156,7 @@ export default function TicketDetail() {
       fetchChatMessages(data.ticketId);
     } catch (error) {
       console.error("Error fetching ticket:", error);
+      toast.error("Failed to fetch ticket details");
     } finally {
       setLoading(false);
     }
@@ -145,6 +169,7 @@ export default function TicketDetail() {
       setComments(data);
     } catch (error) {
       console.error("Error fetching comments:", error);
+      toast.error("Failed to fetch comments");
     }
   }
 
@@ -155,73 +180,92 @@ export default function TicketDetail() {
       setActivities(data);
     } catch (error) {
       console.error("Error fetching activities:", error);
+      toast.error("Failed to fetch activities");
     }
   }
 
-async function fetchChatMessages(ticketId?: string) {  
-  try {
-    const ticketIdToUse = ticketId || ticket?.ticketId;  
-    if (!ticketIdToUse) return;
-    
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
-      {
-        credentials: "include",
+  async function fetchChatMessages(ticketId?: string) {
+    try {
+      const ticketIdToUse = ticketId || ticket?.ticketId;
+      if (!ticketIdToUse) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
+        {
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setChatMessages(data);
       }
-    );
-    if (response.ok) {
-      const data = await response.json();
-      setChatMessages(data);
+    } catch (error) {
+      console.error("Error fetching chat messages:", error);
+      toast.error("Failed to fetch chat messages");
     }
-  } catch (error) {
-    console.error("Error fetching chat messages:", error);
   }
-}
 
   async function handleAcceptTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, accept: true }));
     try {
       await ticketsApi.acceptTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket accepted successfully");
     } catch (error) {
       console.error("Error accepting ticket:", error);
+      toast.error("Failed to accept ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, accept: false }));
     }
   }
 
   async function handleOpenTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, open: true }));
     try {
       await ticketsApi.openTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket reopened successfully");
     } catch (error) {
       console.error("Error opening ticket:", error);
+      toast.error("Failed to reopen ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, open: false }));
     }
   }
 
   async function handleUnacceptTicket() {
     if (!ticket) return;
-
+    setButtonLoading((prev) => ({ ...prev, unaccept: true }));
     try {
       await ticketsApi.unacceptTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket unclaimed successfully");
     } catch (error) {
       console.error("Error unaccepting ticket:", error);
+      toast.error("Failed to unclaim ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, unaccept: false }));
     }
   }
 
   async function handleResolveTicket() {
     if (!ticket) return;
+    setButtonLoading((prev) => ({ ...prev, resolve: true }));
     try {
       await ticketsApi.resolveTicket(ticket._id, useremail);
       fetchTicketDetails();
       fetchActivities();
+      toast.success("Ticket resolved successfully");
     } catch (error) {
       console.error("Error resolving ticket:", error);
+      toast.error("Failed to resolve ticket");
+    } finally {
+      setButtonLoading((prev) => ({ ...prev, resolve: false }));
     }
   }
 
@@ -234,39 +278,41 @@ async function fetchChatMessages(ticketId?: string) {
         useremail: currentUser ? currentUser.email : "test-user@gmail.com",
         content: newComment,
       };
-      
+
       await commentsApi.create(ticket ? ticket._id : "", messageData);
       fetchComments();
       setNewComment("");
+      toast.success("Comment added successfully");
     } catch (error) {
       console.error("Failed to add message:", error);
+      toast.error("Failed to add comment");
     } finally {
       setSubmitting(false);
     }
   };
 
-const handleSendChatMessage = async () => {
-  if (!newChatMessage.trim() || !ticket?.ticketId) return;
-  setSendingChat(true);
-  try {
-    await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticket.ticketId}/messages`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: newChatMessage, attachment: "" }),
-      }
-    );
-    // Do not push to state here; wait for "newMessage" from server
-    setNewChatMessage("");
-  } catch (e) {
-    console.error("Send chat failed:", e);
-  } finally {
-    setSendingChat(false);
-  }
-};
-
+  const handleSendChatMessage = async () => {
+    if (!newChatMessage.trim() || !ticket?.ticketId) return;
+    setSendingChat(true);
+    try {
+      await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticket.ticketId}/messages`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: newChatMessage, attachment: "" }),
+        }
+      );
+      setNewChatMessage("");
+      // toast.success("Message sent successfully");
+    } catch (e) {
+      console.error("Send chat failed:", e);
+      toast.error("Failed to send chat message");
+    } finally {
+      setSendingChat(false);
+    }
+  };
 
   function formatDateTime(dateString: string): string {
     return new Date(dateString).toLocaleString("en-US", {
@@ -286,10 +332,10 @@ const handleSendChatMessage = async () => {
 
     if (minutes < 1) return "Just now";
     if (minutes < 60) return `${minutes}m ago`;
-    
+
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h ago`;
-    
+
     return date.toLocaleString("en-US", {
       month: "short",
       day: "numeric",
@@ -337,6 +383,16 @@ const handleSendChatMessage = async () => {
   return (
     <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
       <div className="max-w-7xl mx-auto">
+        {/* <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          limit={1}
+          hideProgressBar={false}
+          closeOnClick
+          pauseOnHover
+          draggable
+          closeButton
+        /> */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -434,108 +490,160 @@ const handleSendChatMessage = async () => {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                {!ticket.accepted && (
+                {canAcceptTicket(ticket, currentUser) && !ticket.accepted && (
                   <button
                     onClick={handleAcceptTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                    disabled={buttonLoading.accept}
+                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
+                      buttonLoading.accept ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Accept Ticket
+                    {buttonLoading.accept ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Accepting...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Accept Ticket
+                      </>
+                    )}
                   </button>
                 )}
-                {ticket.accepted && ticket.status !== "resolved" && (
+                {canAcceptTicket(ticket, currentUser) && ticket.accepted && ticket.status !== "resolved" && (
                   <button
                     onClick={handleUnacceptTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium"
+                    disabled={buttonLoading.unaccept}
+                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
+                      buttonLoading.unaccept ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Unclaim
+                    {buttonLoading.unaccept ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Unclaiming...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Unclaim
+                      </>
+                    )}
                   </button>
                 )}
-                {ticket.accepted && ticket.status !== "resolved" && (
+                {ticket.accepted && ticket.status !== "resolved" && ticket.assignedTo?._id === userId && (
                   <button
                     onClick={handleResolveTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    disabled={buttonLoading.resolve}
+                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
+                      buttonLoading.resolve ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Resolve Ticket
+                    {buttonLoading.resolve ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Resolving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Resolve Ticket
+                      </>
+                    )}
                   </button>
                 )}
                 {ticket.status === "resolved" && (
                   <button
                     onClick={handleOpenTicket}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                    disabled={buttonLoading.open}
+                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
+                      buttonLoading.open ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   >
-                    <CheckCircle size={18} />
-                    Open Again
+                    {buttonLoading.open ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Reopening...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={18} />
+                        Open Again
+                      </>
+                    )}
                   </button>
                 )}
               </div>
             </div>
 
-            {/* Comments Section */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MessageSquare size={20} />
-                Comments
-              </h2>
+            {/* Comments Section - Only for assigned user and admins (NOT creator) */}
+            {canViewCommentsAndActivity(ticket, currentUser) && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <MessageSquare size={20} />
+                  Comments
+                </h2>
 
-              <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                {comments.length === 0 ? (
-                  <p className="text-gray-500 text-sm">No comments yet</p>
-                ) : (
-                  comments.map((comment) => (
-                    <div
-                      key={comment._id}
-                      className="border-l-2 border-blue-500 pl-4"
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-sm text-gray-900">
-                          {comment.user.name}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDateTime(comment.createdAt)}
-                        </span>
+                <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
+                  {comments.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No comments yet</p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div
+                        key={comment._id}
+                        className="border-l-2 border-blue-500 pl-4"
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm text-gray-900">
+                            {comment.user.name}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatDateTime(comment.createdAt)}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 text-sm">{comment.content}</p>
                       </div>
-                      <p className="text-gray-700 text-sm">{comment.content}</p>
-                    </div>
-                  ))
-                )}
-              </div>
+                    ))
+                  )}
+                </div>
 
-              <div className="flex items-start gap-2">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      if (newComment.trim()) handleAddComment();
-                    }
-                  }}
-                  placeholder="Add a comment..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  disabled={submitting}
-                  rows={1}
-                />
-                <button
-                  onClick={handleAddComment}
-                  disabled={submitting || !newComment.trim()}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                >
-                  <Send size={18} />
-                </button>
+                <div className="flex items-start gap-2">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (newComment.trim()) handleAddComment();
+                      }
+                    }}
+                    placeholder="Add a comment..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={submitting}
+                    rows={1}
+                  />
+                  <button
+                    onClick={handleAddComment}
+                    disabled={submitting || !newComment.trim()}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    <Send size={18} />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Activity Log */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Clock size={20} />
-                Activity Log
-              </h2>
-              <ActivityTimeline activities={activities} />
-            </div>
+            {/* Activity Log - Only for assigned user and admins (NOT creator) */}
+            {canViewCommentsAndActivity(ticket, currentUser) && (
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <Clock size={20} />
+                  Activity Log
+                </h2>
+                <ActivityTimeline activities={activities} />
+              </div>
+            )}
           </div>
 
           {/* Right Column - Real-time Chat */}
@@ -559,8 +667,6 @@ const handleSendChatMessage = async () => {
                   </div>
                 ) : (
                   chatMessages.map((msg, index) => {
-                      console.log('Message:', msg);
-                      console.log('msg.user._id:', msg.user._id, 'userId:', userId);
                     const isOwnMessage = msg.user._id === userId;
                     return (
                       <div

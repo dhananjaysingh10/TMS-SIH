@@ -47,10 +47,12 @@ export const createTicket = async (req, res) => {
       priority,
       title,
     } = req.body;
-
+    console.log(req.body);
     const finalTicketId = ticketId || crypto.randomUUID();
     const createdBy = await User.findOne({ email: useremail });
+    console.log(createdBy);
     const assignedTo = await User.findOne({ email: assignedemail });
+    console.log(assignedTo);
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department,
@@ -64,13 +66,15 @@ export const createTicket = async (req, res) => {
     });
 
     const savedTicket = await newTicket.save();
-    await logProgress(ticketId, useremail, "Employee created ticket");
+    console.log(savedTicket);
+    await logProgress(newTicket._id, useremail, "Employee created ticket");
     res.status(201).json({
       success: true,
       message: "Ticket created successfully",
       data: savedTicket,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({
       success: false,
       message: "Error creating ticket",
@@ -279,6 +283,18 @@ export const acceptTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Employee accepted ticket");
+    const remark = "Employee accepted ticket"
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        remark,
+        Date.now()
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket accepted and assigned successfully.",
@@ -306,7 +322,7 @@ export const unacceptTicket = async (req, res) => {
         assignedTo: null,
       },
       { new: true, runValidators: true }
-    );
+    ).populate("assignedTo createdBy", "name email");;
 
     if (!updatedTicket) {
       return res.status(404).json({
@@ -315,6 +331,18 @@ export const unacceptTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Employee unclaimed ticket");
+    const remark = "Employee uncalimed ticket"
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        remark,
+        Date.now()
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket accepted and assigned successfully.",
@@ -342,7 +370,7 @@ export const openTicket = async (req, res) => {
         assignedTo: null,
       },
       { new: true, runValidators: true }
-    );
+    ).populate("assignedTo createdBy", "name email");;
 
     if (!updatedTicket) {
       return res.status(404).json({
@@ -351,6 +379,18 @@ export const openTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket opened again");
+    const remark = "Ticket opened again"
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        remark,
+        Date.now()
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket accepted and assigned successfully.",
@@ -385,6 +425,18 @@ export const resolveTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket Resolved");
+    const remark = "Ticket Resolved"
+    try {
+      await sendTicketStatusUpdateEmail(
+        updatedTicket.createdBy.email,
+        updatedTicket.ticketId,
+        updatedTicket.status,
+        remark,
+        Date.now()
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(200).json({
       success: true,
       message: "Ticket resolved successfully.",
@@ -612,10 +664,10 @@ export const getTicketsCreatedBy = async (req, res) => {
       });
     }
 
-    const filter = {
-      createdBy: user._id,
-      ...(query.$or ? { $or: query.$or } : {}),
-    };
+//     const filter = {
+//       assignedTo: user._id,
+//       ...(query.$or ? { $or: query.$or } : {}),
+//     };
 
     const tickets = await Ticket.find(filter)
       .populate("createdBy", "name email")
