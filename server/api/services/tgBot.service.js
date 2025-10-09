@@ -151,9 +151,14 @@ bot.on('text', async (ctx) => {
         return ctx.reply(`ℹ️ No progress updates for Ticket ID: ${text}`);
 
       let msg = `📈 *Progress for Ticket ${text}:*\n\n`;
+
+      // console.log("hello bro");
+      // console.log(ticket);
+      // console.log(ticket.data);
+      // console.log(ticket.data.progress);
       ticket.data.progress.forEach((p, i) => {
-        msg += `${i + 1}. ${p.status} — ${p.remark || 'No remark'}\nAt: ${new Date(
-          p.createdAt
+        msg += `${i + 1}. ${p.description} — ${p.remark || 'No remark'}\nAt: ${new Date(
+          p.timestamp
         ).toLocaleString()}\n\n`;
       });
       ctx.reply(msg, { parse_mode: 'Markdown' });

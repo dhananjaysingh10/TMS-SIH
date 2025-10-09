@@ -1,4 +1,3 @@
-//message.controller.js
 import Ticket from "../models/ticket.model.js";
 
 export const getTicketMessages = async (req, res) => {
@@ -23,14 +22,15 @@ export const sendMessage = async (req, res) => {
     try {
         const { ticketId } = req.params;
         const { content, attachment } = req.body;
-        const userId = req.user.userId;
-
+        const userId = req.user?.userId || '68de960ded0521abd7f4772b';
+        
+        
         const ticket = await Ticket.findOne({ ticketId });
         if (!ticket) {
             res.status(404);
             throw new Error("Ticket not found");
         }
-
+        
         const message = {
             user:userId,
             content,
@@ -43,7 +43,7 @@ export const sendMessage = async (req, res) => {
 
         req.io.to(ticketId).emit("newMessage", {
             ticketId,
-            message: { ...message, user: { _id: userId, username: req.user.username } }, // Change userId to user
+            message: { ...message, user: { _id: userId, username: req.user?.username || "uk" } }, 
         });
 
         res.status(201).json(message);

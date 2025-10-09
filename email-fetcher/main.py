@@ -15,7 +15,7 @@ EMAIL_ACCOUNT = os.getenv("EMAIL_ACCOUNT")
 APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD") # NEVER hardcode this in production
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
-TICKET_QUEUE_NAME = "new_ticket_queue"
+TICKET_QUEUE_NAME = "tickets_queue"
 
 
 def connect_to_redis():
@@ -73,17 +73,22 @@ def create_ticket_json(sender, subject, body, msg_id):
     timestamp = int(time.time())
     unique_hash = hashlib.sha1(msg_id.encode()).hexdigest()[:8]
     ticket_id = f"eml-{timestamp}-{unique_hash}"
-
+    print(f"Generated Ticket ID: {ticket_id}")
+    print(f"Category: {category}, Priority: {priority}")
+    print(f"ticket_id: {ticket_id}, sender: {sender}, subject: {subject}")
+    print(f"description: {body[:50]}...")  # Print first 50 chars of body
+    print(f"timestamp: {timestamp}")
+    print(f"created_by: email-fetcher")
     ticket = {
-      "ticket_id": ticket_id,
-      "source": "email",
-      "timestamp_received_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(timestamp)),
-      "sender_email": email.utils.parseaddr(sender)[1],
-      "subject": subject,
-      "body": body,
-      "initial_category_suggestion": category,
-      "initial_priority_suggestion": priority,
-      "status": "New"
+      "ticketId": ticket_id,  
+      "description": body,
+      "title": subject,  
+      "priority": priority.lower(), 
+      "createdBy": email.utils.parseaddr(sender)[1],
+      "department": category,  
+      "type": "task",
+      "status": "open", 
+   
     }
     return json.dumps(ticket)
 
