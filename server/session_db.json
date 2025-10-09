@@ -5,8 +5,9 @@
       "data": {
         "waitingForTicketId": false,
         "waitingForEmail": false,
-        "waitingForTicketIdForComment": false,
-        "commentTicketId": "8741294a-ef9f-4be8-ae24-ed064bf57584"
+        "waitingForTicketIdForComment": true,
+        "commentTicketId": "8741294a-ef9f-4be8-ae24-ed064bf57584",
+        "createTicket": null
       }
     }
   ]

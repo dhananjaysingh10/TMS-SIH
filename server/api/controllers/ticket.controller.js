@@ -7,7 +7,7 @@ import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const paginateTickets = async (query, page, limit, sortOptions) => {
   const pageNum = parseInt(page) || 1;
-  const limitNum = parseInt(limit) || 10;
+  const limitNum = parseInt(limit) || 100;
   const skip = (pageNum - 1) * limitNum;
   if (pageNum < 1 || limitNum < 1) {
     throw new Error("Page and limit must be positive integers");
@@ -67,7 +67,19 @@ export const createTicket = async (req, res) => {
 
     const savedTicket = await newTicket.save();
     console.log(savedTicket);
+    const remark = "Your ticket created Succesafuly";
     await logProgress(newTicket._id, useremail, "Employee created ticket");
+    try {
+      await sendTicketStatusUpdateEmail(
+        savedTicket.createdBy.email,
+        savedTicket.ticketId,
+        savedTicket.status,
+        remark,
+        Date.now()
+      );
+    } catch (emailError) {
+      console.error("Failed to send status update email:", emailError);
+    }
     res.status(201).json({
       success: true,
       message: "Ticket created successfully",

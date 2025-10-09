@@ -133,13 +133,20 @@ export interface NewTicketData {
   useremail: string;
   assignedemail?: string;
 }
-
+interface Pagination {
+  total: number; // Total number of tickets in the category or result set
+  page: number; // Current page number
+  limit: number; // Number of tickets per page
+  totalPages: number; // Total number of pages, calculated as Math.ceil(total / limit)
+}
 export const ticketsApi = {
   getAll: async (searchTerm: string = "") => {
+    console.log("here we go", searchTerm);
     const endpoint = searchTerm
-      ? `/ticket?search=${encodeURIComponent(searchTerm)}&limit=1000`
-      : `/ticket?search=&limit=1000`;
-    const response = await fetchApi<Ticket[]>(endpoint);
+    //   ? `/ticket?search=${encodeURIComponent(searchTerm)}&limit=10`
+    //   : `/ticket?search=&limit=1000`;
+    // const response = await fetchApi<Ticket[]>(endpoint);
+    const response = await fetchApi<Ticket[] | { tickets: Ticket[]; pagination: Pagination }>(endpoint);
     return response;
   },
   getAllDepartment: (department: string) =>
@@ -150,31 +157,57 @@ export const ticketsApi = {
     return response.data;
   },
 
-  getCreatedBy: async (userId: string): Promise<Ticket[]> => {
-    console.log("API: getCreatedBy called with userId:", userId);
+  // getCreatedBy: async (userId: string): Promise<Ticket[]> => {
+  //   console.log("API: getCreatedBy called with userId:", userId);
+  //   try {
+  //     const response = await fetchApi<any>(`/ticket/createdBy/${userId}`);
+  //     console.log("API: getCreatedBy response:", response);
+  //     return response.data || [];
+  //   } catch (error) {
+  //     console.error("API: getCreatedBy error:", error);
+  //     throw error;
+  //   }
+  // },
+  getCreatedBy: async (endpoint: string): Promise<Ticket[] | { tickets: Ticket[]; pagination: Pagination }> => {
+    console.log("API: getCreatedBy called with endpoint:", endpoint);
     try {
-      const response = await fetchApi<any>(`/ticket/createdBy/${userId}`);
+      const response = await fetchApi<Ticket[] | { tickets: Ticket[]; pagination: Pagination }>(endpoint);
       console.log("API: getCreatedBy response:", response);
-      return response.data || [];
+      return response;
     } catch (error) {
       console.error("API: getCreatedBy error:", error);
       throw error;
     }
   },
 
-    getMyTickets: async (
-    email: string,
-    searchTerm: string = ""
-  ): Promise<Ticket[]> => {
-    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(
-      searchTerm
-    )}&limit=1000`;
-    const payload = { email };
-    const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    return response.data;
+  //   getMyTickets: async (
+  //   email: string,
+  //   searchTerm: string = ""
+  // ): Promise<Ticket[]> => {
+  //   const endpoint = `/ticket/assignedto?search=${encodeURIComponent(
+  //     searchTerm
+  //   )}&limit=1000`;
+  //   const payload = { email };
+  //   const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
+  //     method: "POST",
+  //     body: JSON.stringify(payload),
+  //   });
+  //   return response.data;
+  // },
+  getMyTickets: async (email: string, searchTerm: string = ""): Promise<Ticket[]> => {
+    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(searchTerm)}&limit=1000`;
+    console.log("API: getMyTickets called with endpoint:", endpoint, "email:", email);
+    try {
+      const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      console.log("API: getMyTickets response:", response);
+      return response.data;
+    } catch (error) {
+      console.error("API: getMyTickets error:", error);
+      throw error;
+    }
   },
   
   create: async (ticketData: NewTicketData): Promise<Ticket> => {

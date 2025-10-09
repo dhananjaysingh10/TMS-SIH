@@ -3,7 +3,8 @@ import {TICKET_STATUS_UPDATE_TEMPLATE} from './emailTemplate.js';
 
 export const sendTicketStatusUpdateEmail = async (email, ticketId, status, remark, timestamp) => {
     const recipient = [{ email }];
-
+console.log(recipient);
+console.log(email);
     try {
         const response = await nodemailerClient.sendMail({
             to: email,

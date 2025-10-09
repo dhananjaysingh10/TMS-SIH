@@ -6,13 +6,12 @@ import redis # Example for Redis queue
 import hashlib
 import time
 import os
-import dotenv
-
-dotenv.load_dotenv()
+# import dotenv
+# dotenv.load_dotenv()
 # --- Configuration ---
 IMAP_SERVER = "imap.gmail.com"
-EMAIL_ACCOUNT = os.getenv("EMAIL_ACCOUNT")
-APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD") # NEVER hardcode this in production
+EMAIL_ACCOUNT = "sihticketing@gmail.com"
+APP_PASSWORD = "shmo nodv yyyz txza" # NEVER hardcode this in production
 REDIS_HOST = "localhost"
 REDIS_PORT = 6379
 TICKET_QUEUE_NAME = "tickets_queue"
