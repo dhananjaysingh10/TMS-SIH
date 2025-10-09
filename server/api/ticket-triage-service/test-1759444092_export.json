@@ -1,0 +1,47 @@
+{
+  "ticket_id": "test-1759444092",
+  "source": "email",
+  "sender_email": "test@powergrid.com",
+  "subject": "VPN Connection Issue - Samsung Phone",
+  "body": "Hi, I'm unable to connect to the VPN from my Samsung Galaxy phone. Getting authentication failed error. This is urgent as I need to access internal systems for a critical task. Please help ASAP.",
+  "timestamp_received": "2025-10-02T22:28:12.408757",
+  "classification": {
+    "category": "Mobile",
+    "subcategory": "VPN Connection Issue",
+    "service": "VPN",
+    "intent": "ConnectivityIssue",
+    "priority": "P1",
+    "impact": "high",
+    "urgency": "high",
+    "confidence": 0.97,
+    "routing_hints": [
+      "Team:Mobility",
+      "Skill:Android",
+      "Skill:VPN"
+    ],
+    "suggested_actions": [
+      "Verify user credentials and authentication method",
+      "Reset and reconfigure the VPN profile on the Samsung device",
+      "Ensure device date and time are correct",
+      "Confirm VPN client app is up to date and compatible",
+      "Check network connectivity and firewall settings",
+      "Escalate to Network/VPN team if issue persists"
+    ]
+  },
+  "assistant_reply": "**Ticket:** VPN Connection Issue \u2013 Samsung Galaxy Phone  \n**Priority:** High (critical task)  \n\nBelow is a step\u2011by\u2011step troubleshooting guide you can follow right now. If any step does not resolve the problem, let me know the result (including screenshots or exact error messages) and we\u2019ll move to the next level of support.\n\n---\n\n## 1\ufe0f\u20e3 Verify the Basics\n\n| Item | What to Check | How to Check |\n|------|---------------|--------------|\n| **Internet connectivity** | Can you browse the web (e.g., https://www.google.com) on the same network? | Open Chrome/Browser and load any external site. |\n| **Date & Time** | Must be exact (including time\u2011zone). A drift of >5\u202fmin will break most VPN auth. | Settings \u2192 General management \u2192 Date & time \u2192 **Enable \u201cAutomatic date & time\u201d** (or set manually to the correct time). |\n| **VPN credentials** | Username / password are correct and not expired. | Try logging into the corporate web portal (or any other service that uses the same credentials). |\n| **Account lockout** | After several failed attempts the account may be locked. | If you get a \u201caccount locked\u201d message on the portal, request an unlock from AD/Identity team. |\n\n---\n\n## 2\ufe0f\u20e3 Identify Which VPN Client You\u2019re Using  \n\n| Client | Typical Settings | Where to Find It on Samsung |\n|--------|----------------",
+  "citations": [],
+  "clarifying_questions": [],
+  "resolution_type": "needs_agent",
+  "automation_candidates": [],
+  "recommended_assignment": {
+    "teams": [
+      "Mobility"
+    ],
+    "skills": [
+      "Android",
+      "VPN"
+    ],
+    "priority": "P1",
+    "urgency": "high"
+  }
+}

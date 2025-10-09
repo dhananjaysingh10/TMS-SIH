@@ -41,7 +41,7 @@ app.use(cors(corsOptions));
 app.use(express.static('public'));
 app.use(
   express.json({
-    limit: '10mb',
+    limit: '50mb',
   })
 );
 app.use(cookieParser());
