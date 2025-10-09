@@ -1,5 +1,4 @@
-// components/chat/AudioPlayer.tsx
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { Play, Pause, Mic, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -14,38 +13,62 @@ export const AudioPlayer = memo(({ audioUrl, isOwnMessage = false }: AudioPlayer
   const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const updateTime = useCallback(() => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      if (isPlaying) {
+        animationFrameRef.current = requestAnimationFrame(updateTime);
+      }
+    }
+  }, [isPlaying]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => {
+    const handleLoadedMetadata = () => {
       setDuration(audio.duration);
       setIsLoading(false);
     };
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0); // Reset progress bar when audio ends
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
     const handleCanPlay = () => setIsLoading(false);
     const handleError = (e: Event) => {
       console.error("Audio load error:", (e.target as HTMLAudioElement)?.error);
       setIsLoading(false);
       toast.error("Failed to load audio. Please try refreshing the page.");
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
 
-    audio.addEventListener("timeupdate", updateTime);
-    audio.addEventListener("loadedmetadata", updateDuration);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("canplay", handleCanPlay);
     audio.addEventListener("error", handleError);
 
+    // Start time updates when audio starts playing
+    if (isPlaying) {
+      animationFrameRef.current = requestAnimationFrame(updateTime);
+    }
+
     return () => {
-      audio.removeEventListener("timeupdate", updateTime);
-      audio.removeEventListener("loadedmetadata", updateDuration);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("canplay", handleCanPlay);
       audio.removeEventListener("error", handleError);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [audioUrl]);
+  }, [isPlaying, updateTime, audioUrl]);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -54,14 +77,21 @@ export const AudioPlayer = memo(({ audioUrl, isOwnMessage = false }: AudioPlayer
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
       } else {
         await audioRef.current.play();
         setIsPlaying(true);
+        animationFrameRef.current = requestAnimationFrame(updateTime);
       }
     } catch (err) {
       console.error("Audio play failed:", err);
       toast.error("Could not play audio. Try again.");
       setIsPlaying(false);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     }
   };
 
@@ -122,14 +152,14 @@ export const AudioPlayer = memo(({ audioUrl, isOwnMessage = false }: AudioPlayer
             style={{
               background: isOwnMessage
                 ? `linear-gradient(to right, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.6) ${
-                    (currentTime / duration) * 100
+                    duration ? (currentTime / duration) * 100 : 0
                   }%, rgba(255,255,255,0.3) ${
-                    (currentTime / duration) * 100
+                    duration ? (currentTime / duration) * 100 : 0
                   }%, rgba(255,255,255,0.3) 100%)`
                 : `linear-gradient(to right, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0.6) ${
-                    (currentTime / duration) * 100
+                    duration ? (currentTime / duration) * 100 : 0
                   }%, rgba(209, 213, 219, 0.5) ${
-                    (currentTime / duration) * 100
+                    duration ? (currentTime / duration) * 100 : 0
                   }%, rgba(209, 213, 219, 0.5) 100%)`,
             }}
           />

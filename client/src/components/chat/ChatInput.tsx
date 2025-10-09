@@ -2,8 +2,8 @@
 import { useState, useRef } from "react";
 import { Send, Loader2, X, FileText } from "lucide-react";
 import { AudioRecorder } from "./AudioRecorder";
-import { FileAttachment} from "./FileAttachment";
-import type { FileAttachmentRef} from "./FileAttachment";
+import { FileAttachment } from "./FileAttachment";
+import type { FileAttachmentRef } from "./FileAttachment";
 import { toast } from "react-toastify";
 
 interface ChatInputProps {
@@ -25,7 +25,7 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
   const [isSending, setIsSending] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false); // NEW
+  const [isRecording, setIsRecording] = useState(false);
   const fileAttachmentRef = useRef<FileAttachmentRef>(null);
 
   const handleSendMessage = async () => {
@@ -79,7 +79,7 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
 
   return (
     <>
-      {selectedFile && (
+      {selectedFile && !isRecording && (
         <div className="mb-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -106,16 +106,14 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
       )}
 
       <div className="flex items-end gap-2">
-        {isRecording ? (
-          // Show only AudioRecorder when recording
-          <AudioRecorder
-            ticketId={ticketId}
-            onSendSuccess={onMessageSent}
-            disabled={disabled || isSending}
-            onRecordingChange={setIsRecording}
-          />
-        ) : (
-          // Show normal input layout when not recording
+        <AudioRecorder
+          ticketId={ticketId}
+          onSendSuccess={onMessageSent}
+          disabled={disabled || isSending || selectedFile !== null}
+          onRecordingChange={setIsRecording}
+        />
+
+        {!isRecording && (
           <>
             <FileAttachment
               ref={fileAttachmentRef}
@@ -139,13 +137,6 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
               className="flex-[1_1_0%] min-w-0 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={disabled || isSending}
               rows={2}
-            />
-
-            <AudioRecorder
-              ticketId={ticketId}
-              onSendSuccess={onMessageSent}
-              disabled={disabled || isSending || selectedFile !== null}
-              onRecordingChange={setIsRecording}
             />
 
             <button
