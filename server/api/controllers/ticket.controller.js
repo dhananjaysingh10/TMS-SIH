@@ -665,7 +665,7 @@ export const getTicketsCreatedBy = async (req, res) => {
     }
 
 //     const filter = {
-//       createdBy: user._id,
+//       assignedTo: user._id,
 //       ...(query.$or ? { $or: query.$or } : {}),
 //     };
 
