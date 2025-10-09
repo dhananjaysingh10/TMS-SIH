@@ -99,7 +99,7 @@ export function ChatMessage({ message, isOwnMessage }: ChatMessageProps) {
             href={attachment}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-sm hover:underline mb-2"
+            className={`flex items-center gap-2 text-sm hover:underline mb-2 ${isOwnMessage ? '!text-white' : '!text-gray-900'}`}
           >
             <FileText size={16} />
             {(mimeType || "").includes("pdf") ? "View PDF" : "View File"}

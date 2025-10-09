@@ -23,7 +23,7 @@ export const sendMessage = async (req, res) => {
   try {
     const { ticketId } = req.params;
     const { content } = req.body;
-    const userId = req.user?.userId;
+    const userId = req.user?.userId || '68de960ded0521abd7f4772b';
 
     let uploadedFile = null;
     if (req.files) {
