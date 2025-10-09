@@ -1,4 +1,4 @@
-// components/chat/ChatInput.tsx (FINAL VERSION)
+// components/chat/ChatInput.tsx
 import { useState, useRef } from "react";
 import { Send, Loader2, X, FileText } from "lucide-react";
 import { AudioRecorder } from "./AudioRecorder";
@@ -25,19 +25,18 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
   const [isSending, setIsSending] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false); // NEW
   const fileAttachmentRef = useRef<FileAttachmentRef>(null);
 
   const handleSendMessage = async () => {
     if (!ticketId) return;
 
-    // If file is selected, trigger file send
     if (selectedFile) {
       await fileAttachmentRef.current?.sendFile();
       setMessage("");
       return;
     }
 
-    // Text-only message
     if (!message.trim()) return;
 
     setIsSending(true);
@@ -79,8 +78,7 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
   };
 
   return (
-    <div className="p-4 border-t border-gray-200">
-      {/* File Preview - Rendered ABOVE input row */}
+    <>
       {selectedFile && (
         <div className="mb-2 p-2 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between">
@@ -107,46 +105,59 @@ export function ChatInput({ ticketId, onMessageSent, disabled = false }: ChatInp
         </div>
       )}
 
-      {/* Input Row */}
       <div className="flex items-end gap-2">
-        <FileAttachment
-          ref={fileAttachmentRef}
-          ticketId={ticketId}
-          additionalText={message}
-          onSendSuccess={() => {
-            setMessage("");
-            setSelectedFile(null);
-            setPreviewUrl(null);
-            onMessageSent();
-          }}
-          disabled={disabled || isSending}
-          onFileSelected={handleFileSelected}
-        />
+        {isRecording ? (
+          // Show only AudioRecorder when recording
+          <AudioRecorder
+            ticketId={ticketId}
+            onSendSuccess={onMessageSent}
+            disabled={disabled || isSending}
+            onRecordingChange={setIsRecording}
+          />
+        ) : (
+          // Show normal input layout when not recording
+          <>
+            <FileAttachment
+              ref={fileAttachmentRef}
+              ticketId={ticketId}
+              additionalText={message}
+              onSendSuccess={() => {
+                setMessage("");
+                setSelectedFile(null);
+                setPreviewUrl(null);
+                onMessageSent();
+              }}
+              disabled={disabled || isSending}
+              onFileSelected={handleFileSelected}
+            />
 
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={disabled || isSending}
-          rows={2}
-        />
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Type a message..."
+              className="flex-[1_1_0%] min-w-0 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={disabled || isSending}
+              rows={2}
+            />
 
-        <AudioRecorder
-          ticketId={ticketId}
-          onSendSuccess={onMessageSent}
-          disabled={disabled || isSending || selectedFile !== null}
-        />
+            <AudioRecorder
+              ticketId={ticketId}
+              onSendSuccess={onMessageSent}
+              disabled={disabled || isSending || selectedFile !== null}
+              onRecordingChange={setIsRecording}
+            />
 
-        <button
-          onClick={handleSendMessage}
-          disabled={disabled || isSending || (!message.trim() && !selectedFile)}
-          className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0"
-        >
-          {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-        </button>
+            <button
+              onClick={handleSendMessage}
+              disabled={disabled || isSending || (!message.trim() && !selectedFile)}
+              className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex-shrink-0"
+            >
+              {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+            </button>
+          </>
+        )}
       </div>
-    </div>
+    </>
   );
 }

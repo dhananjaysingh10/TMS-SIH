@@ -26,17 +26,24 @@ export const AudioPlayer = memo(({ audioUrl, isOwnMessage = false }: AudioPlayer
     };
     const handleEnded = () => setIsPlaying(false);
     const handleCanPlay = () => setIsLoading(false);
+    const handleError = (e: Event) => {
+      console.error("Audio load error:", (e.target as HTMLAudioElement)?.error);
+      setIsLoading(false);
+      toast.error("Failed to load audio. Please try refreshing the page.");
+    };
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateDuration);
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("error", handleError);
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("ended", handleEnded);
       audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("error", handleError);
     };
   }, [audioUrl]);
 
@@ -75,13 +82,13 @@ export const AudioPlayer = memo(({ audioUrl, isOwnMessage = false }: AudioPlayer
 
   const iconColor = isOwnMessage ? "#ffffff" : "#374151";
   const buttonBg = isOwnMessage
-    ? "bg-white bg-opacity-20 hover:bg-opacity-30"
+    ? "bg-blue-600 hover:bg-blue-700"
     : "bg-gray-200 hover:bg-gray-300";
   const textColor = isOwnMessage ? "text-white" : "text-gray-700";
 
   return (
     <div className="flex items-center gap-3 min-w-[220px] max-w-full">
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      <audio ref={audioRef} src={audioUrl} preload="metadata" crossOrigin="use-credentials" />
 
       <button
         onClick={togglePlay}

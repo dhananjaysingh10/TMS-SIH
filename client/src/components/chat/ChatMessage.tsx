@@ -1,3 +1,4 @@
+// components/chat/ChatMessage.tsx
 import { FileText } from "lucide-react";
 import { AudioPlayer } from "./AudioPlayer";
 
@@ -42,7 +43,7 @@ export function ChatMessage({ message, isOwnMessage }: ChatMessageProps) {
   const attachment = message.attachment || "";
   const mimeType = message.mimeType || "";
 
-  const isAudio = mimeType.startsWith("audio/") || mimeType === "video/webm";
+  const isAudio = mimeType.startsWith("audio/") || mimeType === "video/webm" || mimeType === "audio/webm";
   const isImage = mimeType.startsWith("image/");
   const isVideo = mimeType.startsWith("video/") && mimeType !== "video/webm";
   const isGenericFile = attachment && !isAudio && !isImage && !isVideo;
@@ -55,7 +56,7 @@ export function ChatMessage({ message, isOwnMessage }: ChatMessageProps) {
     <div
       className={`flex gap-2 mb-3 ${isOwnMessage ? "justify-end" : "justify-start"}`}
     >
-      <div className={`px-4 py-2 rounded-lg ${bgColor}`}>
+      <div className={`px-4 py-2 rounded-lg ${bgColor} max-w-[75%]`}>
         {!isOwnMessage && (
           <p className="text-xs font-semibold mb-1 opacity-75">
             {message.user.name || "User"}
@@ -67,12 +68,12 @@ export function ChatMessage({ message, isOwnMessage }: ChatMessageProps) {
           <AudioPlayer audioUrl={attachment} isOwnMessage={isOwnMessage} />
         )}
 
-        {/* Image attachment */}
+        {/* Image attachment - REDUCED SIZE */}
         {isImage && attachment && (
           <img
             src={attachment}
             alt="Attachment"
-            className="max-w-xs h-auto rounded cursor-pointer hover:opacity-90 transition-opacity mb-2"
+            className="max-w-[200px] max-h-[200px] rounded cursor-pointer hover:opacity-90 transition-opacity mb-2"
             onClick={() => window.open(attachment, "_blank")}
             onError={(e) => {
               console.error("Image load failed:", attachment);
@@ -81,12 +82,12 @@ export function ChatMessage({ message, isOwnMessage }: ChatMessageProps) {
           />
         )}
 
-        {/* Video attachment */}
+        {/* Video attachment - REDUCED SIZE */}
         {isVideo && attachment && (
           <video
             src={attachment}
             controls
-            className="max-w-xs h-auto rounded mb-2"
+            className="max-w-[200px] max-h-[200px] rounded mb-2"
           >
             Your browser doesn't support video playback.
           </video>

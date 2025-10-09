@@ -7,6 +7,7 @@ interface AudioRecorderProps {
   ticketId: string;
   onSendSuccess: () => void;
   disabled?: boolean;
+  onRecordingChange?: (isRecording: boolean) => void;
 }
 
 function formatDuration(seconds: number): string {
@@ -15,7 +16,7 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
-export function AudioRecorder({ ticketId, onSendSuccess, disabled = false }: AudioRecorderProps) {
+export function AudioRecorder({ ticketId, onSendSuccess, disabled = false, onRecordingChange }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isSending, setIsSending] = useState(false);
@@ -54,8 +55,9 @@ export function AudioRecorder({ ticketId, onSendSuccess, disabled = false }: Aud
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
+      onRecordingChange?.(true); // MOVED HERE - only notify after recording starts
 
-      recordingIntervalRef.current = setInterval(() => {
+      recordingIntervalRef.current = window.setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (error) {
@@ -68,6 +70,7 @@ export function AudioRecorder({ ticketId, onSendSuccess, disabled = false }: Aud
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      onRecordingChange?.(false);
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current);
       }
@@ -106,7 +109,7 @@ export function AudioRecorder({ ticketId, onSendSuccess, disabled = false }: Aud
 
   if (isRecording) {
     return (
-      <div className="flex items-center justify-between bg-red-50 p-3 rounded-lg">
+      <div className="flex items-center justify-between bg-red-50 p-3 rounded-lg w-full">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
           <span className="text-sm font-medium text-red-700">
@@ -127,7 +130,7 @@ export function AudioRecorder({ ticketId, onSendSuccess, disabled = false }: Aud
     <button
       onClick={startRecording}
       disabled={disabled || isSending}
-      className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
       title="Record audio"
     >
       {isSending ? <Loader2 size={18} className="animate-spin" /> : <Mic size={18} />}

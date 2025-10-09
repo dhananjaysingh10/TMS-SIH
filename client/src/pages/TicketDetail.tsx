@@ -1,4 +1,4 @@
-// ticketdetail.tsx (Refactored)
+// ticketdetail.tsx
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -609,7 +609,7 @@ export default function TicketDetail() {
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[calc(100vh-300px)]">
                 {chatMessages.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-gray-400 text-sm">
                     No messages yet. Start the conversation!
@@ -628,12 +628,14 @@ export default function TicketDetail() {
 
               {/* Chat Input */}
               {ticket?.ticketId && (
-                <ChatInput
-                  ticketId={ticket.ticketId}
-                  onMessageSent={() => {
-                    // Message already appears via socket
-                  }}
-                />
+                <div className="p-4 border-t border-gray-200">
+                  <ChatInput
+                    ticketId={ticket.ticketId}
+                    onMessageSent={() => {
+                      // Message already appears via socket
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>
