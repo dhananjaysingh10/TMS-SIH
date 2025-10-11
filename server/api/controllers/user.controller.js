@@ -41,7 +41,7 @@ export const getUserById = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
-    const { name, primaryPhone, email, role, department, profilePicture, telegram } = req.body;
+    const { name, primaryPhone, email, role, department, profilePicture, telegramId } = req.body;
 
     const updateData = {
       name,
@@ -50,7 +50,7 @@ export const updateUser = async (req, res) => {
       role,
       department,
       profilePicture,
-      telegramId:telegram
+      telegramId
     };
 
     Object.keys(updateData).forEach(
