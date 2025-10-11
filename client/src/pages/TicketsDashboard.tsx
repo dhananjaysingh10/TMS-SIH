@@ -1,155 +1,3 @@
-// import { useEffect, useState } from "react";
-// import Layout from "../components/Layout";
-// import { Search } from "lucide-react";
-// import TicketCard from "../components/TicketCard";
-// import { ticketsApi, type Ticket } from "../lib/api";
-// import { AlertCircle } from "lucide-react";
-// import useDebounce from "../hooks/debounce";
-// import { useSelector } from "react-redux";
-// import { selectCurrentUser } from "../redux/user/userSlice";
-
-// export default function TicketsDashboard() {
-//   const [tickets, setTickets] = useState<Ticket[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-//   const currentUser = useSelector(selectCurrentUser);
-
-//   useEffect(() => {
-//     async function fetchTickets() {
-//       try {
-//         setLoading(true);
-//         const res = await ticketsApi.getAll(debouncedSearchTerm);
-//         setTickets(res);
-//       } catch (error) {
-//         console.error("Error fetching tickets:", error);
-//         setTickets([]);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-//     fetchTickets();
-//   }, [debouncedSearchTerm]);
-
-  
-//   const departmentTickets = tickets.filter((t) => t.department === currentUser.department);
-//   const open = departmentTickets.filter((t) => !t.accepted);
-//   const assigned = departmentTickets.filter((t) => t.accepted && t.status !== "resolved");
-//   const closedTickets = departmentTickets.filter((t) => t.status === "resolved");
-
-//   const renderSection = (
-//     title: string,
-//     sectionTickets: Ticket[],
-//     description?: string
-//   ) => (
-//     <div>
-//       <div className="mb-4">
-//         <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-//         {description && (
-//           <p className="text-sm text-gray-600 mt-1">{description}</p>
-//         )}
-//         <div className="mt-2 text-sm text-gray-500">
-//           {sectionTickets.length} ticket{sectionTickets.length !== 1 ? "s" : ""}
-//         </div>
-//       </div>
-
-//       {sectionTickets.length === 0 ? (
-//         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-//           <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
-//           <p className="text-gray-500">No tickets in this category</p>
-//         </div>
-//       ) : (
-//         <div className="grid grid-cols-1 gap-4">
-//           {sectionTickets
-//             .filter((ticket) => ticket.department === currentUser.department)
-//             .map((ticket) => (
-//               <TicketCard
-//                 key={ticket._id}
-//                 _id={ticket._id}
-//                 ticketId={ticket.ticketId}
-//                 title={ticket.title}
-//                 status={ticket.status}
-//                 priority={ticket.priority}
-//                 department={ticket.department}
-//                 createdBy={ticket.createdBy}
-//                 assignedTo={ticket.assignedTo}
-//                 createdAt={ticket.createdAt}
-//                 accepted={ticket.accepted}
-//               />
-//             ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-
-//   if (loading) {
-//     return (
-//       <Layout pageTitle="Tickets Dashboard">
-//         <div className="max-w-7xl mx-auto">
-//           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-//             {[1, 2, 3].map((i) => (
-//               <div key={i} className="space-y-4">
-//                 <div className="h-8 bg-gray-200 rounded w-48 animate-pulse" />
-//                 <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
-//                   <div className="h-4 bg-gray-200 rounded w-32 mb-4" />
-//                   <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-//                   <div className="h-4 bg-gray-200 rounded w-3/4" />
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </Layout>
-//     );
-//   }
-
-//   return (
-//     <Layout pageTitle="Tickets Dashboard">
-//       <div className="max-w-7xl mx-auto">
-//         <div className="mb-6">
-//           <h1 className="text-2xl font-bold text-gray-900 mb-2">All Tickets</h1>
-//           <p className="text-gray-600">
-//             View and manage all support tickets across different states
-//           </p>
-//         </div>
-//         <div className="relative mb-6">
-//           <Search
-//             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-//             size={20}
-//           />
-//           <input
-//             type="text"
-//             placeholder="Search by title..."
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="w-full pl-12 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-//           />
-//         </div>
-//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-//           {renderSection(
-//             "Open Tickets",
-//             open,
-//             "Tickets waiting to be accepted"
-//           )}
-//           {renderSection(
-//             "Assigned Tickets",
-//             assigned,
-//             "Tickets accepted by a team member"
-//           )}
-//           {renderSection(
-//             "Closed Tickets",
-//             closedTickets,
-//             "Resolved and completed tickets"
-//           )}
-//         </div>
-//       </div>
-//     </Layout>
-//   );
-// }
-
-
-
-
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { Search, AlertCircle, Grid3x3, List } from "lucide-react";
@@ -159,7 +7,6 @@ import useDebounce from "../hooks/debounce";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
 import { Navigate, useNavigate } from "react-router-dom";
-// import usePersistentState from "@/hooks/usePersistantState";
 
 interface Pagination {
   total: number;
@@ -169,57 +16,78 @@ interface Pagination {
 }
 
 export default function TicketsDashboard() {
-  const xx = localStorage.getItem("viewMode");
+  const xx = localStorage.getItem("viewMode") || "grid";
   const [viewMode, setViewMode] = useState(xx);
 
-  // const [viewMode, setViewMode] = usePersistentState<"grid" | "list">("viewMode", "list");
-  const [activeTab, setActiveTab] = useState<"open" | "assigned" | "closed">("open");
+  const [activeTab, setActiveTab] = useState<"open" | "assigned" | "closed">(
+    "open"
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const currentUser = useSelector(selectCurrentUser);
   const navigate = useNavigate();
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({ total: 0, page: 1, limit: 10, totalPages: 1 });
+  const [pagination, setPagination] = useState<Pagination>({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
   const limit = 100;
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to page 1 on search change
+    fetchTickets();
+    setCurrentPage(1);
   }, [debouncedSearchTerm]);
 
   useEffect(() => {
-    console.log("ckicked");
     localStorage.setItem("viewMode", viewMode);
   }, [viewMode]);
 
   useEffect(() => {
-    async function fetchTickets() {
-      try {
-        setLoading(true);
-        const endpoint = debouncedSearchTerm
-          ? `/ticket?search=${encodeURIComponent(debouncedSearchTerm)}&page=${currentPage}&limit=${limit}`
-          : `/ticket?page=${currentPage}&limit=${limit}`;
-        const res = await ticketsApi.getAll(endpoint);
-        setTickets(res.tickets || res);
-        setPagination(res.pagination || { total: res.length, page: currentPage, limit, totalPages: Math.ceil(res.length / limit) });
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
-        setTickets([]);
-        setPagination({ total: 0, page: 1, limit, totalPages: 1 });
-      } finally {
-        setLoading(false);
-      }
-    }
     fetchTickets();
-  }, [currentPage, debouncedSearchTerm]);
+  }, [currentPage]);
 
-  // Filter tickets client-side based on department and category
-  const departmentTickets = tickets.filter((t) => t.department === currentUser.department);
-  const openTickets = departmentTickets.filter((t) => !t.accepted);
-  const assignedTickets = departmentTickets.filter((t) => t.accepted && t.status !== "resolved");
-  const closedTickets = departmentTickets.filter((t) => t.status === "resolved");
+  async function fetchTickets() {
+    try {
+      setLoading(true);
+      const endpoint = debouncedSearchTerm
+        ? `/ticket?search=${encodeURIComponent(
+            debouncedSearchTerm
+          )}&page=${currentPage}&limit=${limit}`
+        : `/ticket?page=${currentPage}&limit=${limit}`;
+      const res = await ticketsApi.getAll(endpoint);
+      setTickets(res);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+      setTickets([]);
+      setPagination({ total: 0, page: 1, limit, totalPages: 1 });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const departmentTickets = tickets.filter(
+    (t) => t.department === currentUser?.department
+  );
+
+  const openTickets =
+    currentUser?.role === "super-admin"
+      ? tickets.filter((t) => !t.accepted)
+      : departmentTickets.filter((t) => !t.accepted);
+  const assignedTickets =
+    currentUser?.role === "super-admin"
+      ? tickets.filter((t) => t.accepted && t.status === "in-progress")
+      : departmentTickets.filter((t) => t.status === "in-progress");
+  const closedTickets =
+    currentUser?.role === "super-admin"
+      ? tickets.filter((t) => t.status === "resolved" || t.status === "closed")
+      : departmentTickets.filter(
+          (t) => t.status === "resolved" || t.status === "closed"
+        );
 
   const getPaginatedTickets = (ticketList: Ticket[], page: number) => {
     const start = (page - 1) * limit;
@@ -235,22 +103,56 @@ export default function TicketsDashboard() {
     const paginatedTickets = getPaginatedTickets(sectionTickets, currentPage);
     const totalPages = Math.ceil(sectionTickets.length / limit) || 1;
 
+    const sectionColors = {
+      "Open Tickets": {
+        bg: "bg-gradient-to-br from-amber-50 to-orange-50",
+        border: "border-amber-200",
+        accent: "text-amber-700",
+        badgeBg: "bg-amber-100",
+        badgeText: "text-amber-700",
+      },
+      "Assigned Tickets": {
+        bg: "bg-gradient-to-br from-emerald-50 to-teal-50",
+        border: "border-emerald-200",
+        accent: "text-emerald-700",
+        badgeBg: "bg-emerald-100",
+        badgeText: "text-emerald-700",
+      },
+      "Closed Tickets": {
+        bg: "bg-gradient-to-br from-blue-50 to-cyan-50",
+        border: "border-blue-200",
+        accent: "text-blue-700",
+        badgeBg: "bg-blue-100",
+        badgeText: "text-blue-700",
+      },
+    };
+
+    const colors = sectionColors[title as keyof typeof sectionColors];
+
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 transition-all duration-200 hover:shadow-md">
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+      <div
+        className={`${colors.bg} rounded-xl shadow-lg border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]`}
+      >
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className={`text-xl font-bold ${colors.accent}`}>{title}</h2>
+            <span
+              className={`${colors.badgeBg} ${colors.badgeText} px-3 py-1 rounded-full text-sm font-bold`}
+            >
+              {sectionTickets.length}
+            </span>
+          </div>
           {description && (
             <p className="text-sm text-gray-600 mt-1">{description}</p>
           )}
-          <div className="mt-2 text-sm text-gray-500 font-medium">
-            {sectionTickets.length} ticket{sectionTickets.length !== 1 ? "s" : ""}
-          </div>
         </div>
 
         {sectionTickets.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-            <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
-            <p className="text-gray-500 font-medium">No tickets in this category</p>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border-2 border-dashed border-gray-300 p-10 text-center">
+            <AlertCircle className="mx-auto text-gray-400 mb-3" size={40} />
+            <p className="text-gray-500 font-semibold text-lg">
+              No tickets in this category
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
@@ -267,25 +169,26 @@ export default function TicketsDashboard() {
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}
                 accepted={ticket.accepted}
-                className="hover:-translate-y-0.5"
               />
             ))}
           </div>
         )}
         {sectionTickets.length > 0 && (
-          <div className="mt-4 flex justify-between items-center">
+          <div className="mt-6 flex justify-between items-center bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-gray-200">
             <button
               disabled={currentPage <= 1}
               onClick={() => setCurrentPage(currentPage - 1)}
-              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
+              className="px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
             >
               Previous
             </button>
-            <span className="text-gray-600 font-medium">Page {currentPage} of {totalPages}</span>
+            <span className="text-gray-700 font-bold text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
             <button
               disabled={currentPage >= totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
-              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
+              className="px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
             >
               Next
             </button>
@@ -301,69 +204,83 @@ export default function TicketsDashboard() {
 
     if (tickets.length === 0) {
       return (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-          <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
-          <p className="text-gray-500 font-medium">No tickets in this category</p>
+        <div className="bg-white rounded-xl border-2 border-dashed border-gray-300 p-12 text-center">
+          <AlertCircle className="mx-auto text-gray-400 mb-3" size={48} />
+          <p className="text-gray-500 font-semibold text-lg">
+            No tickets in this category
+          </p>
         </div>
       );
     }
 
     return (
       <>
-        <div className="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="overflow-hidden bg-white rounded-xl border-2 border-gray-200 shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Title</th>
-                <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Priority</th>
-                <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Requester</th>
-                <th className="px-5 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Time</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Title
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Priority
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Requester
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  Time
+                </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200" >
+            <tbody className="bg-white divide-y divide-gray-100">
               {paginatedTickets.map((ticket) => (
                 <tr
                   key={ticket.ticketId}
-                  className={`hover:bg-gray-50 transition-all duration-200 ${
+                  className={`hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 ${
                     !ticket.accepted
-                      ? "border-l-4 border-l-orange-400"
+                      ? "border-l-4 border-l-amber-400 bg-amber-50/30"
                       : ticket.status === "in-progress"
-                      ? "border-l-4 border-l-green-400"
+                      ? "border-l-4 border-l-emerald-400 bg-emerald-50/30"
                       : ticket.status === "resolved"
-                      ? "border-l-4 border-l-blue-400"
+                      ? "border-l-4 border-l-blue-400 bg-blue-50/30"
                       : ""
                   }`}
-                  // onClick={()=>navigate(`/${paginatedTickets.ticketId}`)}
                 >
-                  <td className="px-5 py-4 whitespace-nowrap">
-                    <a href={`/ticket/${ticket.ticketId}`} className="text-blue-600 hover:text-blue-700 font-semibold">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <a
+                      href={`/ticket/${ticket.ticketId}`}
+                      className="text-blue-600 hover:text-blue-800 font-bold hover:underline transition-colors duration-200"
+                    >
                       {ticket.title}
                     </a>
                   </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
+                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${
                         ticket.priority === "high"
-                          ? "bg-red-100 text-red-700"
+                          ? "bg-red-100 text-red-700 border border-red-200"
                           : ticket.priority === "medium"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
+                          ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
+                          : "bg-green-100 text-green-700 border border-green-200"
                       }`}
                     >
                       {ticket.priority.toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-5 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
+                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${
                         !ticket.accepted
-                          ? "bg-orange-100 text-orange-700"
+                          ? "bg-amber-100 text-amber-700 border border-amber-200"
                           : ticket.status === "in-progress"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                           : ticket.status === "resolved"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-blue-100 text-blue-700"
+                          ? "bg-blue-100 text-blue-700 border border-blue-200"
+                          : "bg-blue-100 text-blue-700 border border-blue-200"
                       }`}
                     >
                       {!ticket.accepted
@@ -371,10 +288,10 @@ export default function TicketsDashboard() {
                         : ticket.status.replace("-", " ").toUpperCase()}
                     </span>
                   </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-gray-600 text-xs font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-700 text-sm font-medium">
                     {ticket.createdBy?.name || "Unknown"}
                   </td>
-                  <td className="px-5 py-4 whitespace-nowrap text-gray-600 text-xs font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-600 text-sm font-medium">
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
@@ -382,19 +299,21 @@ export default function TicketsDashboard() {
             </tbody>
           </table>
         </div>
-        <div className="mt-4 flex justify-end items-center gap-4">
+        <div className="mt-5 flex justify-end items-center gap-4 bg-white rounded-lg p-4 border-2 border-gray-200 shadow-sm">
           <button
             disabled={currentPage <= 1}
             onClick={() => setCurrentPage(currentPage - 1)}
-            className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
+            className="px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
           >
             Previous
           </button>
-          <span className="text-gray-600 font-medium">Page {currentPage} of {totalPages}</span>
+          <span className="text-gray-700 font-bold">
+            Page {currentPage} of {totalPages}
+          </span>
           <button
             disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
-            className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 transition-all duration-200"
+            className="px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
           >
             Next
           </button>
@@ -410,11 +329,11 @@ export default function TicketsDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="space-y-4">
-                <div className="h-8 bg-gray-200 rounded-lg w-48 animate-pulse" />
-                <div className="bg-white rounded-lg border border-gray-200 p-5 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-32 mb-4" />
-                  <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-8 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg w-48 animate-pulse" />
+                <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-lg animate-pulse">
+                  <div className="h-5 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-32 mb-4" />
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-full mb-3" />
+                  <div className="h-4 bg-gradient-to-r from-gray-200 to-gray-300 rounded w-3/4" />
                 </div>
               </div>
             ))}
@@ -427,29 +346,27 @@ export default function TicketsDashboard() {
   return (
     <Layout pageTitle="Tickets Dashboard">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">All Tickets</h1>
-          <p className="text-gray-600 text-sm">View and manage all support tickets across different states</p>
-        </div> */}
-        <div className="flex items-center mb-6 space-x-4">
+        <div className="flex items-center mb-8 space-x-4">
           <div className="relative flex-1">
             <Search
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+              size={22}
             />
             <input
               type="text"
-              placeholder="Search by title..."
+              placeholder="Search tickets..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200"
+              className="w-full pl-12 pr-5 py-3.5 bg-white border-2 border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 font-medium text-gray-700 placeholder-gray-400"
             />
           </div>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3 bg-white border-2 border-gray-300 rounded-xl p-1.5 shadow-sm">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm transition-all duration-200 ${
-                viewMode === "grid" ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+              className={`p-3 rounded-lg transition-all duration-200 ${
+                viewMode === "grid"
+                  ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
               title="Grid View"
             >
@@ -457,8 +374,10 @@ export default function TicketsDashboard() {
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-2.5 bg-white border border-gray-200 rounded-lg shadow-sm transition-all duration-200 ${
-                viewMode === "list" ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-50"
+              className={`p-3 rounded-lg transition-all duration-200 ${
+                viewMode === "list"
+                  ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
               }`}
               title="List View"
             >
@@ -485,42 +404,53 @@ export default function TicketsDashboard() {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-            <div className="flex mb-4 border-b border-gray-200">
+          <div className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6">
+            <div className="flex mb-6 border-b-2 border-gray-200 bg-gray-50 rounded-t-lg -mt-6 -mx-6 px-6">
               <button
                 onClick={() => setActiveTab("open")}
-                className={`px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${
                   activeTab === "open"
-                    ? "bg-blue-100 text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "text-amber-600"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Open ({openTickets.length})
+                {activeTab === "open" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t"></div>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab("assigned")}
-                className={`px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${
                   activeTab === "assigned"
-                    ? "bg-blue-100 text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "text-emerald-600"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Assigned ({assignedTickets.length})
+                {activeTab === "assigned" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-t"></div>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab("closed")}
-                className={`px-4 py-2 text-sm font-semibold transition-all duration-200 ${
+                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${
                   activeTab === "closed"
-                    ? "bg-blue-100 text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "text-blue-600"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 Closed ({closedTickets.length})
+                {activeTab === "closed" && (
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-t"></div>
+                )}
               </button>
             </div>
-            {activeTab === "open" && renderTable(openTickets)}
-            {activeTab === "assigned" && renderTable(assignedTickets)}
-            {activeTab === "closed" && renderTable(closedTickets)}
+            <div className="pt-2">
+              {activeTab === "open" && renderTable(openTickets)}
+              {activeTab === "assigned" && renderTable(assignedTickets)}
+              {activeTab === "closed" && renderTable(closedTickets)}
+            </div>
           </div>
         )}
       </div>

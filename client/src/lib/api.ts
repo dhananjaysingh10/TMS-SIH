@@ -143,10 +143,7 @@ export const ticketsApi = {
   getAll: async (searchTerm: string = "") => {
     console.log("here we go", searchTerm);
     const endpoint = searchTerm
-    //   ? `/ticket?search=${encodeURIComponent(searchTerm)}&limit=10`
-    //   : `/ticket?search=&limit=1000`;
-    // const response = await fetchApi<Ticket[]>(endpoint);
-    const response = await fetchApi<Ticket[] | { tickets: Ticket[]; pagination: Pagination }>(endpoint);
+    const response = await fetchApi<Ticket[]>(endpoint);
     return response;
   },
   getAllDepartment: (department: string) =>
@@ -272,11 +269,6 @@ export const commentsApi = {
     return response.data;
   },
 
-  /**
-   * Creates a new message and adds it to a ticket.
-   * @param ticketId The ID of the ticket to add the message to.
-   * @param messageData The payload containing the message details.
-   */
   create: async (
     ticketId: string,
     messageData: NewMessageData
