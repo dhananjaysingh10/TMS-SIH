@@ -169,6 +169,7 @@ export default function TicketsDashboard() {
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}
                 accepted={ticket.accepted}
+                userTicket={false}
               />
             ))}
           </div>

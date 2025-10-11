@@ -458,7 +458,7 @@ export default function TicketsCreatedByMe() {
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}
                 accepted={ticket.accepted}
-                className="hover:-translate-y-0.5"
+                userTicket={false}
               />
             ))}
           </div>
@@ -552,8 +552,7 @@ export default function TicketsCreatedByMe() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${
-                        ticket.priority === "high" ||
-                        ticket.priority === "urgent"
+                        ticket.priority === "high"
                           ? "bg-red-100 text-red-700 border border-red-200"
                           : ticket.priority === "medium"
                           ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
