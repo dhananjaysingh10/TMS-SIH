@@ -170,11 +170,11 @@ export default function Users() {
           </p>
           {currentUser?.role === "super-admin" && (
             <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">Select Department</label>
+              <label className="block text-sm font-medium text-gray-500">Select Department</label>
               <select
                 value={selectedDepartment}
                 onChange={(e) => setSelectedDepartment(e.target.value)}
-                className="mt-1 block w-48 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="mt-1 block w-48 h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               >
                 {availableDepartments.map((dept) => (
                   <option key={dept} value={dept}>

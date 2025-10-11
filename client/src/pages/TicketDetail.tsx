@@ -1,644 +1,306 @@
-// ticketdetail.tsx
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
-import ActivityTimeline from "@/components/activity";
-import { io, Socket } from "socket.io-client";
-import {
-  ticketsApi,
-  commentsApi,
-  activitiesApi,
-  type Ticket,
-  type Message,
-  type Activity,
-} from "../lib/api";
-import {
-  ArrowLeft,
-  User,
-  Clock,
-  Tag,
-  AlertCircle,
-  CheckCircle,
-  MessageSquare,
-  Send,
-  Loader2,
-} from "lucide-react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { ChatMessage } from "@/components/chat/ChatMessage";
-import { ChatInput } from "@/components/chat/ChatInput";
+import { AlertCircle, Edit, Save, X } from "lucide-react";
+import Layout from "../components/Layout";
+import axios from "axios";
 
-const priorityColors = {
-  low: "bg-gray-100 text-gray-700",
-  medium: "bg-blue-100 text-blue-700",
-  high: "bg-orange-100 text-orange-700",
-  urgent: "bg-red-100 text-red-700",
-};
-
-const statusColors = {
-  open: "bg-green-100 text-green-700",
-  "in-progress": "bg-blue-100 text-blue-700",
-  resolved: "bg-purple-100 text-purple-700",
-  closed: "bg-gray-100 text-gray-600",
-};
-
-interface ChatMessageType {
-  _id?: string;
-  user: {
-    _id: string;
-    name?: string;
-    email?: string;
-    profilePicture?: string;
-  };
-  content: string;
-  attachment?: string;
-  mimeType?: string;
-  createdAt: string | Date;
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  primaryPhone?: string;
+  profilePicture: string;
+  role: "user" | "admin" | "super-admin";
+  department:
+    | "IT"
+    | "DevOps"
+    | "Software"
+    | "Networking"
+    | "Cybersecurity"
+    | "Other"
+    | "NA";
+  telegramId?: string;
+  createdAt: string;
 }
 
-function canViewCommentsAndActivity(ticket: Ticket | null, currentUser: any): boolean {
-  if (!ticket || !currentUser) return false;
-
-  if (ticket.createdBy.email === currentUser.email) return false;
-
-  return true;
-}
-
-function canAcceptTicket(ticket: Ticket | null, currentUser: any): boolean {
-  if (!ticket || !currentUser) return false;
-
-  if (ticket.createdBy.email === currentUser.email) return false;
-
-  return true;
-}
-
-export default function TicketDetail() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [ticket, setTicket] = useState<Ticket | null>(null);
-  const [comments, setComments] = useState<Message[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessageType[]>([]);
+export default function ProfilePage() {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [buttonLoading, setButtonLoading] = useState({
-    accept: false,
-    unaccept: false,
-    resolve: false,
-    open: false,
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    primaryPhone: "",
+    department: "NA",
+    telegramId: "",
   });
+  const [formError, setFormError] = useState<string | null>(null);
   const currentUser = useSelector(selectCurrentUser);
-  const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser.id : "";
 
-  const socketRef = useRef<Socket | null>(null);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-
-  // Initialize Socket.IO connection
   useEffect(() => {
-    socketRef.current = io("http://localhost:10000", {
-      transports: ["websocket"],
-      withCredentials: true,
-    });
-
-    socketRef.current.on("connect", () => {
-      console.log("Socket connected:", socketRef.current?.id);
-    });
-
-    socketRef.current.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
+    async function fetchUser() {
+      try {
+        if (currentUser?.id) {
+          const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/api/user/${currentUser.id}`
+          );
+          if (response.data.success) {
+            setUser(response.data.data);
+            setFormData({
+              name: response.data.data.name,
+              email: response.data.data.email,
+              primaryPhone: response.data.data.primaryPhone || "",
+              department: response.data.data.department,
+              telegramId: response.data.data.telegramId,
+            });
+          } else {
+            setError(response.data.message || "Failed to fetch user data");
+          }
+        } else {
+          setError("No user ID available");
+        }
+      } catch (err) {
+        setError("Error fetching user data");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    };
-  }, []);
-
-  // Join ticket room and listen for new messages
-  useEffect(() => {
-    if (ticket?.ticketId && socketRef.current) {
-      socketRef.current.emit("joinTicket", ticket.ticketId);
-
-      socketRef.current.on("newMessage", (data: { ticketId: string; message: ChatMessageType }) => {
-        if (data.ticketId === ticket.ticketId) {
-          setChatMessages((prev) => [...prev, data.message]);
-        }
-      });
-
-      return () => {
-        socketRef.current?.off("newMessage");
-      };
     }
-  }, [ticket?.ticketId]);
 
-  // Auto-scroll to bottom of chat
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+    fetchUser();
+  }, [currentUser]);
 
-  useEffect(() => {
-    if (id) {
-      fetchTicketDetails();
-      fetchComments();
-      fetchActivities();
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    }
-  }, [id]);
-
-  async function fetchTicketDetails() {
+  const handleSave = async () => {
     try {
-      if (!id) return;
-      const data = await ticketsApi.getById(id);
-      setTicket(data);
-      fetchChatMessages(data.ticketId);
-    } catch (error) {
-      console.error("Error fetching ticket:", error);
-      toast.error("Failed to fetch ticket details");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function fetchComments() {
-    try {
-      if (!id) return;
-      const data = await commentsApi.getByTicket(id);
-      setComments(data);
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-      toast.error("Failed to fetch comments");
-    }
-  }
-
-  async function fetchActivities() {
-    try {
-      if (!id) return;
-      const data = await activitiesApi.getByTicket(id);
-      setActivities(data);
-    } catch (error) {
-      console.error("Error fetching activities:", error);
-      toast.error("Failed to fetch activities");
-    }
-  }
-
-  async function fetchChatMessages(ticketId?: string) {
-    try {
-      const ticketIdToUse = ticketId || ticket?.ticketId;
-      if (!ticketIdToUse) return;
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"}/messages/${ticketIdToUse}/messages`,
-        {
-          credentials: "include",
-        }
+      setFormError(null);
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/user/update/${currentUser?.id}`,
+        formData
       );
-      if (response.ok) {
-        const data = await response.json();
-        setChatMessages(data);
+      if (response.data.success) {
+        setUser(response.data.data);
+        setIsEditing(false);
+      } else {
+        setFormError(response.data.message || "Failed to update profile");
       }
-    } catch (error) {
-      console.error("Error fetching chat messages:", error);
-      toast.error("Failed to fetch chat messages");
-    }
-  }
-
-  async function handleAcceptTicket() {
-    if (!ticket) return;
-    setButtonLoading((prev) => ({ ...prev, accept: true }));
-    try {
-      await ticketsApi.acceptTicket(ticket._id, useremail);
-      fetchTicketDetails();
-      fetchActivities();
-      toast.success("Ticket accepted successfully");
-    } catch (error) {
-      console.error("Error accepting ticket:", error);
-      toast.error("Failed to accept ticket");
-    } finally {
-      setButtonLoading((prev) => ({ ...prev, accept: false }));
-    }
-  }
-
-  async function handleOpenTicket() {
-    if (!ticket) return;
-    setButtonLoading((prev) => ({ ...prev, open: true }));
-    try {
-      await ticketsApi.openTicket(ticket._id, useremail);
-      fetchTicketDetails();
-      fetchActivities();
-      toast.success("Ticket reopened successfully");
-    } catch (error) {
-      console.error("Error opening ticket:", error);
-      toast.error("Failed to reopen ticket");
-    } finally {
-      setButtonLoading((prev) => ({ ...prev, open: false }));
-    }
-  }
-
-  async function handleUnacceptTicket() {
-    if (!ticket) return;
-    setButtonLoading((prev) => ({ ...prev, unaccept: true }));
-    try {
-      await ticketsApi.unacceptTicket(ticket._id, useremail);
-      fetchTicketDetails();
-      fetchActivities();
-      toast.success("Ticket unclaimed successfully");
-    } catch (error) {
-      console.error("Error unaccepting ticket:", error);
-      toast.error("Failed to unclaim ticket");
-    } finally {
-      setButtonLoading((prev) => ({ ...prev, unaccept: false }));
-    }
-  }
-
-  async function handleResolveTicket() {
-    if (!ticket) return;
-    setButtonLoading((prev) => ({ ...prev, resolve: true }));
-    try {
-      await ticketsApi.resolveTicket(ticket._id, useremail);
-      fetchTicketDetails();
-      fetchActivities();
-      toast.success("Ticket resolved successfully");
-    } catch (error) {
-      console.error("Error resolving ticket:", error);
-      toast.error("Failed to resolve ticket");
-    } finally {
-      setButtonLoading((prev) => ({ ...prev, resolve: false }));
-    }
-  }
-
-  const handleAddComment = async () => {
-    if (!newComment.trim()) return;
-
-    setSubmitting(true);
-    try {
-      const messageData = {
-        useremail: currentUser ? currentUser.email : "test-user@gmail.com",
-        content: newComment,
-      };
-
-      await commentsApi.create(ticket ? ticket._id : "", messageData);
-      fetchComments();
-      setNewComment("");
-      toast.success("Comment added successfully");
-    } catch (error) {
-      console.error("Failed to add message:", error);
-      toast.error("Failed to add comment");
-    } finally {
-      setSubmitting(false);
+    } catch (err: any) {
+      setFormError(err.response?.data?.message || "Error updating profile");
     }
   };
 
-  function formatDateTime(dateString: string): string {
-    return new Date(dateString).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const handleCancel = () => {
+    setFormError(null);
+    setIsEditing(false);
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+        primaryPhone: user.primaryPhone || "",
+        department: user.department,
+        telegramId: user.telegramId || "",
+      });
+    }
+  };
+
+  const renderProfileField = (label: string, value: string | undefined) => (
+    <div className="flex flex-col">
+      <span className="text-sm font-medium text-gray-500">{label}</span>
+      <span className="text-gray-900">{value || "Not provided"}</span>
+    </div>
+  );
 
   if (loading) {
     return (
-      <Layout pageTitle="Loading...">
+      <Layout pageTitle="My Profile">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
-            <div className="h-4 bg-gray-200 rounded w-full mb-2" />
-            <div className="h-4 bg-gray-200 rounded w-2/3" />
+          <div className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="h-24 w-24 bg-gray-200 rounded-full" />
+              <div>
+                <div className="h-6 bg-gray-200 rounded w-48 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-32" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-4 bg-gray-200 rounded w-full" />
+              ))}
+            </div>
           </div>
         </div>
       </Layout>
     );
   }
 
-  if (!ticket) {
+  if (error || !user) {
     return (
-      <Layout pageTitle="Ticket Not Found">
-        <div className="max-w-7xl mx-auto text-center py-12">
-          <AlertCircle className="mx-auto text-gray-400 mb-4" size={48} />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Ticket Not Found
-            </h2>
-          <p className="text-gray-600 mb-6">
-            The ticket you're looking for doesn't exist.
-            </p>
-          <button
-            onClick={() => navigate("/tickets")}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Back to Tickets
-          </button>
+      <Layout pageTitle="My Profile">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+            <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
+            <p className="text-gray-500">{error || "No user data found"}</p>
+          </div>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
+    <Layout pageTitle="My Profile">
       <div className="max-w-7xl mx-auto">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          Back
-        </button>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              My Profile
+            </h1>
+            <p className="text-gray-600">Your personal information</p>
+          </div>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              <Edit className="mr-2" size={16} />
+              Edit Profile
+            </button>
+          )}
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Ticket Details */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className="text-lg font-bold text-blue-600">
-                      #{ticket.ticketId}
-                      </span>
-                    <span
-                      className={`text-sm px-3 py-1 rounded-full font-medium ${
-                        statusColors[ticket.status]
-                      }`}
-                    >
-                      {ticket.status.replace("_", " ").toUpperCase()}
-                    </span>
-                    <span
-                      className={`text-sm px-3 py-1 rounded-full font-medium ${
-                        priorityColors[ticket.priority]
-                      }`}
-                    >
-                      {ticket.priority.toUpperCase()}
-                    </span>
-                  </div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                    {ticket.subject}
-                  </h1>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <User className="text-gray-400 mt-1" size={18} />
-                  <div>
-                    <p className="text-sm text-gray-600">Requester</p>
-                    <p className="font-medium text-gray-900">
-                      {ticket.createdBy.name}
-                      </p>
-                    <p className="text-sm text-gray-500">
-                      {ticket.createdBy.email}
-                      </p>
-                  </div>
-                </div>
-
-                {ticket.assignedTo && (
-                  <div className="flex items-start gap-3">
-                    <User className="text-gray-400 mt-1" size={18} />
-                    <div>
-                      <p className="text-sm text-gray-600">Assigned To</p>
-                      <p className="font-medium text-gray-900">
-                        {ticket.assignedTo.name}
-                        </p>
-                      <p className="text-sm text-gray-500">
-                        {ticket.assignedTo.email}
-                        </p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3">
-                  <Tag className="text-gray-400 mt-1" size={18} />
-                  <div>
-                    <p className="text-sm text-gray-600">Category</p>
-                    <p className="font-medium text-gray-900 capitalize">
-                      {ticket.type}
-                      </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Clock className="text-gray-400 mt-1" size={18} />
-                  <div>
-                    <p className="text-sm text-gray-600">Created</p>
-                    <p className="font-medium text-gray-900">
-                      {formatDateTime(ticket.createdAt)}
-                      </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {ticket.description}
-                  </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                {canAcceptTicket(ticket, currentUser) && !ticket.accepted && (
-                  <button
-                    onClick={handleAcceptTicket}
-                    disabled={buttonLoading.accept}
-                    className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
-                      buttonLoading.accept ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {buttonLoading.accept ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Accepting...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle size={18} />
-                        Accept Ticket
-                      </>
-                    )}
-                  </button>
-                )}
-                {canAcceptTicket(ticket, currentUser) && ticket.accepted && ticket.status !== "resolved" && (
-                    <button
-                      onClick={handleUnacceptTicket}
-                      disabled={buttonLoading.unaccept}
-                      className={`flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium ${
-                        buttonLoading.unaccept ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
-                      {buttonLoading.unaccept ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Unclaiming...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={18} />
-                          Unclaim
-                        </>
-                      )}
-                    </button>
-                  )}
-                {ticket.accepted && ticket.status !== "resolved" && ticket.assignedTo?._id === userId && (
-                    <button
-                      onClick={handleResolveTicket}
-                      disabled={buttonLoading.resolve}
-                      className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
-                        buttonLoading.resolve ? "opacity-50 cursor-not-allowed" : ""
-                      }`}
-                    >
-                      {buttonLoading.resolve ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Resolving...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={18} />
-                          Resolve Ticket
-                        </>
-                      )}
-                    </button>
-                  )}
-                {ticket.status === "resolved" && (
-                  <button
-                    onClick={handleOpenTicket}
-                    disabled={buttonLoading.open}
-                    className={`flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium ${
-                      buttonLoading.open ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {buttonLoading.open ? (
-                      <>
-                        <Loader2 size={18} className="animate-spin" />
-                        Reopening...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle size={18} />
-                        Open Again
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-6 mb-6">
+            <img
+              src={user.profilePicture}
+              alt="Profile"
+              className="h-24 w-24 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src =
+                  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+              }}
+            />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {user.name}
+              </h2>
+              <p className="text-sm text-gray-500">{user.email}</p>
             </div>
-
-            {/* Comments Section - Only for assigned user and admins (NOT creator) */}
-            {canViewCommentsAndActivity(ticket, currentUser) && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <MessageSquare size={20} />
-                  Comments
-                </h2>
-
-                <div className="space-y-4 mb-4 max-h-96 overflow-y-auto">
-                  {comments.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No comments yet</p>
-                  ) : (
-                    comments.map((comment) => (
-                      <div 
-                      key={comment._id}
-                       className="border-l-2 border-blue-500 pl-4"
-                       >
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm text-gray-900">
-                            {comment.user.name}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatDateTime(comment.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-gray-700 text-sm">{comment.content}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                <div className="flex items-start gap-2">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (newComment.trim()) handleAddComment();
-                      }
-                    }}
-                    placeholder="Add a comment..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    disabled={submitting}
-                    rows={1}
-                  />
-                  <button
-                    onClick={handleAddComment}
-                    disabled={submitting || !newComment.trim()}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    <Send size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Activity Log - Only for assigned user and admins (NOT creator) */}
-            {canViewCommentsAndActivity(ticket, currentUser) && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <Clock size={20} />
-                  Activity Log
-                </h2>
-                <ActivityTimeline activities={activities} />
-              </div>
-            )}
           </div>
 
-          {/* Right Column - Real-time Chat */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-[calc(100vh-200px)] flex flex-col sticky top-6">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <MessageSquare size={20} />
-                  Live Chat
-                </h2>
-                <p className="text-xs text-gray-500 mt-1">
-                  Real-time conversation
-                  </p>
-              </div>
-
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[calc(100vh-300px)]">
-                {chatMessages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                    No messages yet. Start the conversation!
-                  </div>
-                ) : (
-                  chatMessages.map((msg, index) => (
-                    <ChatMessage
-                      key={msg._id || index}
-                      message={msg}
-                      isOwnMessage={msg.user._id === userId}
-                    />
-                  ))
-                )}
-                <div ref={chatEndRef} />
-              </div>
-
-              {/* Chat Input */}
-              {ticket?.ticketId && (
-                <div className="p-4 border-t border-gray-200">
-                  <ChatInput
-                    ticketId={ticket.ticketId}
-                    onMessageSent={() => {
-                      // Message already appears via socket
-                    }}
-                  />
+          {isEditing ? (
+            <div className="space-y-4">
+              {formError && (
+                <div className="bg-red-100 text-red-700 p-3 rounded-md">
+                  {formError}
                 </div>
               )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-500">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-500">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-500">
+                    Telegram ID
+                  </label>
+                  <input
+                    type="telegram"
+                    name="telegram"
+                    value={formData.telegramId}
+                    onChange={handleInputChange}
+                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-500">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="primaryPhone"
+                    value={formData.primaryPhone}
+                    onChange={handleInputChange}
+                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-sm font-medium text-gray-500">
+                    Department
+                  </label>
+                  <select
+                    name="department"
+                    value={formData.department}
+                    onChange={handleInputChange}
+                    className="mt-1 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="NA">Not Assigned</option>
+                    <option value="IT">IT</option>
+                    <option value="DevOps">DevOps</option>
+                    <option value="Software">Software</option>
+                    <option value="Networking">Networking</option>
+                    <option value="Cybersecurity">Cybersecurity</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleSave}
+                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  <Save className="mr-2" size={16} />
+                  Save
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                >
+                  <X className="mr-2" size={16} />
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderProfileField("Name", user.name)}
+              {renderProfileField("Email", user.email)}
+              {renderProfileField("Phone", user.primaryPhone)}
+              {renderProfileField("Role", user.role)}
+              {renderProfileField("Department", user.department)}
+              {renderProfileField("Telegram Id", user.telegramId)}
+              {renderProfileField(
+                "Account Created",
+                new Date(user.createdAt).toLocaleDateString()
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Layout>

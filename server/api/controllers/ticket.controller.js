@@ -157,7 +157,7 @@ export const getTicketsByDepartment = async (req, res) => {
 export const getTicketsByCreatedBy = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { page, limit } = req.query;
+    const { search, page, limit } = req.query;
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({
@@ -168,17 +168,22 @@ export const getTicketsByCreatedBy = async (req, res) => {
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
     const query = { createdBy: userObjectId };
+    let sortOptions = { createdAt: -1 };
 
-    const { tickets } = await paginateTickets(
-      query,
-      page,
-      limit,
-      { createdAt: -1 }
-    );
-    
+    // Add search functionality similar to getAllTickets
+    if (typeof search === "string" && search.trim().length > 0) {
+      const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+      const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const pattern = terms.map(escapeRegex).join("|");
+      const rx = new RegExp(pattern, "i");
+      query.$or = [{ title: rx }, { description: rx }, { ticketId: rx }];
+    }
+
+    const { tickets } = await paginateTickets(query, page, limit, sortOptions);
+
     res.status(200).json({
       success: true,
-      data: tickets
+      data: tickets,
     });
   } catch (error) {
     console.error("Error fetching tickets by creator:", error);
@@ -192,8 +197,7 @@ export const getTicketsByCreatedBy = async (req, res) => {
 
 export const getTicketById = async (req, res) => {
   try {
-
-    const ticket = await Ticket.findOne({ticketId:req.params.id}).populate([
+    const ticket = await Ticket.findOne({ ticketId: req.params.id }).populate([
       {
         path: "createdBy",
         select: "name email",
@@ -295,7 +299,7 @@ export const acceptTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Employee accepted ticket");
-    const remark = "Employee accepted ticket"
+    const remark = "Employee accepted ticket";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,
@@ -334,7 +338,7 @@ export const unacceptTicket = async (req, res) => {
         assignedTo: null,
       },
       { new: true, runValidators: true }
-    ).populate("assignedTo createdBy", "name email");;
+    ).populate("assignedTo createdBy", "name email");
 
     if (!updatedTicket) {
       return res.status(404).json({
@@ -343,7 +347,7 @@ export const unacceptTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Employee unclaimed ticket");
-    const remark = "Employee uncalimed ticket"
+    const remark = "Employee uncalimed ticket";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,
@@ -382,7 +386,7 @@ export const openTicket = async (req, res) => {
         assignedTo: null,
       },
       { new: true, runValidators: true }
-    ).populate("assignedTo createdBy", "name email");;
+    ).populate("assignedTo createdBy", "name email");
 
     if (!updatedTicket) {
       return res.status(404).json({
@@ -391,7 +395,7 @@ export const openTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket opened again");
-    const remark = "Ticket opened again"
+    const remark = "Ticket opened again";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,
@@ -437,7 +441,7 @@ export const resolveTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket Resolved");
-    const remark = "Ticket Resolved"
+    const remark = "Ticket Resolved";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,
@@ -588,10 +592,12 @@ export const getMessage = async (req, res) => {
   try {
     const ticketId = req.params.id;
 
-    const ticket = await Ticket.findOne({ticketId}).select("messages").populate({
-      path: "messages.user",
-      select: "name email profilePicture",
-    });
+    const ticket = await Ticket.findOne({ ticketId })
+      .select("messages")
+      .populate({
+        path: "messages.user",
+        select: "name email profilePicture",
+      });
 
     if (!ticket) {
       return res
@@ -676,10 +682,10 @@ export const getTicketsCreatedBy = async (req, res) => {
       });
     }
 
-//     const filter = {
-//       assignedTo: user._id,
-//       ...(query.$or ? { $or: query.$or } : {}),
-//     };
+    //     const filter = {
+    //       assignedTo: user._id,
+    //       ...(query.$or ? { $or: query.$or } : {}),
+    //     };
 
     const tickets = await Ticket.find(filter)
       .populate("createdBy", "name email")
@@ -795,7 +801,7 @@ export const logProgress = async (ticketId, useremail, description) => {
       );
       return;
     }
-    
+
     const progressEntry = {
       user: user._id,
       description: description,
@@ -818,10 +824,12 @@ export const getActivites = async (req, res) => {
   try {
     const ticketId = req.params.id;
 
-    const ticket = await Ticket.findOne({ticketId}).select("progress").populate({
-      path: "progress.user",
-      select: "name email profilePicture",
-    });
+    const ticket = await Ticket.findOne({ ticketId })
+      .select("progress")
+      .populate({
+        path: "progress.user",
+        select: "name email profilePicture",
+      });
 
     if (!ticket) {
       return res
