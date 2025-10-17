@@ -328,4 +328,7 @@ The Telegram bot runs as a separate Node.js process.
 cd server
 npm run startbot
 ```
+Telegram Bot Link: [Powergrid-Support](t.me/PowerGridTicketbot)
+
+Use `/help` to see all supported commands. 
 
