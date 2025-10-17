@@ -127,13 +127,11 @@ It maintains a **human-in-the-loop** workflow for complex issues and ensures **f
 ## Tech Stack (Suggested)
 | Layer | Technology |
 |--------|-------------|
-| Frontend | React / Next.js / Tailwind CSS |
-| Backend | Node.js / Express.js / Python (FastAPI) |
-| Database | PostgreSQL / MongoDB |
-| AI/NLP | HuggingFace Transformers / LangChain / OpenAI API |
-| Vector Store | Pinecone / FAISS / Chroma |
+| Frontend | React, Tailwind CSS |
+| Backend | Node.js, Express.js, Python |
+| Database | MongoDB |
+| AI/NLP | HuggingFace Transformers, LangChain, Gemini API |
 | Integrations | IMAP/SMTP, GLPI API, Solman API, Telegram Bot |
-| Deployment | Docker / Kubernetes / CI/CD (GitHub Actions) |
 
 ---
 
