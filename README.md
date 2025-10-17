@@ -158,10 +158,8 @@ Before you begin, ensure you have the following software installed on your syste
 First, clone the official repository and navigate into the project root directory.
 
 ```bash
-# Clone the repository using the provided URL
 git clone https://github.com/dhananjaysingh10/TMS-SIH.git
 
-# Navigate to the project root
 cd TMS-SIH
 ```
 
@@ -181,6 +179,7 @@ touch server/.env
 **Populate .env with Demo Content**: Copy the following content into `server/.env`. These are DEMO values and should be replaced with actual secured keys for production.
 
 ```
+# Replace demo credentials with original
 # Server Configuration
 PORT=10000
 CORS_ORIGIN=http://localhost:5173
@@ -253,7 +252,7 @@ The frontend application requires its own dependencies and configuration.
 
 **Navigate and Install Dependencies**:
 ```bash
-cd frontend # Assuming the frontend directory is named 'frontend'
+cd client 
 npm install
 cd ..
 ```
@@ -316,7 +315,7 @@ python rag_worker.py
 
 #### 5.4. Start Frontend Application (React/Vite)
 ```bash
-cd frontend
+cd client
 npm run dev
 ```
 
