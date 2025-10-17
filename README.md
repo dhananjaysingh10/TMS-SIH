@@ -135,6 +135,12 @@ It maintains a **human-in-the-loop** workflow for complex issues and ensures **f
 
 ---
 
+## Architecture Diagram
+
+![Architecture Diagram](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/diagram-export-10-17-2025-9_20_12-PM.png)
+
+---
+
 ## Project Setup Guide
 
 This guide details the steps required to set up and run the Ticket Management System (TMS) project, which includes a Node.js backend, a React/Vite frontend, and a Python-based ticket triage service.
