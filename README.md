@@ -135,3 +135,191 @@ It maintains a **human-in-the-loop** workflow for complex issues and ensures **f
 
 ---
 
+## Project Setup Guide
+
+This guide details the steps required to set up and run the Ticket Management System (TMS) project, which includes a Node.js backend, a React/Vite frontend, and a Python-based ticket triage service.
+
+### 1. Prerequisites
+
+Before you begin, ensure you have the following software installed on your system:
+- **Git**: For cloning the repository.
+- **Node.js & npm**: For the frontend and main backend server/bot.
+- **Python 3.x & pip**: For the ticket triage service.
+- **venv module**: For creating isolated Python environments.
+
+### 2. Repository Setup
+
+First, clone the official repository and navigate into the project root directory.
+
+```bash
+# Clone the repository using the provided URL
+git clone https://github.com/dhananjaysingh10/TMS-SIH.git
+
+# Navigate to the project root
+cd TMS-SIH
+```
+
+### 3. Backend Setup (Node.js & Python)
+
+The project includes the main Node.js server and the Python-based AI Triage Service.
+
+#### 3.1. Main Backend (/server) Setup
+
+Create a demo `.env` file in the root of the `/server` directory.
+
+**Create .env File**:
+```bash
+touch server/.env
+```
+
+**Populate .env with Demo Content**: Copy the following content into `server/.env`. These are DEMO values and should be replaced with actual secured keys for production.
+
+```
+# Server Configuration
+PORT=10000
+CORS_ORIGIN=http://localhost:5173
+
+# Security & Authentication (DEMO SECRET)
+JWT_SECRET=(*##3[]8ue)
+
+# Database & External Services (DEMO URIs/TOKENS)
+MONGO_URI=mongodb+srter0.sx2gjvt.mongodb.net/?retryWriteser0
+TG_BOT_TOKEN=8387684659:6REkYI
+
+# Email Service Credentials (DEMO VALUES)
+GMAIL_USER=qs.com
+GMAIL_PASS=ovv
+
+# Appwrite Configuration (DEMO IDS)
+APPWRITE_BUCKET_ID=6733bf
+APPWRITE_PROJECT_ID=6772fc
+APPWRITE_API_END_POINT=he.io/v1
+```
+
+**Install Dependencies**:
+```bash
+cd server
+npm install
+cd ..
+```
+
+#### 3.2. AI Triage Service Setup (Python)
+
+The AI pipeline is located under `server/ticket-triage-service`. This requires a dedicated Python virtual environment.
+
+**Navigate and Create Python Venv**:
+```bash
+cd server/ticket-triage-service
+python -m venv venv
+```
+
+**Activate Venv**:
+
+*Windows*:
+```bash
+.\venv\Scripts\activate
+```
+
+*macOS/Linux*:
+```bash
+source venv/bin/activate
+```
+
+**Install Dependencies**:
+```bash
+# Ensure 'requirements.txt' is present in this directory
+pip install -r requirements.txt
+```
+
+**Explore Worker Structure**: The AI pipeline workers are located in the following directory structure:
+```
+server/ticket-triage-service/src/triage/workers
+├── assignment_worker.py
+├── classify_worker.py   # AI Classification pipeline
+├── rag_worker.py        # AI RAG pipeline
+├── redis_consumer.py    # Redis-based consumer/pipeline orchestrator
+└── ...
+```
+
+### 4. Frontend Setup
+
+The frontend application requires its own dependencies and configuration.
+
+**Navigate and Install Dependencies**:
+```bash
+cd frontend # Assuming the frontend directory is named 'frontend'
+npm install
+cd ..
+```
+
+**Create Frontend .env**:
+```bash
+touch frontend/.env
+```
+
+**Populate Frontend .env**: Note: This file should contain the Firebase configuration and the backend URL.
+
+```
+# Backend API URL
+VITE_API_URL=http://localhost:10000
+
+# Firebase Configuration (Add your config here)
+VITE_FIREBASE_API_KEY=YOUR_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN=YOUR_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID=YOUR_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET=YOUR_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID=YOUR_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID=YOUR_FIREBASE_APP_ID
+```
+
+### 5. Running Services
+
+All services should be run in separate terminal windows. Verify script names in the respective `package.json` files.
+
+#### 5.1. Start Main Backend Server (Node.js API)
+```bash
+cd server
+# Use the development start script
+npm run dev
+```
+
+#### 5.2. Run Email Ingestion Worker (Node.js)
+This worker is responsible for ingesting emails and converting them into tickets.
+```bash
+# While in the 'email-fetcher' directory
+python main.py
+```
+
+#### 5.3. Run AI Pipeline Workers (Python)
+Ensure your Python virtual environment is activated. These workers handle ticket classification, RAG lookup, and final assignment.
+
+**A. Run Redis Consumer/Orchestrator**: (Mandatory first step)
+```bash
+cd server/ticket-triage-service/src/triage/workers
+python redis_consumer.py
+```
+
+**B. Run Individual AI Workers**: (Run in separate terminals)
+```bash
+# Run the Classification Worker
+python classify_worker.py
+
+# Run the RAG Worker
+python rag_worker.py
+```
+
+#### 5.4. Start Frontend Application (React/Vite)
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend should now be accessible at `http://localhost:5173`.
+
+#### 5.5. Start Telegram Bot
+The Telegram bot runs as a separate Node.js process.
+```bash
+cd server
+npm run startbot
+```
+
