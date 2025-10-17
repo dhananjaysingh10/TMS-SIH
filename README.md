@@ -331,3 +331,45 @@ Telegram Bot Link: [Powergrid-Support](t.me/PowerGridTicketbot)
 
 Use `/help` to see all supported commands. 
 
+---
+
+## Home Page  
+View **personal** and **department-level analytics** in a clean and interactive dashboard.  
+
+![Home Page](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/Screenshot%202025-10-18%20011819.png)
+
+---
+
+## Ticket Dashboard  
+Track all your **open, closed, and active tickets**. Switch seamlessly between **grid view** and **tabular view** for better visualization.  
+
+![Ticket Dashboard](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/Screenshot%202025-10-18%20011912.png)
+
+---
+
+## Ticket Details  
+View detailed **ticket information**, update **status**, and monitor **activity logs**.  
+Includes a **real-time chat window** and **comment support** for collaboration among co-workers handling the same ticket.  
+
+![Ticket Details](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/Screenshot%202025-10-18%20011937.png)
+
+---
+
+## Profile Page  
+Access and manage your **personal profile**, view your **ticket statistics**, and monitor your recent activity.  
+
+![Profile Page](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/Screenshot%202025-10-18%20012059.png)
+
+---
+
+## User Management  
+Manage **user privileges** and enforce **role-based access control (RBAC)** to ensure secure and structured user management.  
+
+![User Management](https://github.com/dhananjaysingh10/TMS-SIH/blob/main/Screenshot%202025-10-18%20012125.png)
+
+
+
+
+
+
+
