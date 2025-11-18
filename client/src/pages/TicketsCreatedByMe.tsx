@@ -335,7 +335,7 @@ export default function TicketsCreatedByMe() {
   }, [viewMode]);
 
   const fetchCreatedTickets = async () => {
-    if (!currentUser?._id) {
+    if (!currentUser?.id) {
       setError("User ID not found");
       setLoading(false);
       setTickets([]);
@@ -345,10 +345,10 @@ export default function TicketsCreatedByMe() {
     try {
       setLoading(true);
       const endpoint = debouncedSearchTerm
-        ? `/ticket/createdBy/${currentUser._id}?search=${encodeURIComponent(
+        ? `/ticket/createdBy/${currentUser.id}?search=${encodeURIComponent(
             debouncedSearchTerm
           )}&page=${currentPage}&limit=${limit}`
-        : `/ticket/createdBy/${currentUser._id}?page=${currentPage}&limit=${limit}`;
+        : `/ticket/createdBy/${currentUser.id}?page=${currentPage}&limit=${limit}`;
       const res = await ticketsApi.getAll(endpoint);
       // Handle different API response formats
       const ticketsData = Array.isArray(res)
