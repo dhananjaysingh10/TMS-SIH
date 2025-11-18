@@ -1,7 +1,12 @@
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 
-export const TICKET_STATUS_UPDATE_TEMPLATE = (ticketId, status, remark, timestamp) => `
+export const TICKET_STATUS_UPDATE_TEMPLATE = (
+  ticketId,
+  status,
+  remark,
+  timestamp
+) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,10 +21,13 @@ export const TICKET_STATUS_UPDATE_TEMPLATE = (ticketId, status, remark, timestam
   <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
     <p>Hello,</p>
     <p>Your ticket with ID: <strong>${ticketId}</strong> has been updated:</p>
-    <p><strong>Status:</strong> ${status.charAt(0).toUpperCase() + status.slice(1)}</p>
+    <p><strong>Status:</strong> ${
+      status.charAt(0).toUpperCase() + status.slice(1)
+    }</p>
     <p><strong>Update Time:</strong> ${new Date(timestamp).toLocaleString()}</p>
-    ${remark ? `<p><strong>Remark:</strong> ${remark}</p>` : ''}
-    <p>You can view the ticket details in your account dashboard.</p>
+    ${remark ? `<p><strong>Remark:</strong> ${remark}</p>` : ""}
+    <p>You can view the ticket details in your account dashboard. or use the link to view the ticket:</p>
+    <a href="${process.env.CORS_ORIGIN}/ticket/${ticketId}">View Ticket</a>
     <p>If you have any questions, please contact our support team.</p>
     <p>Best regards,<br>Ticket Management Team</p>
   </div>
