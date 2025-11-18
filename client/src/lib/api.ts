@@ -248,16 +248,16 @@ export const ticketsApi = {
       body: JSON.stringify({ useremail }),
     }),
 
-  openTicket: (ticketId: string, useremail: string) =>
+  openTicket: (ticketId: string, useremail: string,remark:string) =>
     fetchApi<Ticket>(`/ticket/open/${ticketId}`, {
       method: "POST",
-      body: JSON.stringify({ useremail }),
+      body: JSON.stringify({ useremail,remark }),
     }),
 
-  resolveTicket: (ticketId: string, useremail: string) =>
+  resolveTicket: (ticketId: string, useremail: string,remark:string) =>
     fetchApi<Ticket>(`/ticket/resolve/${ticketId}`, {
       method: "POST",
-      body: JSON.stringify({ useremail }),
+      body: JSON.stringify({ useremail,remark }),
     }),
   ticketStats: () => fetchApi<TicketStats>("/tickets/stats"),
   updateStatus: (ticketId: string, status: string) =>

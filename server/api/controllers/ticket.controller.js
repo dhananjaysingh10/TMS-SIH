@@ -382,6 +382,7 @@ export const unacceptTicket = async (req, res) => {
         message: "Ticket not found.",
       });
     }
+
     await logProgress(ticketId, useremail, "Employee unclaimed ticket");
     const remark = "Employee uncalimed ticket";
     try {
@@ -413,7 +414,7 @@ export const unacceptTicket = async (req, res) => {
 export const openTicket = async (req, res) => {
   try {
     const { id: ticketId } = req.params;
-    const { useremail } = req.body;
+    const { useremail,remark } = req.body;
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
@@ -431,7 +432,6 @@ export const openTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket opened again");
-    const remark = "Ticket opened again";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,
@@ -460,8 +460,8 @@ export const openTicket = async (req, res) => {
 
 export const resolveTicket = async (req, res) => {
   try {
-    const { id: ticketId } = req.params;
-    const { useremail } = req.body;
+    const { id: ticketId} = req.params;
+    const { useremail,remark } = req.body;
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
@@ -477,7 +477,6 @@ export const resolveTicket = async (req, res) => {
       });
     }
     await logProgress(ticketId, useremail, "Ticket Resolved");
-    const remark = "Ticket Resolved";
     try {
       await sendTicketStatusUpdateEmail(
         updatedTicket.createdBy.email,

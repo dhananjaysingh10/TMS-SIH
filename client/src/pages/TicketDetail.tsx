@@ -25,6 +25,7 @@ import {
   Loader2,
   Calendar,
   UserCheck,
+  X,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -84,6 +85,9 @@ export default function TicketDetail() {
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [resolveremark, setResolveRemark] = useState("Ticket Resolved");
+  const [openremark, setOpenRemark] = useState("Ticket Opened Again");
+  const [resolvepanel, setResolvePanel] = useState(false);
   const [buttonLoading, setButtonLoading] = useState({
     accept: false,
     unaccept: false,
@@ -92,7 +96,7 @@ export default function TicketDetail() {
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser.id : "";
+  const userId = currentUser ? currentUser._id : "";
 
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -228,7 +232,7 @@ export default function TicketDetail() {
     if (!ticket) return;
     setButtonLoading((prev) => ({ ...prev, open: true }));
     try {
-      await ticketsApi.openTicket(ticket._id, useremail);
+      await ticketsApi.openTicket(ticket._id, useremail,openremark);
       fetchTicketDetails();
       fetchActivities();
       toast.success("Ticket reopened successfully");
@@ -255,12 +259,23 @@ export default function TicketDetail() {
       setButtonLoading((prev) => ({ ...prev, unaccept: false }));
     }
   }
+  const handleConfirm = () => {
+    handleResolveTicket();
+  };
+  const handleOpenConfirm = () => {
+    handleOpenTicket();
+  };
+  const handleCancel = () => {
+    setResolvePanel(false);
+    setResolveRemark("");
+    setOpenRemark("");
+  };
 
   async function handleResolveTicket() {
     if (!ticket) return;
     setButtonLoading((prev) => ({ ...prev, resolve: true }));
     try {
-      await ticketsApi.resolveTicket(ticket._id, useremail);
+      await ticketsApi.resolveTicket(ticket._id, useremail, resolveremark);
       fetchTicketDetails();
       fetchActivities();
       toast.success("Ticket resolved successfully");
@@ -505,7 +520,7 @@ export default function TicketDetail() {
                       <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${
+                        className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${
                           buttonLoading.unaccept
                             ? "opacity-50 cursor-not-allowed"
                             : ""
@@ -526,52 +541,140 @@ export default function TicketDetail() {
                     )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
-                    ticket.assignedTo?._id === userId && (
+                    ticket.assignedTo?.id === userId &&
+                    (!resolvepanel ? (
                       <button
-                        onClick={handleResolveTicket}
+                        onClick={() => setResolvePanel(true)}
                         disabled={buttonLoading.resolve}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow ${
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
                           buttonLoading.resolve
                             ? "opacity-50 cursor-not-allowed"
                             : ""
                         }`}
                       >
                         {buttonLoading.resolve ? (
-                          <>
-                            <Loader2 size={18} className="animate-spin" />
-                            Resolving...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle size={18} />
-                            Resolve Ticket
-                          </>
-                        )}
-                      </button>
-                    )}
-                  {ticket.status === "resolved" && (
-                    <button
-                      onClick={handleOpenTicket}
-                      disabled={buttonLoading.open}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-all font-medium shadow-sm hover:shadow ${
-                        buttonLoading.open
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {buttonLoading.open ? (
-                        <>
                           <Loader2 size={18} className="animate-spin" />
-                          Reopening...
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle size={18} />
-                          Open Again
-                        </>
-                      )}
-                    </button>
-                  )}
+                        ) : (
+                          <CheckCircle size={18} />
+                        )}
+                        {buttonLoading.resolve
+                          ? "Resolving..."
+                          : "Resolve Ticket"}
+                      </button>
+                    ) : (
+                      // STATE 2: The Expansion Panel
+                      <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-semibold text-teal-900 flex items-center gap-2">
+                            <CheckCircle size={16} />
+                            Resolution Remark
+                          </label>
+                          <button
+                            onClick={handleCancel}
+                            className="text-teal-700 hover:text-teal-900 hover:bg-teal-100 p-1 rounded-full transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+
+                        <textarea
+                          value={resolveremark}
+                          onChange={(e) => setResolveRemark(e.target.value)}
+                          placeholder="Briefly explain how this was resolved..."
+                          className="w-full min-h-[80px] p-3 text-sm border-teal-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent mb-3 bg-white text-gray-700 resize-y"
+                          autoFocus
+                        />
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={handleCancel}
+                            className="px-3 py-1.5 text-sm text-teal-700 font-medium hover:bg-teal-100 rounded-md transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleConfirm}
+                            disabled={
+                              !resolveremark.trim() || buttonLoading.resolve
+                            }
+                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                            {buttonLoading.resolve ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <Send size={14} />
+                            )}
+                            Confirm Resolution
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  {ticket.status === "resolved" &&
+                    (!resolvepanel ? (
+                      <button
+                        onClick={() => setResolvePanel(true)}
+                        disabled={buttonLoading.open}
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
+                          buttonLoading.open
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        {buttonLoading.open ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                          <CheckCircle size={18} />
+                        )}
+                        {buttonLoading.open ? "Opening..." : "Open Ticket"}
+                      </button>
+                    ) : (
+                      // STATE 2: The Expansion Panel
+                      <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-semibold text-teal-900 flex items-center gap-2">
+                            <CheckCircle size={16} />
+                            Repopening Remark
+                          </label>
+                          <button
+                            onClick={handleCancel}
+                            className="text-teal-700 hover:text-teal-900 hover:bg-teal-100 p-1 rounded-full transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+
+                        <textarea
+                          value={openremark}
+                          onChange={(e) => setOpenRemark(e.target.value)}
+                          placeholder="Briefly explain why this was reopened..."
+                          className="w-full min-h-[80px] p-3 text-sm rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent mb-3 bg-white  text-gray-700 resize-y"
+                          autoFocus
+                        />
+
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={handleCancel}
+                            className="px-3 py-1.5 text-sm text-teal-700 font-medium hover:bg-teal-100 rounded-md transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleOpenConfirm}
+                            disabled={
+                              !openremark.trim() || buttonLoading.open
+                            }
+                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          >
+                            {buttonLoading.open ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              <Send size={14} />
+                            )}
+                            Confirm Reopen
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
