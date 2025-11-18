@@ -503,6 +503,40 @@ export const resolveTicket = async (req, res) => {
   }
 };
 
+export const requestTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { useremail, remark } = req.body;
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      {
+        inreview: true,
+      },
+      { new: true, runValidators: true }
+    ).populate("assignedTo createdBy", "name email");
+
+    if (!updatedTicket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+    await logProgress(ticketId, useremail, "Department Change Request Initiated");
+    res.status(200).json({
+      success: true,
+      message: "Department Change request initiated successfully.",
+      data: updatedTicket,
+    });
+  } catch (error) {
+    console.error("Error creating request:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while requesting change.",
+      error: error.message,
+    });
+  }
+};
+
 export const deleteTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findByIdAndDelete(req.params.id);

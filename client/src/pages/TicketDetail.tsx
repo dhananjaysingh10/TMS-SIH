@@ -87,16 +87,20 @@ export default function TicketDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [resolveremark, setResolveRemark] = useState("Ticket Resolved");
   const [openremark, setOpenRemark] = useState("Ticket Opened Again");
+  const [requestremark, setrequestRemark] = useState(
+    "Request for change of Department"
+  );
   const [resolvepanel, setResolvePanel] = useState(false);
   const [buttonLoading, setButtonLoading] = useState({
     accept: false,
     unaccept: false,
     resolve: false,
     open: false,
+    request: false,
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser._id : "";
+  const userId = currentUser ? currentUser.id : "";
 
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -232,7 +236,7 @@ export default function TicketDetail() {
     if (!ticket) return;
     setButtonLoading((prev) => ({ ...prev, open: true }));
     try {
-      await ticketsApi.openTicket(ticket._id, useremail,openremark);
+      await ticketsApi.openTicket(ticket._id, useremail, openremark);
       fetchTicketDetails();
       fetchActivities();
       toast.success("Ticket reopened successfully");
@@ -240,6 +244,7 @@ export default function TicketDetail() {
       console.error("Error opening ticket:", error);
       toast.error("Failed to reopen ticket");
     } finally {
+      setResolvePanel(false);
       setButtonLoading((prev) => ({ ...prev, open: false }));
     }
   }
@@ -259,18 +264,34 @@ export default function TicketDetail() {
       setButtonLoading((prev) => ({ ...prev, unaccept: false }));
     }
   }
+  const handleCancel = () => {
+    setResolvePanel(false);
+    setResolveRemark("");
+    setOpenRemark("");
+    setrequestRemark("");
+  };
   const handleConfirm = () => {
     handleResolveTicket();
   };
   const handleOpenConfirm = () => {
     handleOpenTicket();
   };
-  const handleCancel = () => {
-    setResolvePanel(false);
-    setResolveRemark("");
-    setOpenRemark("");
-  };
-
+  async function handleRequest() {
+    if (!ticket) return;
+    setButtonLoading((prev) => ({ ...prev, request: true }));
+    try {
+      await ticketsApi.requestChange(ticket._id, useremail, requestremark);
+      fetchTicketDetails();
+      fetchActivities();
+      toast.success("Change Request Initiated successfully");
+    } catch (error) {
+      console.error("Error requesting department change:", error);
+      toast.error("Failed to request change");
+    } finally {
+      setResolvePanel(false);
+      setButtonLoading((prev) => ({ ...prev, request: false }));
+    }
+  }
   async function handleResolveTicket() {
     if (!ticket) return;
     setButtonLoading((prev) => ({ ...prev, resolve: true }));
@@ -283,10 +304,10 @@ export default function TicketDetail() {
       console.error("Error resolving ticket:", error);
       toast.error("Failed to resolve ticket");
     } finally {
+      setResolvePanel(false);
       setButtonLoading((prev) => ({ ...prev, resolve: false }));
     }
   }
-
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
 
@@ -404,6 +425,14 @@ export default function TicketDetail() {
                       >
                         {ticket.priority.toUpperCase()}
                       </span>
+                      {ticket.inreview && (
+                        <span
+                          className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${priorityColors["urgent"]}
+                          }`}
+                        >
+                          Department Change in Review
+                        </span>
+                      )}
                     </div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 leading-tight">
                       {ticket.subject}
@@ -492,27 +521,96 @@ export default function TicketDetail() {
               <div className="bg-slate-50 px-6 sm:px-8 py-5 border-t border-slate-200">
                 <div className="flex flex-wrap gap-3">
                   {canAcceptTicket(ticket, currentUser) && !ticket.accepted && (
-                    <button
-                      onClick={handleAcceptTicket}
-                      disabled={buttonLoading.accept}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${
-                        buttonLoading.accept
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {buttonLoading.accept ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Accepting...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle size={18} />
-                          Accept Ticket
-                        </>
+                    <div className="flex gap-2 justify-center items-center">
+                      <button
+                        onClick={handleAcceptTicket}
+                        disabled={buttonLoading.accept}
+                        className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${
+                          buttonLoading.accept
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                      >
+                        {buttonLoading.accept ? (
+                          <>
+                            <Loader2 size={18} className="animate-spin" />
+                            Accepting...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle size={18} />
+                            Accept Ticket
+                          </>
+                        )}
+                      </button>
+                      {!resolvepanel && !ticket.inreview && (
+                        <button
+                          onClick={() => setResolvePanel(true)}
+                          disabled={buttonLoading.request}
+                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
+                            buttonLoading.request
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          {buttonLoading.request ? (
+                            <Loader2 size={18} className="animate-spin" />
+                          ) : (
+                            <CheckCircle size={18} />
+                          )}
+                          {buttonLoading.request
+                            ? "Requesting..."
+                            : "Change Department"}
+                        </button>
                       )}
-                    </button>
+                      {resolvepanel && ( // STATE 2: The Expansion Panel
+                        <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="flex justify-between items-center mb-2">
+                            <label className="text-sm font-semibold text-teal-900 flex items-center gap-2">
+                              <CheckCircle size={16} />
+                              Mention Reason
+                            </label>
+                            <button
+                              onClick={handleCancel}
+                              className="text-teal-700 hover:text-teal-900 hover:bg-teal-100 p-1 rounded-full transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+
+                          <textarea
+                            value={requestremark}
+                            onChange={(e) => setrequestRemark(e.target.value)}
+                            placeholder="Briefly explain why to change its department..."
+                            className="w-full min-h-[80px] p-3 text-sm border-teal-200 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-transparent mb-3 bg-white text-gray-700 resize-y"
+                            autoFocus
+                          />
+
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={handleCancel}
+                              className="px-3 py-1.5 text-sm text-teal-700 font-medium hover:bg-teal-100 rounded-md transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleRequest}
+                              disabled={
+                                !requestremark.trim() || buttonLoading.request
+                              }
+                              className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                              {buttonLoading.request ? (
+                                <Loader2 size={14} className="animate-spin" />
+                              ) : (
+                                <Send size={14} />
+                              )}
+                              Confirm Request
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   )}
                   {canAcceptTicket(ticket, currentUser) &&
                     ticket.accepted &&
@@ -660,9 +758,7 @@ export default function TicketDetail() {
                           </button>
                           <button
                             onClick={handleOpenConfirm}
-                            disabled={
-                              !openremark.trim() || buttonLoading.open
-                            }
+                            disabled={!openremark.trim() || buttonLoading.open}
                             className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                           >
                             {buttonLoading.open ? (
