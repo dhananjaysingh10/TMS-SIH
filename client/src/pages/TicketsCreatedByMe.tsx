@@ -335,7 +335,7 @@ export default function TicketsCreatedByMe() {
   }, [viewMode]);
 
   const fetchCreatedTickets = async () => {
-    if (!currentUser?.id) {
+    if (!currentUser?._id) {
       setError("User ID not found");
       setLoading(false);
       setTickets([]);
@@ -345,10 +345,10 @@ export default function TicketsCreatedByMe() {
     try {
       setLoading(true);
       const endpoint = debouncedSearchTerm
-        ? `/ticket/createdBy/${currentUser.id}?search=${encodeURIComponent(
+        ? `/ticket/createdBy/${currentUser._id}?search=${encodeURIComponent(
             debouncedSearchTerm
           )}&page=${currentPage}&limit=${limit}`
-        : `/ticket/createdBy/${currentUser.id}?page=${currentPage}&limit=${limit}`;
+        : `/ticket/createdBy/${currentUser._id}?page=${currentPage}&limit=${limit}`;
       const res = await ticketsApi.getAll(endpoint);
       // Handle different API response formats
       const ticketsData = Array.isArray(res)
@@ -420,7 +420,7 @@ export default function TicketsCreatedByMe() {
 
     return (
       <div
-        className={`${colors.bg} rounded-xl shadow-lg border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]`}
+        className={`${colors.bg} rounded-xl shadow-lg border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-xl `}
       >
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">

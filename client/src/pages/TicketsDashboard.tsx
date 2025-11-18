@@ -131,7 +131,7 @@ export default function TicketsDashboard() {
 
     return (
       <div
-        className={`${colors.bg} rounded-xl shadow-lg border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]`}
+        className={`${colors.bg} rounded-xl shadow-lg border-2 ${colors.border} p-6 transition-all duration-300 hover:shadow-xl `}
       >
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
