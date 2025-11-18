@@ -9,6 +9,14 @@
         "commentTicketId": "8741294a-ef9f-4be8-ae24-ed064bf57584",
         "createTicket": null
       }
+    },
+    {
+      "id": "1087908909:1087908909",
+      "data": {
+        "waitingForTicketIdForComment": false,
+        "createTicket": null,
+        "commentTicketId": null
+      }
     }
   ]
 }

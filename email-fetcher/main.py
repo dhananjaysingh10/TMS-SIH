@@ -87,7 +87,6 @@ def create_ticket_json(sender, subject, body, msg_id):
       "department": category,  
       "type": "task",
       "status": "open", 
-   
     }
     return json.dumps(ticket)
 

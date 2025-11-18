@@ -4,6 +4,8 @@ import Ticket from "../models/ticket.model.js";
 import crypto from "crypto";
 import User from "../models/user.model.js";
 import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
+import { createClient } from "redis";
+
 
 const paginateTickets = async (query, page, limit, sortOptions) => {
   const pageNum = parseInt(page) || 1;
@@ -92,6 +94,40 @@ export const createTicket = async (req, res) => {
       message: "Error creating ticket",
       error: error.message,
     });
+  }
+};
+
+const TICKET_QUEUE_NAME = "tickets_queue";
+export const createTicketFrontend = async (req, res) => {
+  try {
+    const { title, description, useremail } = req.body;
+    if (!title || !description || !useremail) {
+      return res.status(400).json({
+        error:
+          "Bad Request. Missing required fields: sender, subject, and body are all required.",
+      });
+    }
+    const ticket = {
+      ticketId: crypto.randomUUID(),
+      title,
+      description,
+      priority: "medium",
+      department: "IT",
+      type: "task",
+      status: "open",
+      createdBy: useremail,
+    };
+    const redisClient = createClient();
+    redisClient.connect();
+    await redisClient.lPush(TICKET_QUEUE_NAME, JSON.stringify(ticket));
+    await redisClient.disconnect();
+    return res.status(201).json({
+      success:true,
+      message: "Ticket submitted successfully.",
+      ticket_id: ticket.ticketId,
+    });
+  } catch (err) {
+    return res.status(500).json({success:false,message:"Failed to queue ticket",error:err.message});
   }
 };
 

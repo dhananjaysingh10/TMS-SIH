@@ -52,9 +52,9 @@ export default function CreateTicketModal({
 
     try {
       console.log(ticketData);
-      await ticketsApi.create(ticketData);
-
-      toast.success("Ticket created successfully!");
+      const response=await ticketsApi.createFrontend(ticketData);
+      if(response.success) toast.success("Ticket created successfully!");
+      else toast.error(response.message);
       onTicketCreated();
     } catch (error) {
       toast.error("Failed to create ticket. Please try again.");
@@ -66,7 +66,7 @@ export default function CreateTicketModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
+      className="fixed inset-0 bg-white bg-opacity-50 z-50 flex justify-center items-center"
       aria-modal="true"
       role="dialog"
     >
@@ -89,7 +89,7 @@ export default function CreateTicketModal({
               htmlFor="title"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Title
+              Subject
             </label>
             <textarea
               id="title"
@@ -116,7 +116,7 @@ export default function CreateTicketModal({
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-900"
             />
           </div>
-
+{/* 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label
@@ -160,7 +160,7 @@ export default function CreateTicketModal({
                 <option>high</option>
               </select>
             </div>
-          </div>
+          </div> */}
 
           <div>
             <label

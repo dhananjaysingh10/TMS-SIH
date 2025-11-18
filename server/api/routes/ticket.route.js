@@ -19,6 +19,7 @@ import {
   unacceptTicket,
   openTicket,
   getActivites,
+  createTicketFrontend,
  // getTicketsCreatedBy,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
@@ -26,6 +27,7 @@ import { authMiddleware } from "../utils/verifyUser.js";
 const router = express.Router();
 
 router.post("/", createTicket);
+router.post("/frontend", createTicketFrontend);
 router.get("/:id", getTicketById);
 router.get("/", getAllTickets);
 router.post("/filter", getFilteredTickets);

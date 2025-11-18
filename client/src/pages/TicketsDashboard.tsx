@@ -76,8 +76,8 @@ export default function TicketsDashboard() {
 
   const openTickets =
     currentUser?.role === "super-admin"
-      ? tickets.filter((t) => !t.accepted)
-      : departmentTickets.filter((t) => !t.accepted);
+      ? tickets.filter((t) => !t.accepted&&t.createdBy.email!==currentUser?.email)
+      : departmentTickets.filter((t) => !t.accepted&&t.createdBy.email!==currentUser?.email);
   const assignedTickets =
     currentUser?.role === "super-admin"
       ? tickets.filter((t) => t.accepted && t.status === "in-progress")

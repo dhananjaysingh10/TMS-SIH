@@ -142,7 +142,7 @@ interface Pagination {
 export const ticketsApi = {
   getAll: async (searchTerm: string = "") => {
     console.log("here we go", searchTerm);
-    const endpoint = searchTerm
+    const endpoint = searchTerm;
     const response = await fetchApi<Ticket[]>(endpoint);
     return response;
   },
@@ -165,10 +165,14 @@ export const ticketsApi = {
   //     throw error;
   //   }
   // },
-  getCreatedBy: async (endpoint: string): Promise<Ticket[] | { tickets: Ticket[]; pagination: Pagination }> => {
+  getCreatedBy: async (
+    endpoint: string
+  ): Promise<Ticket[] | { tickets: Ticket[]; pagination: Pagination }> => {
     console.log("API: getCreatedBy called with endpoint:", endpoint);
     try {
-      const response = await fetchApi<Ticket[] | { tickets: Ticket[]; pagination: Pagination }>(endpoint);
+      const response = await fetchApi<
+        Ticket[] | { tickets: Ticket[]; pagination: Pagination }
+      >(endpoint);
       console.log("API: getCreatedBy response:", response);
       return response;
     } catch (error) {
@@ -191,9 +195,19 @@ export const ticketsApi = {
   //   });
   //   return response.data;
   // },
-  getMyTickets: async (email: string, searchTerm: string = ""): Promise<Ticket[]> => {
-    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(searchTerm)}&limit=1000`;
-    console.log("API: getMyTickets called with endpoint:", endpoint, "email:", email);
+  getMyTickets: async (
+    email: string,
+    searchTerm: string = ""
+  ): Promise<Ticket[]> => {
+    const endpoint = `/ticket/assignedto?search=${encodeURIComponent(
+      searchTerm
+    )}&limit=1000`;
+    console.log(
+      "API: getMyTickets called with endpoint:",
+      endpoint,
+      "email:",
+      email
+    );
     try {
       const response = await fetchApi<ApiResponse<Ticket[]>>(endpoint, {
         method: "POST",
@@ -206,13 +220,20 @@ export const ticketsApi = {
       throw error;
     }
   },
-  
+
   create: async (ticketData: NewTicketData): Promise<Ticket> => {
     const response = await fetchApi<ApiResponse<Ticket>>("/ticket", {
       method: "POST",
       body: JSON.stringify(ticketData),
     });
     return response.data;
+  },
+  createFrontend: async (ticketData: NewTicketData): Promise<any> => {
+    const response = await fetchApi<any>("/ticket/frontend", {
+      method: "POST",
+      body: JSON.stringify(ticketData),
+    });
+    return response;
   },
   getStats: () => fetchApi<TicketStats>("/tickets/stats"),
   acceptTicket: (ticketId: string, userId: string) =>
