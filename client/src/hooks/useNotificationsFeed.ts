@@ -14,7 +14,7 @@ export interface NotificationItem {
   status?: string;
   priority?: string;
   isNew: boolean;
-  source?: "assigned" | "created" | "department"; // Track which ticket relationship this came from
+  source?: "assigned" | "created" | "department";
 }
 
 type CurrentUser = {
@@ -23,6 +23,7 @@ type CurrentUser = {
   email?: string;
   department?: string;
   name?: string;
+  telegramId?: string;
 };
 
 const MAX_ITEMS = 30;
@@ -172,17 +173,32 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
         ticketDetails.map((d) => [d.ticketId, d])
       );
 
+      // Helper function to check if action is from current user
+      const isFromCurrentUser = (user: any) => {
+        if (!user || !currentUser) return false;
+        const currentUserId = currentUser._id || currentUser.id;
+        const actionUserId = user._id || user.id;
+        
+        // Check email (primary), ID, and telegramId
+        const emailMatch = user.email && currentUser.email && user.email.toLowerCase() === currentUser.email.toLowerCase();
+        const idMatch = actionUserId && currentUserId && actionUserId === currentUserId;
+        const telegramMatch = user.telegramId && currentUser.telegramId && user.telegramId === currentUser.telegramId;
+        
+        return emailMatch || idMatch || telegramMatch;
+      };
+
       // Build notifications for assigned tickets
       const assignedNotifications: NotificationItem[] = [];
       assignedTickets.forEach((ticket) => {
         const details = detailsMap.get(ticket.ticketId);
+        const ticketNotifications: NotificationItem[] = [];
         
         // Check for new messages (not from current user)
         if (details?.messages && details.messages.length > 0) {
           const recentMessages = details.messages
             .filter(
               (msg: Message) =>
-                msg.user?.email !== currentUser?.email &&
+                !isFromCurrentUser(msg.user) &&
                 Date.now() - new Date(msg.createdAt).getTime() < TWO_DAYS_IN_MS
             )
             .sort(
@@ -190,28 +206,28 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
 
-          if (recentMessages.length > 0) {
-            const latestMsg = recentMessages[0];
-            assignedNotifications.push(
+          // Add notification for EACH message, not just the latest
+          recentMessages.forEach((msg: Message) => {
+            ticketNotifications.push(
               buildNotification(
                 ticket,
                 "message",
-                `${latestMsg.user?.name || "Someone"} sent a message in chat`,
-                latestMsg.createdAt,
-                `message-${ticket.ticketId}-${latestMsg._id}`,
+                `${msg.user?.name || "Someone"} sent a message in chat`,
+                msg.createdAt,
+                `message-${ticket.ticketId}-${msg._id}`,
                 "assigned"
               )
             );
-          }
+          });
         }
 
         // Check for new comments (not from current user)
         if (details?.comments && details.comments.length > 0) {
           const recentComments = details.comments
             .filter(
-              (msg: Message) =>
-                msg.user?.email !== currentUser?.email &&
-                Date.now() - new Date(msg.createdAt).getTime() < TWO_DAYS_IN_MS
+              (comment: Message) =>
+                !isFromCurrentUser(comment.user) &&
+                Date.now() - new Date(comment.createdAt).getTime() < TWO_DAYS_IN_MS
             )
             .sort(
               (a: Message, b: Message) =>
@@ -220,7 +236,7 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
 
           if (recentComments.length > 0) {
             const latestComment = recentComments[0];
-            assignedNotifications.push(
+            ticketNotifications.push(
               buildNotification(
                 ticket,
                 "comment",
@@ -233,12 +249,12 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
           }
         }
 
-        // Check for recent activities
+        // Check for recent activities (not from current user)
         if (details?.activities && details.activities.length > 0) {
           const recentActivities = details.activities
             .filter(
               (activity: Activity) =>
-                activity.user?.email !== currentUser?.email &&
+                !isFromCurrentUser(activity.user) &&
                 Date.now() - new Date(activity.timestamp).getTime() < TWO_DAYS_IN_MS
             )
             .sort(
@@ -248,7 +264,7 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
 
           if (recentActivities.length > 0) {
             const latestActivity = recentActivities[0];
-            assignedNotifications.push(
+            ticketNotifications.push(
               buildNotification(
                 ticket,
                 "activity",
@@ -261,22 +277,14 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
           }
         }
 
-        // If no specific activity, add general assignment notification
-        if (assignedNotifications.filter(n => n.ticketId === ticket.ticketId).length === 0) {
-          assignedNotifications.push(
-            buildNotification(
-              ticket,
-              "assigned",
-              `Ticket ${ticket.ticketId} was assigned to you`,
-              undefined,
-              undefined,
-              "assigned"
-            )
-          );
+        // Only add ticket notifications if there are specific activities from others
+        // If there are no specific notifications, don't add the generic "assigned to you" message
+        if (ticketNotifications.length > 0) {
+          assignedNotifications.push(...ticketNotifications);
         }
       });
 
-      // Build notifications for created tickets
+      // Build notifications for created tickets - ONLY chat messages from others
       const createdNotifications: NotificationItem[] = [];
       createdTickets.forEach((ticket) => {
         const details = detailsMap.get(ticket.ticketId);
@@ -286,7 +294,7 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
           const recentMessages = details.messages
             .filter(
               (msg: Message) =>
-                msg.user?.email !== currentUser?.email &&
+                !isFromCurrentUser(msg.user) &&
                 Date.now() - new Date(msg.createdAt).getTime() < TWO_DAYS_IN_MS
             )
             .sort(
@@ -308,91 +316,28 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
             );
           }
         }
-
-        // Check for new comments (not from current user)
-        if (details?.comments && details.comments.length > 0) {
-          const recentComments = details.comments
-            .filter(
-              (msg: Message) =>
-                msg.user?.email !== currentUser?.email &&
-                Date.now() - new Date(msg.createdAt).getTime() < TWO_DAYS_IN_MS
-            )
-            .sort(
-              (a: Message, b: Message) =>
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-
-          if (recentComments.length > 0) {
-            const latestComment = recentComments[0];
-            createdNotifications.push(
-              buildNotification(
-                ticket,
-                "comment",
-                `${latestComment.user?.name || "Someone"} added a comment`,
-                latestComment.createdAt,
-                `comment-${ticket.ticketId}-${latestComment._id}`,
-                "created"
-              )
-            );
-          }
-        }
-
-        // Check for recent activities
-        if (details?.activities && details.activities.length > 0) {
-          const recentActivities = details.activities
-            .filter(
-              (activity: Activity) =>
-                activity.user?.email !== currentUser?.email &&
-                Date.now() - new Date(activity.timestamp).getTime() < TWO_DAYS_IN_MS
-            )
-            .sort(
-              (a: Activity, b: Activity) =>
-                new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-            );
-
-          if (recentActivities.length > 0) {
-            const latestActivity = recentActivities[0];
-            createdNotifications.push(
-              buildNotification(
-                ticket,
-                "activity",
-                latestActivity.description,
-                latestActivity.timestamp,
-                `activity-${ticket.ticketId}-${latestActivity._id}`,
-                "created"
-              )
-            );
-          }
-        }
-
-        // If no specific activity, add status update notification
-        if (createdNotifications.filter(n => n.ticketId === ticket.ticketId).length === 0) {
-          createdNotifications.push(
-            buildNotification(
-              ticket,
-              "created",
-              `Ticket ${ticket.ticketId} status changed to ${ticket.status?.replace("-", " ")}`,
-              undefined,
-              undefined,
-              "created"
-            )
-          );
-        }
       });
 
-      // Build notifications for department tickets
+      // Build notifications for department tickets - ONLY newly created tickets by others
       const departmentNotifications = departmentTickets
         .filter(
-          (ticket) =>
-            ticket.createdBy?.id !== userId &&
-            ticket.createdBy?.email !== currentUser?.email
+          (ticket) => {
+            // Only show tickets not created by current user
+            const notCreatedByMe = !isFromCurrentUser(ticket.createdBy);
+            
+            // Only show tickets that were created recently (within 2 days)
+            const ticketCreatedAt = new Date(ticket.createdAt).getTime();
+            const isNewlyCreated = Date.now() - ticketCreatedAt < TWO_DAYS_IN_MS;
+            
+            return notCreatedByMe && isNewlyCreated;
+          }
         )
         .map((ticket) =>
           buildNotification(
             ticket,
             "department",
             `New ticket ${ticket.ticketId} opened in ${ticket.department}`,
-            undefined,
+            ticket.createdAt,
             undefined,
             "department"
           )
@@ -436,4 +381,3 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
     unreadCount,
   };
 }
-
