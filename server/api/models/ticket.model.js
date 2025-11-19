@@ -25,14 +25,14 @@ const messageSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: false, 
+    required: false,
     trim: true,
   },
   attachment: {
     type: String,
     required: false,
   },
-  mimeType: {  
+  mimeType: {
     type: String,
     required: false,
   },
@@ -132,6 +132,10 @@ const ticketSchema = new mongoose.Schema(
       default: false,
     },
     messages: [messageSchema],
+    inreview: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

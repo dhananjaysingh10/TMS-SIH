@@ -20,6 +20,7 @@ import {
   openTicket,
   getActivites,
   createTicketFrontend,
+  requestTicket
  // getTicketsCreatedBy,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
@@ -42,6 +43,7 @@ router.post("/accept/:id", acceptTicket);
 router.post("/unaccept/:id", unacceptTicket);
 router.post("/open/:id", openTicket);
 router.post("/resolve/:id", resolveTicket);
+router.post("/request/:id",requestTicket);
 router.post("/message/:id", createMessage);
 router.get("/getmessage/:id", getMessage);
 router.get("/activities/:id", getActivites);
