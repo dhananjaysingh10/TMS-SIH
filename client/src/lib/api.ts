@@ -242,7 +242,6 @@ export const ticketsApi = {
       method: "POST",
       body: JSON.stringify({ userId }),
     }),
-
   unacceptTicket: (ticketId: string, useremail: string) =>
     fetchApi<Ticket>(`/ticket/unaccept/${ticketId}`, {
       method: "POST",
