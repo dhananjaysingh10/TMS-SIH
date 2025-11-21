@@ -69,7 +69,6 @@ async def log_conversation(
             },
             upsert=True,
         )
-
         if result.upserted_id:
             logging.info(f"📝 Created new chat log for Ticket {ticket_id}")
         else:

@@ -13,6 +13,9 @@ from google.adk.sessions import DatabaseSessionService
 import logging
 from typing import Dict, Any, Optional
 from db_connect import log_conversation
+from supabase import create_client, Client
+from custom_session import PostgresSessionService
+import sys
 
 load_dotenv()
 
@@ -21,10 +24,22 @@ APP_NAME = "powergridai"
 USER_ID = "tester"
 DB_URL = "sqlite:///./deal_history.db"
 MODEL_NAME = "gemini-2.5-flash-lite"
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    logging.error("CRITICAL: DATABASE_URL is missing. Cannot connect to Supabase.")
+    sys.exit(1)
 
 memory_service = InMemoryMemoryService()
-session_service = InMemorySessionService()
+# session_service = InMemorySessionService()
 # session_service = DatabaseSessionService(db_url=DB_URL)
+try:
+    session_service = PostgresSessionService(db_url=DATABASE_URL)
+    logging.info("Initialized Custom Supabase Session Service.")
+except Exception as e:
+    logging.error(f"Service Init Failed: {e}")
+    # Fallback to prevent crash during dev
+    session_service = InMemoryMemoryService()
+
 
 retry_config = types.HttpRetryOptions(
     attempts=3,
@@ -33,20 +48,33 @@ retry_config = types.HttpRetryOptions(
     http_status_codes=[429, 500, 503, 504],
 )
 
+# from rag_engine import query_knowledge_base
+
+# # Define the RAG Tool
+# rag_tool = FunctionTool(query_knowledge_base)
+
 root_agent = Agent(
     name="assistant",
     model=Gemini(model=MODEL_NAME, retry_options=retry_config),
+    # tools=[rag_tool],
     instruction="""ROLE:
-        You are the Root AI Assistant for Power Grid Corporation of India Limited (POWERGRID). 
+        You are the personal AI Assistant for Power Grid Corporation of India Limited (POWERGRID). 
         You assist internal IT employees in resolving support tickets efficiently. 
         
         CONTEXT:
         You are operating within the internal ticketing system. The users are IT support staff, 
         so you can use technical jargon (LDAP, VPN, Switch Config, SCADA).
 
+        KNOWLEDGE BASE:
+        You have access to a secure internal knowledge base containing PDFs of policies and manuals.
+        ALWAYS use the `query_knowledge_base` tool when the user asks about specific PowerGrid policies, 
+        procedures, or technical configurations that might be documented.
+
         OBJECTIVES:
         1. Analyze the Ticket Context and User Message.
-        2. Provide a concise, technical solution or troubleshooting step.
+        2. If the query requires specific internal knowledge, use `query_knowledge_base` through rag_tool.
+        3. Provide a concise, technical solution or troubleshooting step.
+        4. Help the IT employee with any of their query. 
 
         TONE:
         Professional, decisive, safety-conscious (critical for PowerGrid), and efficient.
@@ -82,6 +110,7 @@ async def run_session(
 
     try:
         # 1. Session Management (Idempotent creation)
+
         try:
             session = await session_service.create_session(
                 app_name=APP_NAME, user_id=USER_ID, session_id=session_id

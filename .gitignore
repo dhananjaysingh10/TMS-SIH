@@ -26,3 +26,4 @@ package-lock.json
 myenv/
 __pycache__
 venv
+chroma_db

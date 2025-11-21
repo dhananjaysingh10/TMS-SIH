@@ -12,6 +12,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Configure logging
+import logging
+logging.basicConfig(level=logging.INFO)
+
 class ChatMessage(BaseModel):
     role: str
     text: str
@@ -20,6 +24,7 @@ class ChatRequest(BaseModel):
     ticketId: str
     userMessage: str
     user_email: Optional[str] = None
+    ticketContext:str
 
 
 origins = [
@@ -85,9 +90,12 @@ async def chat_endpoint(request: ChatRequest):
     and formats the response.
     """
     try:
-        print("enter")
+        user_query=f"""
+        "employee_query":{request.userMessage}
+        "ticket_context":{request.ticketContext}
+        """
         res = await run_session(
-            user_query=request.userMessage,
+            user_query=user_query,
             session_id=request.ticketId,
             user_email=request.user_email,
         )

@@ -39,9 +39,10 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
         const response = await fetch(
           `http://localhost:8000/api/chat/${ticket._id}`
         );
-
+        
         if (response.ok) {
           const history = await response.json();
+          console.log(history);
           // The backend should return an array of { role: 'user'|'ai', text: '...' }
           if (Array.isArray(history) && history.length > 0) {
             const formattedHistory = history.map((msg, index) => ({
@@ -83,7 +84,7 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
         userMessage: userMsg.text,
         user_email: user?.email,
         // Context is important for the AI to know what it's talking about
-        ticketContext: `Title: ${ticket.title}\nDescription: ${ticket.description}`,
+        ticketContext: `"Title": ${ticket.title}\n"Description": ${ticket.description}`,
       };
 
       const response = await fetch("http://localhost:8000/api/chat", {
