@@ -48,15 +48,13 @@ retry_config = types.HttpRetryOptions(
     http_status_codes=[429, 500, 503, 504],
 )
 
-# from rag_engine import query_knowledge_base
-
-# # Define the RAG Tool
-# rag_tool = FunctionTool(query_knowledge_base)
+from rag_engine import query_knowledge_base
+rag_tool = FunctionTool(query_knowledge_base)
 
 root_agent = Agent(
     name="assistant",
     model=Gemini(model=MODEL_NAME, retry_options=retry_config),
-    # tools=[rag_tool],
+    tools=[rag_tool],
     instruction="""ROLE:
         You are the personal AI Assistant for Power Grid Corporation of India Limited (POWERGRID). 
         You assist internal IT employees in resolving support tickets efficiently. 
