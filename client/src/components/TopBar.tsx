@@ -1,6 +1,5 @@
-//topbar.tsx
 import { Bell, Loader2, Menu, User } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
 import { useDispatch } from 'react-redux';
@@ -30,6 +29,78 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
   } = useNotificationsFeed(currentUser);
 
   const previewNotifications = notifications.slice(0, 5);
+  
+  const [lastSeenIds, setLastSeenIds] = useState<string[]>([]);
+  const [seenIdsLoading, setSeenIdsLoading] = useState(true);
+
+useEffect(() => {
+  const fetchSeenNotifications = async () => {    
+    if (!currentUser) {
+      console.log('⚠️ No current user, skipping fetch');
+      setSeenIdsLoading(false);
+      return;
+    }
+
+    try {
+      const fullUrl = `${import.meta.env.VITE_API_URL}/api/user/seen-notifications`;
+      
+      const response = await fetch(fullUrl, {
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+      //  console.log('✅ Data received:', data);
+        setLastSeenIds(data.seenNotificationIds || []);
+      } else {
+        console.error('❌ Response not ok:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch seen notifications:', error);
+    } finally {
+      setSeenIdsLoading(false);
+    }
+  };
+
+  fetchSeenNotifications();
+}, [currentUser]);
+
+  // Mark notifications as seen in MongoDB
+  const markNotificationsAsSeen = async (notificationIds: string[]) => {
+    if (notificationIds.length === 0) return;
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/user/mark-notifications-seen`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ notificationIds }),
+        }
+      );
+
+      if (response.ok) {
+        setLastSeenIds(prev => [...new Set([...prev, ...notificationIds])]);
+      }
+    } catch (error) {
+      console.error('Failed to mark notifications as seen:', error);
+    }
+  };
+
+  // Check if there are any new notification IDs we haven't seen
+  const currentNotificationIds = notifications
+    .filter(n => n.isNew)
+    .map(n => n.id);
+  
+  const hasNewNotifications = currentNotificationIds.some(
+    id => !lastSeenIds.includes(id)
+  );
+
+  // Show indicator if there are new notifications we haven't seen
+  const showIndicator = !seenIdsLoading && hasNewNotifications && unreadCount > 0;
 
   const handleLogout = async () => {
     try {
@@ -55,13 +126,30 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
 
   const handleToggleNotifications = () => {
     setShowUserMenu(false);
+    const wasOpen = showNotifications;
     setShowNotifications((prev) => !prev);
+    
+    // When opening, mark current notification IDs as seen
+    if (!wasOpen && currentNotificationIds.length > 0) {
+      markNotificationsAsSeen(currentNotificationIds);
+    }
   };
 
   const handleViewAllNotifications = () => {
     setShowNotifications(false);
+    // Mark all current notifications as seen
+    if (currentNotificationIds.length > 0) {
+      markNotificationsAsSeen(currentNotificationIds);
+    }
     navigate("/notifications");
   };
+
+  // Update seen IDs when notifications panel is open
+  useEffect(() => {
+    if (showNotifications && currentNotificationIds.length > 0) {
+      markNotificationsAsSeen(currentNotificationIds);
+    }
+  }, [showNotifications, notifications]);
 
   return (
     <header className="bg-white border-b border-gray-200 h-16 flex items-center px-4 lg:px-6 sticky top-0 z-30">
@@ -85,10 +173,11 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
             aria-label="Notifications"
           >
             <Bell size={20} className="text-gray-600" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1 flex items-center justify-center">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
+            {showIndicator && (
+              <span 
+                className="absolute top-1.5 right-1.5 rounded-full h-2 w-2 shadow-sm"
+                style={{ backgroundColor: '#ef4444' }}
+              ></span>
             )}
           </button>
 
@@ -103,11 +192,6 @@ export default function TopBar({ onMenuClick, pageTitle }: TopBarProps) {
                   <div>
                     <p className="text-sm font-semibold text-gray-900">
                       Notifications
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {unreadCount > 0
-                        ? `${unreadCount} new notification${unreadCount === 1 ? '' : 's'}`
-                        : "You're all caught up"}
                     </p>
                   </div>
                   <button

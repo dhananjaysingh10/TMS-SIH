@@ -23,7 +23,7 @@ type CurrentUser = {
   email?: string;
   department?: string;
   name?: string;
-  telegramId?: string;
+  telegramId? :string;
 };
 
 const MAX_ITEMS = 30;
@@ -234,19 +234,19 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
 
-          if (recentComments.length > 0) {
-            const latestComment = recentComments[0];
+          // Add notification for EACH comment
+          recentComments.forEach((comment: Message) => {
             ticketNotifications.push(
               buildNotification(
                 ticket,
                 "comment",
-                `${latestComment.user?.name || "Someone"} added a comment`,
-                latestComment.createdAt,
-                `comment-${ticket.ticketId}-${latestComment._id}`,
+                `${comment.user?.name || "Someone"} added a comment`,
+                comment.createdAt,
+                `comment-${ticket.ticketId}-${comment._id}`,
                 "assigned"
               )
             );
-          }
+          });
         }
 
         // Check for recent activities (not from current user)
@@ -262,19 +262,19 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
                 new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
             );
 
-          if (recentActivities.length > 0) {
-            const latestActivity = recentActivities[0];
+          // Add notification for EACH activity
+          recentActivities.forEach((activity: Activity) => {
             ticketNotifications.push(
               buildNotification(
                 ticket,
                 "activity",
-                latestActivity.description,
-                latestActivity.timestamp,
-                `activity-${ticket.ticketId}-${latestActivity._id}`,
+                activity.description,
+                activity.timestamp,
+                `activity-${ticket.ticketId}-${activity._id}`,
                 "assigned"
               )
             );
-          }
+          });
         }
 
         // Only add ticket notifications if there are specific activities from others
@@ -284,12 +284,12 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
         }
       });
 
-      // Build notifications for created tickets - ONLY chat messages from others
+      // Build notifications for created tickets - ALL chat messages from others (within 2 days)
       const createdNotifications: NotificationItem[] = [];
       createdTickets.forEach((ticket) => {
         const details = detailsMap.get(ticket.ticketId);
         
-        // Check for new messages (not from current user)
+        // Get ALL recent messages (not from current user)
         if (details?.messages && details.messages.length > 0) {
           const recentMessages = details.messages
             .filter(
@@ -302,19 +302,19 @@ export function useNotificationsFeed(currentUser: CurrentUser | null) {
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
 
-          if (recentMessages.length > 0) {
-            const latestMsg = recentMessages[0];
+          // Create a separate notification for EACH message received
+          recentMessages.forEach((msg: Message) => {
             createdNotifications.push(
               buildNotification(
                 ticket,
                 "message",
-                `${latestMsg.user?.name || "Someone"} sent a message in chat`,
-                latestMsg.createdAt,
-                `message-${ticket.ticketId}-${latestMsg._id}`,
+                `${msg.user?.name || "Someone"} sent a message in chat`,
+                msg.createdAt,
+                `message-created-${ticket.ticketId}-${msg._id}`,
                 "created"
               )
             );
-          }
+          });
         }
       });
 

@@ -1,4 +1,51 @@
 import User from "../models/user.model.js";
+import jwt from 'jsonwebtoken';
+
+export const markNotificationsAsSeen = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded._id || decoded.id; // ← ADD decoded.userId    
+    const { notificationIds } = req.body;
+    
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { seenNotificationIds: { $each: notificationIds } }
+    });
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('Mark notifications error:', error);
+    res.status(500).json({ success: false, error: 'Failed to mark notifications as seen' });
+  }
+};
+
+export const getSeenNotifications = async (req, res) => {
+  try {
+    const token = req.cookies.token;    
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded._id || decoded.id; 
+    const user = await User.findById(userId).select('seenNotificationIds');
+    
+    if (!user) {
+      console.log('User not found in database');
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    
+    res.status(200).json({ seenNotificationIds: user.seenNotificationIds || [] });
+  } catch (error) {
+    console.error('Get seen notifications error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get seen notifications' });
+  }
+};
+
 
 export const getAllUsers = async (req, res) => {
   try {

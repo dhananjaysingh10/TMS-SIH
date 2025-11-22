@@ -1,5 +1,5 @@
 //notification.tsx
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -42,6 +42,39 @@ export default function NotificationsPage() {
   const { notifications, loading, error, refresh } =
     useNotificationsFeed(currentUser);
   const [filter, setFilter] = useState<FilterValue>("all");
+
+  useEffect(() => {
+    // Mark all notifications as seen when viewing the notifications page
+    const currentIds = notifications.filter(n => n.isNew).map(n => n.id);
+    if (currentIds.length > 0) {
+      localStorage.setItem('lastSeenNotificationIds', JSON.stringify(currentIds));
+    }
+  }, [notifications]);
+
+useEffect(() => {
+  const markAsSeen = async () => {
+    const currentIds = notifications.filter(n => n.isNew).map(n => n.id);
+    if (currentIds.length > 0) {
+      try {
+        await fetch(
+          `${import.meta.env.VITE_API_URL}/api/user/mark-notifications-seen`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({ notificationIds: currentIds }),
+          }
+        );
+      } catch (error) {
+        console.error('Failed to mark notifications as seen:', error);
+      }
+    }
+  };
+
+  markAsSeen();
+}, [notifications]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return notifications;
