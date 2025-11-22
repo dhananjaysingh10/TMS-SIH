@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
 import ActivityTimeline from "@/components/activity";
 import { io, Socket } from "socket.io-client";
+import { TicketChatbot } from "@/components/chatbot";
 import {
   ticketsApi,
   commentsApi,
@@ -25,6 +26,7 @@ import {
   Loader2,
   Calendar,
   UserCheck,
+  Sparkles,
   X,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
@@ -101,7 +103,7 @@ export default function TicketDetail() {
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
   const userId = currentUser ? currentUser.id : "";
-
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -390,6 +392,28 @@ export default function TicketDetail() {
   return (
     <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <button
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          className={`fixed bottom-8 right-8 rounded-full shadow-2xl transition-all duration-300 z-[60] group flex items-center gap-3 px-6 py-3 font-semibold ${
+            isChatOpen
+              ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-500/50 scale-100"
+              : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:scale-110 hover:shadow-xl"
+          }`}
+        >
+          {isChatOpen ? (
+            <X size={20} className="transition-transform duration-300" />
+          ) : (
+            <>
+              <Sparkles size={20} className="animate-pulse" />
+              <span className="max-w-0 overflow-hidden group-hover:max-w-[120px] transition-all duration-300 ease-in-out whitespace-nowrap">
+                Ask AI
+              </span>
+            </>
+          )}
+        </button>
+        {isChatOpen && (
+          <TicketChatbot ticket={ticket} onClose={() => setIsChatOpen(false)} />
+        )}
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors font-medium group"
