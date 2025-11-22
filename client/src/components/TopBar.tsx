@@ -167,19 +167,32 @@ useEffect(() => {
       <div className="flex items-center gap-4">
         {/* Notifications Bell */}
         <div className="relative">
-          <button
-            onClick={handleToggleNotifications}
-            className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            aria-label="Notifications"
-          >
-            <Bell size={20} className="text-gray-600" />
-            {showIndicator && (
-              <span 
-                className="absolute top-1.5 right-1.5 rounded-full h-2 w-2 shadow-sm"
-                style={{ backgroundColor: '#ef4444' }}
-              ></span>
-            )}
-          </button>
+
+      <div
+        onClick={handleToggleNotifications}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            handleToggleNotifications();
+          }
+        }}
+        className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        aria-label="Notifications"
+      >
+        <Bell size={24} className="text-gray-800" />
+        {showIndicator && (
+          <span 
+            className="absolute rounded-full shadow-sm bg-red-500"
+            style={{ 
+              width: '8px', 
+              height: '8px',
+              top: '10px',
+              right: '11.5px'
+            }}
+          ></span>
+        )}
+      </div>
 
           {showNotifications && (
             <>
