@@ -53,10 +53,10 @@ useEffect(() => {
       //  console.log('✅ Data received:', data);
         setLastSeenIds(data.seenNotificationIds || []);
       } else {
-        console.error('❌ Response not ok:', response.status, response.statusText);
+        console.error('Response not ok:', response.status, response.statusText);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch seen notifications:', error);
+      console.error('Failed to fetch seen notifications:', error);
     } finally {
       setSeenIdsLoading(false);
     }
@@ -293,8 +293,8 @@ useEffect(() => {
         {/* User Menu */}
         <div className="relative">
           <div
-            onClick={handleToggleUserMenu}
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-gray-100 transition-colors overflow-hidden cursor-pointer border border-gray-200"
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-gray-100 transition-colors overflow-hidden cursor-pointer"
             aria-label="User menu"
           >
             {currentUser?.profilePicture ? (
@@ -306,6 +306,13 @@ useEffect(() => {
                 onError={(e) => {
                   console.error("Profile picture failed to load:", currentUser?.profilePicture);
                   e.currentTarget.style.display = "none";
+                }}
+                onLoad={(e) => {
+                  console.log("Profile picture loaded successfully");
+                  console.log("Natural dimensions:", {
+                    width: e.currentTarget.naturalWidth,
+                    height: e.currentTarget.naturalHeight,
+                  });
                 }}
               />
             ) : (
@@ -347,6 +354,7 @@ useEffect(() => {
             </>
           )}
         </div>
+        
       </div>
       <ToastContainer position="top-right" autoClose={3000} />
     </header>
