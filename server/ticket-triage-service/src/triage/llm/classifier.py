@@ -138,8 +138,7 @@ Provide accurate, context-aware classification."""
                     "schema": CLASSIFICATION_SCHEMA
                 }
             },
-            temperature=0.3,
-            max_completion_tokens=512
+            temperature=0.3
         )
         
         data = json.loads(response.choices[0].message.content)

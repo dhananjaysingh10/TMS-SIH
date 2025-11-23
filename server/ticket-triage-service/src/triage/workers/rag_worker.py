@@ -2,10 +2,12 @@ import redis
 import json
 import logging
 import sys
+import os
 from pathlib import Path
 import requests
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# Add project root to path (where src/ is located)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
 from src.triage.retriever.rag import retrieve_docs
 from src.triage.llm.classifier import client
@@ -91,7 +93,6 @@ Example format:
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,
-            max_completion_tokens=500
         )
 
         assistant_reply = response.choices[0].message.content or "No reply generated"
