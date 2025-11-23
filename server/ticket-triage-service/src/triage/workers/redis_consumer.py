@@ -52,5 +52,8 @@ def run():
         except Exception as e:
             LOG.error(f"❌ Error processing ticket: {e}")
 
+def start_consumer():
+    run()
+
 if __name__ == "__main__":
     run()

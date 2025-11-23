@@ -163,5 +163,8 @@ def run():
             import traceback
             traceback.print_exc()
 
+def start_worker():
+    run()
+
 if __name__ == "__main__":
     run()

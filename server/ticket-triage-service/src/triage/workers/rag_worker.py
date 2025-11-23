@@ -129,5 +129,8 @@ def run():
         except Exception as e:
             LOG.error(f"❌ Critical error in worker loop: {e}")
 
+def start_worker():
+    run()
+
 if __name__ == "__main__":
     run()
