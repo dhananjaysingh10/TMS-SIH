@@ -135,7 +135,7 @@ def main():
 
                     # 4. Push to Queue
                     redis_client.lpush(TICKET_QUEUE_NAME, ticket_json)
-                    print(f"🚀 Pushed ticket {json.loads(ticket_json)['ticket_id']} to queue.")
+                    print(f"🚀 Pushed ticket {json.loads(ticket_json)['ticketId']} to queue.")
 
                     # 5. Mark as Processed (Important!)
                     mail.store(email_id, '+FLAGS', '\\Seen')
