@@ -264,6 +264,24 @@ export const ticketsApi = {
       method: "POST",
       body: JSON.stringify({ useremail, remark }),
     }),
+  transferTicket: async (
+    ticketId: string,
+    transferData: {
+      newDepartment: string;
+      newAssigneeEmail?: string;
+      transferReason: string;
+      transferredByEmail: string;
+    }
+  ): Promise<Ticket> => {
+    const response = await fetchApi<ApiResponse<Ticket>>(
+      `/ticket/transfer/${ticketId}`,
+      {
+        method: "POST",
+        body: JSON.stringify(transferData),
+      }
+    );
+    return response.data;
+  },
   ticketStats: () => fetchApi<TicketStats>("/tickets/stats"),
   updateStatus: (ticketId: string, status: string) =>
     fetchApi<Ticket>(`/ticket/${ticketId}/status`, {

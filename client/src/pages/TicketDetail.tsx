@@ -6,6 +6,7 @@ import { selectCurrentUser } from "../redux/user/userSlice";
 import ActivityTimeline from "@/components/activity";
 import { io, Socket } from "socket.io-client";
 import { TicketChatbot } from "@/components/chatbot";
+import TransferTicketModal from "@/components/TransferTicketModal";
 import {
   ticketsApi,
   commentsApi,
@@ -28,6 +29,7 @@ import {
   UserCheck,
   Sparkles,
   X,
+  ArrowRightLeft,
 } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -93,12 +95,14 @@ export default function TicketDetail() {
     "Request for change of Department"
   );
   const [resolvepanel, setResolvePanel] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [buttonLoading, setButtonLoading] = useState({
     accept: false,
     unaccept: false,
     resolve: false,
     open: false,
     request: false,
+    transfer: false,
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
@@ -414,6 +418,17 @@ export default function TicketDetail() {
         {isChatOpen && (
           <TicketChatbot ticket={ticket} onClose={() => setIsChatOpen(false)} />
         )}
+        <TransferTicketModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setIsTransferModalOpen(false)}
+          ticketId={ticket._id}
+          currentDepartment={ticket.department}
+          currentUserEmail={useremail}
+          onTransferSuccess={() => {
+            fetchTicketDetails();
+            fetchActivities();
+          }}
+        />
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 mb-6 transition-colors font-medium group"
@@ -639,27 +654,50 @@ export default function TicketDetail() {
                   {canAcceptTicket(ticket, currentUser) &&
                     ticket.accepted &&
                     ticket.status !== "resolved" && (
-                      <button
-                        onClick={handleUnacceptTicket}
-                        disabled={buttonLoading.unaccept}
-                        className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${
-                          buttonLoading.unaccept
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
-                      >
-                        {buttonLoading.unaccept ? (
-                          <>
-                            <Loader2 size={18} className="animate-spin" />
-                            Unclaiming...
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle size={18} />
-                            Unclaim
-                          </>
-                        )}
-                      </button>
+                      <>
+                        <button
+                          onClick={handleUnacceptTicket}
+                          disabled={buttonLoading.unaccept}
+                          className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${
+                            buttonLoading.unaccept
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          {buttonLoading.unaccept ? (
+                            <>
+                              <Loader2 size={18} className="animate-spin" />
+                              Unclaiming...
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle size={18} />
+                              Unclaim
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => setIsTransferModalOpen(true)}
+                          disabled={buttonLoading.transfer}
+                          className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-sm hover:shadow ${
+                            buttonLoading.transfer
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          {buttonLoading.transfer ? (
+                            <>
+                              <Loader2 size={18} className="animate-spin" />
+                              Transferring...
+                            </>
+                          ) : (
+                            <>
+                              <ArrowRightLeft size={18} />
+                              Transfer
+                            </>
+                          )}
+                        </button>
+                      </>
                     )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
