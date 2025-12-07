@@ -4,6 +4,15 @@ from fastembed import TextEmbedding
 from ..config import settings
 from ..schemas.models import ClassificationOutput
 import json
+from pathlib import Path
+
+# Try to import BERT classifier
+try:
+    from .bert_classifier import get_classifier
+    BERT_AVAILABLE = True
+except Exception as e:
+    print(f"⚠️ BERT classifier not available: {e}")
+    BERT_AVAILABLE = False
 
 client = Groq(api_key=settings.GROQ_API_KEY)
 
@@ -68,7 +77,14 @@ CLASSIFICATION_SCHEMA = {
     "additionalProperties": False
 }
 
-def classify_ticket(ticket: dict) -> ClassificationOutput:
+# Configuration for hybrid classifier
+CLASSIFIER_MODE = "hybrid"  # "bert", "llm", or "hybrid"
+CONFIDENCE_THRESHOLD = 0.75
+RARE_CLASSES = ["Cybersecurity", "DevOps", "Networking"]
+BERT_MODEL_PATH = Path(__file__).parent.parent.parent.parent / "models" / "bert_classifier"
+
+def llm_classify_ticket(ticket: dict) -> ClassificationOutput:
+    """Classify ticket using LLM (original implementation)."""
     
     # Retrieve similar examples (RAG)
     ticket_text = f"{ticket.get('title', '')} {ticket['description']}"
@@ -198,3 +214,83 @@ Provide accurate, context-aware classification."""
             confidence=0.3,
             suggested_actions=["Manual review required", "Contact submitter for more details"]
         )
+
+def bert_classify_ticket(ticket: dict) -> ClassificationOutput:
+    """Classify ticket using BERT model."""
+    try:
+        # Get BERT classifier
+        classifier = get_classifier(str(BERT_MODEL_PATH))
+        
+        # Prepare input text
+        ticket_text = f"{ticket.get('title', '')} [SEP] {ticket['description']}"
+        
+        # Get prediction
+        result = classifier.predict(ticket_text, return_confidence=True)
+        
+        # Generate suggested actions based on classification
+        suggested_actions = generate_suggested_actions(
+            result['department'],
+            result['type'],
+            result['priority']
+        )
+        
+        return ClassificationOutput(
+            department=result['department'],
+            type=result['type'],
+            priority=result['priority'],
+            confidence=result['confidence'],
+            suggested_actions=suggested_actions
+        )
+    except Exception as e:
+        print(f"❌ BERT classification error: {e}")
+        # Fallback to LLM
+        return llm_classify_ticket(ticket)
+
+def generate_suggested_actions(department: str, ticket_type: str, priority: str) -> list:
+    """Generate suggested actions based on classification."""
+    actions = []
+    
+    # Department-specific actions
+    dept_actions = {
+        "IT": ["Check user account status", "Verify system access", "Review recent changes"],
+        "DevOps": ["Check deployment logs", "Verify infrastructure status", "Review CI/CD pipeline"],
+        "Software": ["Review error logs", "Check recent code changes", "Verify API endpoints"],
+        "Networking": ["Check network connectivity", "Verify VPN status", "Review firewall rules"],
+        "Cybersecurity": ["Assess security impact", "Review access logs", "Initiate security protocol"],
+        "Other": ["Gather more information", "Consult with team lead"]
+    }
+    
+    actions.extend(dept_actions.get(department, [])[:2])
+    
+    # Priority-specific actions
+    if priority == "urgent":
+        actions.insert(0, "Escalate immediately to senior team")
+    elif priority == "high":
+        actions.insert(0, "Prioritize in current sprint")
+    
+    return actions[:5]  # Return max 5 actions
+
+def classify_ticket(ticket: dict) -> ClassificationOutput:
+    """Main classification function with hybrid approach."""
+    
+    # Mode 1: LLM only
+    if CLASSIFIER_MODE == "llm" or not BERT_AVAILABLE:
+        return llm_classify_ticket(ticket)
+    
+    # Mode 2: BERT only
+    if CLASSIFIER_MODE == "bert":
+        return bert_classify_ticket(ticket)
+    
+    # Mode 3: Hybrid (RECOMMENDED)
+    # Try BERT first
+    bert_result = bert_classify_ticket(ticket)
+    
+    # Use LLM fallback for:
+    # 1. Low confidence predictions
+    # 2. Rare classes (insufficient training data)
+    if (bert_result.confidence < CONFIDENCE_THRESHOLD or 
+        bert_result.department in RARE_CLASSES):
+        print(f"🔄 Using LLM fallback (confidence: {bert_result.confidence:.2f}, dept: {bert_result.department})")
+        return llm_classify_ticket(ticket)
+    
+    return bert_result

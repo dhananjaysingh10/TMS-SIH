@@ -1,0 +1,1636 @@
+ticketId,title,description,department,type,priority,text,department_encoded,type_encoded,priority_encoded
+8741294a-ef9f-4be8-ae24-ed064bf57584,hello world,Server downtime reported on main application,IT,bug,high,hello world [SEP] Server downtime reported on main application,2,0,0
+8741294a-ef9f-4be8-ae24-ed064bf57584_aug_1,hello world,Server downtime reported on main application,IT,bug,high,hello [SEP] downtime reported Server main world on application,2,0,0
+8741294a-ef9f-4be8-ae24-ed064bf57584_aug_2,hello world,Server downtime reported on main application,IT,bug,high,please help hello world [SEP] Server downtime reported on main application,2,0,0
+TICKET-12345,raja raja raja kareja me samaja,Server downtime reported on main application,IT,bug,high,raja raja raja kareja me samaja [SEP] Server downtime reported on main application,2,0,0
+TICKET-12345_aug_4,raja raja raja kareja me samaja,Server downtime reported on main application,IT,bug,high,raja me kareja samaja on [SEP] downtime raja Server main reported raja application,2,0,0
+TICKET-12345_aug_5,raja raja raja kareja me samaja,Server downtime reported on main application,IT,bug,high,please help raja raja raja kareja me samaja [SEP] Server downtime reported on main application,2,0,0
+TICKET-123slk5,xlksdmlk,Server downtime reported on main application,Software,bug,high,xlksdmlk [SEP] Server downtime reported on main application,5,0,0
+TICKET-123slk5_aug_7,xlksdmlk,Server downtime reported on main application,Software,bug,high,xlksdmlk downtime Server [SEP] reported on main application,5,0,0
+TICKET-123slk5_aug_8,xlksdmlk,Server downtime reported on main application,Software,bug,high,need assistance xlksdmlk [SEP] Server downtime reported on main application,5,0,0
+TICKET-123sakdkllk5,fsmdlk,Server downtime reported on main application,DevOps,bug,high,fsmdlk [SEP] Server downtime reported on main application,1,0,0
+TICKET-123sakdkllk5_aug_10,fsmdlk,Server downtime reported on main application,DevOps,bug,high,fsmdlk main downtime on reported Server [SEP] application,1,0,0
+TICKET-123sakdkllk5_aug_11,fsmdlk,Server downtime reported on main application,DevOps,bug,high,please help fsmdlk [SEP] Server downtime reported on main application,1,0,0
+a4dad5bb-2c1f-4aa1-af94-acdf019b100c,Test Title,abhi banayi h,IT,task,medium,Test Title [SEP] abhi banayi h,2,3,2
+a4dad5bb-2c1f-4aa1-af94-acdf019b100c_aug_13,Test Title,abhi banayi h,IT,task,medium,Test abhi Title banayi [SEP] h,2,3,2
+a4dad5bb-2c1f-4aa1-af94-acdf019b100c_aug_14,Test Title,abhi banayi h,IT,task,medium,urgent Test Title [SEP] abhi banayi h,2,3,2
+43ed8c1a-6be4-4763-9d7e-8272b9489b45,Test Title,new ticket,IT,task,medium,Test Title [SEP] new ticket,2,3,2
+43ed8c1a-6be4-4763-9d7e-8272b9489b45_aug_16,Test Title,new ticket,IT,task,medium,Test new Title [SEP] ticket,2,3,2
+43ed8c1a-6be4-4763-9d7e-8272b9489b45_aug_17,Test Title,new ticket,IT,task,medium,need assistance Test Title [SEP] new ticket,2,3,2
+37a4830b-eda5-4d4d-8908-d9d2d72b21e2,Test Title,new ticket 2,Software,task,high,Test Title [SEP] new ticket 2,5,3,0
+37a4830b-eda5-4d4d-8908-d9d2d72b21e2_aug_19,Test Title,new ticket 2,Software,task,high,Test Title [SEP] ticket new 2,5,3,0
+37a4830b-eda5-4d4d-8908-d9d2d72b21e2_aug_20,Test Title,new ticket 2,Software,task,high,urgent Test Title [SEP] new ticket 2,5,3,0
+569a0125-e5ce-4efc-a107-784755665d53,Test Title,problems hai,IT,task,medium,Test Title [SEP] problems hai,2,3,2
+569a0125-e5ce-4efc-a107-784755665d53_aug_22,Test Title,problems hai,IT,task,medium,Test Title [SEP] problems hai,2,3,2
+569a0125-e5ce-4efc-a107-784755665d53_aug_23,Test Title,problems hai,IT,task,medium,urgent Test Title [SEP] problems hai,2,3,2
+dc797c5f-5bd4-4791-b8bc-0e79e9f4f628,Test Title,How to add chat feature 😭,Software,task,high,Test Title [SEP] How to add chat feature 😭,5,3,0
+dc797c5f-5bd4-4791-b8bc-0e79e9f4f628_aug_25,Test Title,How to add chat feature 😭,Software,task,high,Test chat [SEP] feature How add Title to 😭,5,3,0
+dc797c5f-5bd4-4791-b8bc-0e79e9f4f628_aug_26,Test Title,How to add chat feature 😭,Software,task,high,please help Test Title [SEP] How to add chat feature 😭,5,3,0
+e8739a23-b0c9-4b8f-84b5-0e6b6d2471a4,Test Title,this is for testing for workflow,IT,task,medium,Test Title [SEP] this is for testing for workflow,2,3,2
+e8739a23-b0c9-4b8f-84b5-0e6b6d2471a4_aug_28,Test Title,this is for testing for workflow,IT,task,medium,Test this for is [SEP] for Title testing workflow,2,3,2
+e8739a23-b0c9-4b8f-84b5-0e6b6d2471a4_aug_29,Test Title,this is for testing for workflow,IT,task,medium,please help Test Title [SEP] this is for testing for workflow,2,3,2
+d261f449-3532-4f95-b652-8518a8ee8de3,error,error,IT,task,medium,error [SEP] error,2,3,2
+d261f449-3532-4f95-b652-8518a8ee8de3_aug_31,error,error,IT,task,medium,urgent error [SEP] error,2,3,2
+db77491d-15e3-4b17-838b-37ca83c0e684,testing,testing,IT,task,medium,testing [SEP] testing,2,3,2
+db77491d-15e3-4b17-838b-37ca83c0e684_aug_33,testing,testing,IT,task,medium,issue with testing [SEP] testing,2,3,2
+2e3c52c1-6443-415b-a785-f2db56e1d23a,hehe,hehe,IT,task,medium,hehe [SEP] hehe,2,3,2
+2e3c52c1-6443-415b-a785-f2db56e1d23a_aug_35,hehe,hehe,IT,task,medium,need assistance hehe [SEP] hehe,2,3,2
+abd7a43d-2df1-4066-aaf1-740bcaea0dd1,helo,I don't know what will happne,IT,bug,low,helo [SEP] I don't know what will happne,2,0,1
+abd7a43d-2df1-4066-aaf1-740bcaea0dd1_aug_37,helo,I don't know what will happne,IT,bug,low,helo [SEP] what will I don't know happne,2,0,1
+abd7a43d-2df1-4066-aaf1-740bcaea0dd1_aug_38,helo,I don't know what will happne,IT,bug,low,please help helo [SEP] I don't know what will happne,2,0,1
+0b981cad-d7a4-4673-abeb-e3724a340f67,testing bot,testing bot,Software,task,medium,testing bot [SEP] testing bot,5,3,2
+0b981cad-d7a4-4673-abeb-e3724a340f67_aug_40,testing bot,testing bot,Software,task,medium,testing bot [SEP] testing bot,5,3,2
+0b981cad-d7a4-4673-abeb-e3724a340f67_aug_41,testing bot,testing bot,Software,task,medium,urgent testing bot [SEP] testing bot,5,3,2
+eml-1759830884-cec718a9,request for repair,laptop screen broken,IT,task,high,request for repair [SEP] laptop screen broken,2,3,0
+eml-1759830884-cec718a9_aug_43,request for repair,laptop screen broken,IT,task,high,request laptop for [SEP] repair screen broken,2,3,0
+eml-1759830884-cec718a9_aug_44,request for repair,laptop screen broken,IT,task,high,please help request for repair [SEP] laptop screen broken,2,3,0
+eml-1759831345-0b4c5890,request for repair,laptop screen broken,IT,task,high,request for repair [SEP] laptop screen broken,2,3,0
+eml-1759831345-0b4c5890_aug_46,request for repair,laptop screen broken,IT,task,high,request [SEP] for repair screen laptop broken,2,3,0
+eml-1759831345-0b4c5890_aug_47,request for repair,laptop screen broken,IT,task,high,need assistance request for repair [SEP] laptop screen broken,2,3,0
+eml-1759831698-83346183,request for repair,laptop screen broken,IT,task,high,request for repair [SEP] laptop screen broken,2,3,0
+eml-1759831698-83346183_aug_49,request for repair,laptop screen broken,IT,task,high,request [SEP] laptop screen repair for broken,2,3,0
+eml-1759831698-83346183_aug_50,request for repair,laptop screen broken,IT,task,high,issue with request for repair [SEP] laptop screen broken,2,3,0
+eml-1759832808-8d191bd9,request for repair,laptop screen broken,IT,bug,high,request for repair [SEP] laptop screen broken,2,0,0
+eml-1759832808-8d191bd9_aug_52,request for repair,laptop screen broken,IT,bug,high,request screen repair laptop for [SEP] broken,2,0,0
+eml-1759832808-8d191bd9_aug_53,request for repair,laptop screen broken,IT,bug,high,please help request for repair [SEP] laptop screen broken,2,0,0
+eml-1759833325-01d9d049,request for repair,"laptop screen broken
+pls",IT,task,high,"request for repair [SEP] laptop screen broken
+pls",2,3,0
+eml-1759833325-01d9d049_aug_55,request for repair,"laptop screen broken
+pls",IT,task,high,request for repair [SEP] screen laptop broken pls,2,3,0
+eml-1759833325-01d9d049_aug_56,request for repair,"laptop screen broken
+pls",IT,task,high,"please help request for repair [SEP] laptop screen broken
+pls",2,3,0
+eml-1759833436-47a65088,Re: request for repair,"helo pls do it quick
+
+
+On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> laptop screen broken
+> pls
+>",IT,task,high,"Re: request for repair [SEP] helo pls do it quick
+
+
+On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> laptop screen broken
+> pls
+>",2,3,0
+eml-1759833436-47a65088_aug_58,Re: request for repair,"helo pls do it quick
+
+
+On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> laptop screen broken
+> pls
+>",IT,task,high,"Re: > > On Tue, [SEP] pls do <dhananjay.ecell@gmail.com> at PM request for 4:05 wrote: repair broken Oct 7, 2025 Singh pls laptop Dhananjay screen it helo quick >",2,3,0
+eml-1759833436-47a65088_aug_59,Re: request for repair,"helo pls do it quick
+
+
+On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> laptop screen broken
+> pls
+>",IT,task,high,"issue with Re: request for repair [SEP] helo pls do it quick
+
+
+On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> laptop screen broken
+> pls
+>",2,3,0
+eml-1759833708-b4fc057f,Re: request for repair,"Dhananjay Singh
+4:06 PM (1 minute ago)
+to sihticketing
+helo pls do it quick
+
+laptop screen broken
+> pls
+>
+
+
+On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo pls do it quick
+>
+>
+> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> laptop screen broken
+>> pls
+>>
+>",IT,task,high,"Re: request for repair [SEP] Dhananjay Singh
+4:06 PM (1 minute ago)
+to sihticketing
+helo pls do it quick
+
+laptop screen broken
+> pls
+>
+
+
+On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo pls do it quick
+>
+>
+> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> laptop screen broken
+>> pls
+>>
+>",2,3,0
+eml-1759833708-b4fc057f_aug_61,Re: request for repair,"Dhananjay Singh
+4:06 PM (1 minute ago)
+to sihticketing
+helo pls do it quick
+
+laptop screen broken
+> pls
+>
+
+
+On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo pls do it quick
+>
+>
+> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> laptop screen broken
+>> pls
+>>
+>",IT,task,high,"Re: at 2025 Singh helo helo On pls > PM > >> (1 <dhananjay.ecell@gmail.com> laptop Oct Dhananjay PM 4:06 screen repair Dhananjay wrote: pls Singh > Tue, Oct > [SEP] do do broken wrote: Singh 4:05 > minute sihticketing pls broken screen it 4:06 On to >> it >> Tue, request at ago) 7, laptop PM > quick 2025 quick 7, <dhananjay.ecell@gmail.com> > > pls for Dhananjay >",2,3,0
+eml-1759833708-b4fc057f_aug_62,Re: request for repair,"Dhananjay Singh
+4:06 PM (1 minute ago)
+to sihticketing
+helo pls do it quick
+
+laptop screen broken
+> pls
+>
+
+
+On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo pls do it quick
+>
+>
+> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> laptop screen broken
+>> pls
+>>
+>",IT,task,high,"issue with Re: request for repair [SEP] Dhananjay Singh
+4:06 PM (1 minute ago)
+to sihticketing
+helo pls do it quick
+
+laptop screen broken
+> pls
+>
+
+
+On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo pls do it quick
+>
+>
+> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> laptop screen broken
+>> pls
+>>
+>",2,3,0
+eml-1759833847-2c673802,Re: request for repair,"helo heloo laptop broken
+
+On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> Dhananjay Singh
+> 4:06 PM (1 minute ago)
+> to sihticketing
+> helo pls do it quick
+>
+> laptop screen broken
+>> pls
+>>
+>
+>
+> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo pls do it quick
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> laptop screen broken
+>>> pls
+>>>
+>>",IT,task,high,"Re: request for repair [SEP] helo heloo laptop broken
+
+On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> Dhananjay Singh
+> 4:06 PM (1 minute ago)
+> to sihticketing
+> helo pls do it quick
+>
+> laptop screen broken
+>> pls
+>>
+>
+>
+> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo pls do it quick
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> laptop screen broken
+>>> pls
+>>>
+>>",2,3,0
+eml-1759833847-2c673802_aug_64,Re: request for repair,"helo heloo laptop broken
+
+On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> Dhananjay Singh
+> 4:06 PM (1 minute ago)
+> to sihticketing
+> helo pls do it quick
+>
+> laptop screen broken
+>> pls
+>>
+>
+>
+> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo pls do it quick
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> laptop screen broken
+>>> pls
+>>>
+>>",IT,task,high,"Re: it > Oct On >> >>> Oct On > > wrote: 4:06 pls 4:06 <dhananjay.ecell@gmail.com> helo at heloo at quick PM 2025 > for >> helo pls 4:11 >> > >> > 7, Singh 7, at Singh Dhananjay pls laptop >> >>> quick Dhananjay PM Tue, Singh > screen >>> [SEP] > 2025 wrote: PM Singh it Tue, <dhananjay.ecell@gmail.com> laptop 2025 (1 Oct >> broken > Dhananjay minute > do to pls 4:05 broken helo laptop <dhananjay.ecell@gmail.com> broken Tue, request screen wrote: > >> 7, repair >> On ago) sihticketing PM Dhananjay do >>",2,3,0
+eml-1759833847-2c673802_aug_65,Re: request for repair,"helo heloo laptop broken
+
+On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> Dhananjay Singh
+> 4:06 PM (1 minute ago)
+> to sihticketing
+> helo pls do it quick
+>
+> laptop screen broken
+>> pls
+>>
+>
+>
+> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo pls do it quick
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> laptop screen broken
+>>> pls
+>>>
+>>",IT,task,high,"please help Re: request for repair [SEP] helo heloo laptop broken
+
+On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> Dhananjay Singh
+> 4:06 PM (1 minute ago)
+> to sihticketing
+> helo pls do it quick
+>
+> laptop screen broken
+>> pls
+>>
+>
+>
+> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo pls do it quick
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> laptop screen broken
+>>> pls
+>>>
+>>",2,3,0
+eml-1759833936-cd18c294,Re: request for repair,"helo helo wtf laptop broken
+
+On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo heloo laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> Dhananjay Singh
+>> 4:06 PM (1 minute ago)
+>> to sihticketing
+>> helo pls do it quick
+>>
+>> laptop screen broken
+>>> pls
+>>>
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo pls do it quick
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> laptop screen broken
+>>>> pls
+>>>>
+>>>",IT,support,high,"Re: request for repair [SEP] helo helo wtf laptop broken
+
+On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo heloo laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> Dhananjay Singh
+>> 4:06 PM (1 minute ago)
+>> to sihticketing
+>> helo pls do it quick
+>>
+>> laptop screen broken
+>>> pls
+>>>
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo pls do it quick
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> laptop screen broken
+>>>> pls
+>>>>
+>>>",2,2,0
+eml-1759833936-cd18c294_aug_67,Re: request for repair,"helo helo wtf laptop broken
+
+On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo heloo laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> Dhananjay Singh
+>> 4:06 PM (1 minute ago)
+>> to sihticketing
+>> helo pls do it quick
+>>
+>> laptop screen broken
+>>> pls
+>>>
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo pls do it quick
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> laptop screen broken
+>>>> pls
+>>>>
+>>>",IT,support,high,"Re: minute >> broken >>>> [SEP] 7, PM 4:06 Oct to >> >>> wrote: at 4:06 Tue, do repair PM >>>> it Dhananjay Dhananjay at > PM (1 Singh >> >> pls Dhananjay 7, pls 2025 helo >> >> Singh PM request On > laptop <dhananjay.ecell@gmail.com> >> screen On <dhananjay.ecell@gmail.com> Singh wrote: do quick helo >>> >>>> 2025 2025 4:11 helo < Dhananjay > 4:05 for On Oct it <dhananjay.ecell@gmail.com> PM ago) 2025 quick >> > at dhananjay.ecell@gmail.com> pls pls >>> sihticketing Oct Dhananjay helo >>> Singh 7, Tue, 4:13 >> Oct helo laptop at broken heloo Tue, >>> >>> wrote: >>> broken >> screen wtf >>> wrote: Tue, broken >> On 7, laptop > Singh laptop >>>",2,2,0
+eml-1759833936-cd18c294_aug_68,Re: request for repair,"helo helo wtf laptop broken
+
+On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo heloo laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> Dhananjay Singh
+>> 4:06 PM (1 minute ago)
+>> to sihticketing
+>> helo pls do it quick
+>>
+>> laptop screen broken
+>>> pls
+>>>
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo pls do it quick
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> laptop screen broken
+>>>> pls
+>>>>
+>>>",IT,support,high,"please help Re: request for repair [SEP] helo helo wtf laptop broken
+
+On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo heloo laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> Dhananjay Singh
+>> 4:06 PM (1 minute ago)
+>> to sihticketing
+>> helo pls do it quick
+>>
+>> laptop screen broken
+>>> pls
+>>>
+>>
+>>
+>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo pls do it quick
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> laptop screen broken
+>>>> pls
+>>>>
+>>>",2,2,0
+eml-1759834144-7a165f97,Re: request for repair,"hey final test pls do it quick
+deplyomet faild please share redis credentials
+
+On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo helo wtf laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo heloo laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> Dhananjay Singh
+>>> 4:06 PM (1 minute ago)
+>>> to sihticketing
+>>> helo pls do it quick
+>>>
+>>> laptop screen broken
+>>>> pls
+>>>>
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> helo pls do it quick
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>",IT,support,high,"Re: request for repair [SEP] hey final test pls do it quick
+deplyomet faild please share redis credentials
+
+On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo helo wtf laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo heloo laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> Dhananjay Singh
+>>> 4:06 PM (1 minute ago)
+>>> to sihticketing
+>>> helo pls do it quick
+>>>
+>>> laptop screen broken
+>>>> pls
+>>>>
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> helo pls do it quick
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>",2,2,0
+eml-1759834144-7a165f97_aug_70,Re: request for repair,"hey final test pls do it quick
+deplyomet faild please share redis credentials
+
+On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo helo wtf laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo heloo laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> Dhananjay Singh
+>>> 4:06 PM (1 minute ago)
+>>> to sihticketing
+>>> helo pls do it quick
+>>>
+>>> laptop screen broken
+>>>> pls
+>>>>
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> helo pls do it quick
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>",IT,support,high,"Re: for deplyomet < >>> 4:11 > Dhananjay 2025 4:06 >>> minute redis credentials Dhananjay Oct >>>> >>> test pls >>>> Tue, On >>>> pls >> Tue, final Singh helo wrote: 7, screen > do Tue, >>> >>> PM >> Dhananjay Oct pls laptop 4:06 pls 2025 >> Dhananjay On 4:15 faild ago) Singh <dhananjay.ecell@gmail.com> Singh 4:13 PM laptop >>> request <dhananjay.ecell@gmail.com> Dhananjay repair >>>>> < wrote: wrote: sihticketing >> 7, dhananjay.ecell@gmail.com> broken at wrote: PM Singh do laptop share dhananjay.ecell@gmail.com> 2025 <dhananjay.ecell@gmail.com> 4:05 PM to >>>> it do > helo >> PM >>> it at > 2025 PM On Dhananjay wrote: 7, hey > please quick >>>> 7, broken helo Tue, pls broken helo On quick >>> at >>>>> >>>> [SEP] helo >>> at Oct Tue, >>>> 2025 Oct Oct 7, >>> Singh at heloo >>> >>>>> screen (1 quick wtf Singh On laptop broken it >>>> >>>>",2,2,0
+eml-1759834144-7a165f97_aug_71,Re: request for repair,"hey final test pls do it quick
+deplyomet faild please share redis credentials
+
+On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo helo wtf laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo heloo laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> Dhananjay Singh
+>>> 4:06 PM (1 minute ago)
+>>> to sihticketing
+>>> helo pls do it quick
+>>>
+>>> laptop screen broken
+>>>> pls
+>>>>
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> helo pls do it quick
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>",IT,support,high,"need assistance Re: request for repair [SEP] hey final test pls do it quick
+deplyomet faild please share redis credentials
+
+On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> helo helo wtf laptop broken
+>
+> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo heloo laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> Dhananjay Singh
+>>> 4:06 PM (1 minute ago)
+>>> to sihticketing
+>>> helo pls do it quick
+>>>
+>>> laptop screen broken
+>>>> pls
+>>>>
+>>>
+>>>
+>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> helo pls do it quick
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>",2,2,0
+eml-1759836314-b9080d6b,Re: request for repair,"hello please it has m=been 10 days replace the laptop fast
+
+On Tue, Oct 7, 2025 at 4:18 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> hey final test pls do it quick
+> deplyomet faild please share redis credentials
+>
+> On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo helo wtf laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo heloo laptop broken
+>>>
+>>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> Dhananjay Singh
+>>>> 4:06 PM (1 minute ago)
+>>>> to sihticketing
+>>>> helo pls do it quick
+>>>>
+>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> helo pls do it quick
+>>>>>
+>>>>>
+>>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>>
+>>>>>> laptop screen broken
+>>>>>> pls
+>>>>>>
+>>>>>",IT,support,high,"Re: request for repair [SEP] hello please it has m=been 10 days replace the laptop fast
+
+On Tue, Oct 7, 2025 at 4:18 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> hey final test pls do it quick
+> deplyomet faild please share redis credentials
+>
+> On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo helo wtf laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo heloo laptop broken
+>>>
+>>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> Dhananjay Singh
+>>>> 4:06 PM (1 minute ago)
+>>>> to sihticketing
+>>>> helo pls do it quick
+>>>>
+>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> helo pls do it quick
+>>>>>
+>>>>>
+>>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>>
+>>>>>> laptop screen broken
+>>>>>> pls
+>>>>>>
+>>>>>",2,2,0
+eml-1759836314-b9080d6b_aug_73,Re: request for repair,"hello please it has m=been 10 days replace the laptop fast
+
+On Tue, Oct 7, 2025 at 4:18 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> hey final test pls do it quick
+> deplyomet faild please share redis credentials
+>
+> On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo helo wtf laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo heloo laptop broken
+>>>
+>>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> Dhananjay Singh
+>>>> 4:06 PM (1 minute ago)
+>>>> to sihticketing
+>>>> helo pls do it quick
+>>>>
+>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> helo pls do it quick
+>>>>>
+>>>>>
+>>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>>
+>>>>>> laptop screen broken
+>>>>>> pls
+>>>>>>
+>>>>>",IT,support,high,"Re: PM >>>>> share it at do >>>>>> > Singh Dhananjay ago) 7, < at <dhananjay.ecell@gmail.com> < >> On <dhananjay.ecell@gmail.com> >>>>> Singh >>>> 7, wrote: do >>>>> credentials broken wrote: Singh >> Oct Dhananjay 7, 10 Singh it On >>>> Dhananjay hello fast PM at >>> Oct On please helo >>> On >> Oct 4:11 PM >> dhananjay.ecell@gmail.com> laptop at Singh at Tue, screen 4:13 do <dhananjay.ecell@gmail.com> wrote: >>> pls broken >>> Tue, Singh 4:18 PM > < [SEP] heloo > screen laptop 2025 hey >> >>>> Oct wrote: dhananjay.ecell@gmail.com> please >>>>> request >>>> 2025 PM repair Oct Dhananjay PM >>>> Dhananjay wrote: has On helo quick laptop Dhananjay Singh m=been >>>>> 7, >>>>> Tue, Dhananjay final >>>>> Oct days 7, PM 4:06 > >>>> test deplyomet 2025 2025 to >>>>> wtf broken 2025 pls On helo >>>>>> redis >>>> minute >>>> sihticketing helo 2025 quick quick dhananjay.ecell@gmail.com> pls broken >>>> the it Tue, Tue, wrote: (1 > for >>>>>> laptop >>>> pls >>> at helo 4:05 4:06 pls 7, Tue, >>>> laptop replace it faild 4:15 > >>>>>",2,2,0
+eml-1759836314-b9080d6b_aug_74,Re: request for repair,"hello please it has m=been 10 days replace the laptop fast
+
+On Tue, Oct 7, 2025 at 4:18 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> hey final test pls do it quick
+> deplyomet faild please share redis credentials
+>
+> On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo helo wtf laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo heloo laptop broken
+>>>
+>>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> Dhananjay Singh
+>>>> 4:06 PM (1 minute ago)
+>>>> to sihticketing
+>>>> helo pls do it quick
+>>>>
+>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> helo pls do it quick
+>>>>>
+>>>>>
+>>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>>
+>>>>>> laptop screen broken
+>>>>>> pls
+>>>>>>
+>>>>>",IT,support,high,"urgent Re: request for repair [SEP] hello please it has m=been 10 days replace the laptop fast
+
+On Tue, Oct 7, 2025 at 4:18 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> hey final test pls do it quick
+> deplyomet faild please share redis credentials
+>
+> On Tue, Oct 7, 2025 at 4:15 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+> wrote:
+>
+>> helo helo wtf laptop broken
+>>
+>> On Tue, Oct 7, 2025 at 4:13 PM Dhananjay Singh <dhananjay.ecell@gmail.com>
+>> wrote:
+>>
+>>> helo heloo laptop broken
+>>>
+>>> On Tue, Oct 7, 2025 at 4:11 PM Dhananjay Singh <
+>>> dhananjay.ecell@gmail.com> wrote:
+>>>
+>>>> Dhananjay Singh
+>>>> 4:06 PM (1 minute ago)
+>>>> to sihticketing
+>>>> helo pls do it quick
+>>>>
+>>>> laptop screen broken
+>>>>> pls
+>>>>>
+>>>>
+>>>>
+>>>> On Tue, Oct 7, 2025 at 4:06 PM Dhananjay Singh <
+>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>
+>>>>> helo pls do it quick
+>>>>>
+>>>>>
+>>>>> On Tue, Oct 7, 2025 at 4:05 PM Dhananjay Singh <
+>>>>> dhananjay.ecell@gmail.com> wrote:
+>>>>>
+>>>>>> laptop screen broken
+>>>>>> pls
+>>>>>>
+>>>>>",2,2,0
+eml-1759859253-0fdf250e,powergrid ticketing api integration,lets integrate glpi and solman api,Software,feature,medium,powergrid ticketing api integration [SEP] lets integrate glpi and solman api,5,1,2
+eml-1759859253-0fdf250e_aug_76,powergrid ticketing api integration,lets integrate glpi and solman api,Software,feature,medium,powergrid and api glpi solman integration [SEP] lets integrate ticketing api,5,1,2
+eml-1759859253-0fdf250e_aug_77,powergrid ticketing api integration,lets integrate glpi and solman api,Software,feature,medium,urgent powergrid ticketing api integration [SEP] lets integrate glpi and solman api,5,1,2
+eml-1759859566-e5f5ee40,powergrid ticketing app deployment,we need to deploy the current build by today,DevOps,task,high,powergrid ticketing app deployment [SEP] we need to deploy the current build by today,1,3,0
+eml-1759859566-e5f5ee40_aug_79,powergrid ticketing app deployment,we need to deploy the current build by today,DevOps,task,high,powergrid deployment we ticketing the current [SEP] build need by app deploy to today,1,3,0
+eml-1759859566-e5f5ee40_aug_80,powergrid ticketing app deployment,we need to deploy the current build by today,DevOps,task,high,issue with powergrid ticketing app deployment [SEP] we need to deploy the current build by today,1,3,0
+eml-1760016772-903a526e,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid ticketing app update [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1760016772-903a526e_aug_82,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid We’ve There's chat app a now ticketing rolled out please update, take [SEP] small a issue, update a our feature CSS supports media!! look",5,0,1
+eml-1760016772-903a526e_aug_83,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"need assistance powergrid ticketing app update [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1760016616-1d9f4abd,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid ticketing app update [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1760016616-1d9f4abd_aug_85,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid media!! update a We’ve update, now rolled take supports CSS a There's chat [SEP] app out ticketing small please issue, a our feature look",5,0,1
+eml-1760016616-1d9f4abd_aug_86,powergrid ticketing app update,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"need assistance powergrid ticketing app update [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1760024389-729228ed,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+eml-1760024389-729228ed_aug_88,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"powergrid rolled out ticketing [SEP] now CSS We’ve please issue, take There's feature a a our small supports chat a media!! update, look",5,0,2
+eml-1760024389-729228ed_aug_89,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"need assistance powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+7a288a36-a8f8-4557-98ef-14c1a24bb299,helo trial,desc,Software,bug,low,helo trial [SEP] desc,5,0,1
+7a288a36-a8f8-4557-98ef-14c1a24bb299_aug_91,helo trial,desc,Software,bug,low,urgent helo trial [SEP] desc,5,0,1
+ed6d91f8-2a45-49b9-928f-7c971cf49da8,Repair,Laptop repair required,IT,task,medium,Repair [SEP] Laptop repair required,2,3,2
+ed6d91f8-2a45-49b9-928f-7c971cf49da8_aug_93,Repair,Laptop repair required,IT,task,medium,Repair Laptop [SEP] repair required,2,3,2
+ed6d91f8-2a45-49b9-928f-7c971cf49da8_aug_94,Repair,Laptop repair required,IT,task,medium,please help Repair [SEP] Laptop repair required,2,3,2
+eml-1763579545-623242d3,frontend ticket creation,tester:arpan,Software,task,low,frontend ticket creation [SEP] tester:arpan,5,3,1
+eml-1763579545-623242d3_aug_96,frontend ticket creation,tester:arpan,Software,task,low,frontend [SEP] creation ticket tester:arpan,5,3,1
+eml-1763579545-623242d3_aug_97,frontend ticket creation,tester:arpan,Software,task,low,need assistance frontend ticket creation [SEP] tester:arpan,5,3,1
+914bd141-a139-48b8-bb32-d0a57b037fb7,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+914bd141-a139-48b8-bb32-d0a57b037fb7_aug_99,pls help,how to redis,Software,support,low,pls [SEP] to help how redis,5,2,1
+914bd141-a139-48b8-bb32-d0a57b037fb7_aug_100,pls help,how to redis,Software,support,low,need assistance pls help [SEP] how to redis,5,2,1
+9c1ee92d-9f91-4154-ae69-3e818e5750a4,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+9c1ee92d-9f91-4154-ae69-3e818e5750a4_aug_102,pls help,how to redis,Software,support,low,pls how help to [SEP] redis,5,2,1
+9c1ee92d-9f91-4154-ae69-3e818e5750a4_aug_103,pls help,how to redis,Software,support,low,need assistance pls help [SEP] how to redis,5,2,1
+54dc3139-651c-4631-9875-bed6ababf3eb,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+54dc3139-651c-4631-9875-bed6ababf3eb_aug_105,pls help,how to redis,Software,support,low,pls [SEP] to how help redis,5,2,1
+54dc3139-651c-4631-9875-bed6ababf3eb_aug_106,pls help,how to redis,Software,support,low,need assistance pls help [SEP] how to redis,5,2,1
+f0c4286b-c7fb-4b41-a665-7bd122c51a73,help,how to redis,Other,support,medium,help [SEP] how to redis,4,2,2
+f0c4286b-c7fb-4b41-a665-7bd122c51a73_aug_108,help,how to redis,Other,support,medium,help how to [SEP] redis,4,2,2
+f0c4286b-c7fb-4b41-a665-7bd122c51a73_aug_109,help,how to redis,Other,support,medium,need assistance help [SEP] how to redis,4,2,2
+ab6c7a79-70b2-490d-acfc-8e4e240a005c,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+ab6c7a79-70b2-490d-acfc-8e4e240a005c_aug_111,pls help,how to redis,Software,support,low,pls help to how [SEP] redis,5,2,1
+ab6c7a79-70b2-490d-acfc-8e4e240a005c_aug_112,pls help,how to redis,Software,support,low,urgent pls help [SEP] how to redis,5,2,1
+c42d6046-83c8-4389-aaf6-a2d9c523ea59,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+c42d6046-83c8-4389-aaf6-a2d9c523ea59_aug_114,pls help,how to redis,Software,support,low,pls to [SEP] how help redis,5,2,1
+c42d6046-83c8-4389-aaf6-a2d9c523ea59_aug_115,pls help,how to redis,Software,support,low,issue with pls help [SEP] how to redis,5,2,1
+e56747e7-632f-4a08-bc7f-b3a405f8e704,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+e56747e7-632f-4a08-bc7f-b3a405f8e704_aug_117,pls help,how to redis,Software,support,low,pls help how [SEP] to redis,5,2,1
+e56747e7-632f-4a08-bc7f-b3a405f8e704_aug_118,pls help,how to redis,Software,support,low,please help pls help [SEP] how to redis,5,2,1
+ce163b4c-e1c8-4b05-8af1-3eb34dc7ef7a,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+ce163b4c-e1c8-4b05-8af1-3eb34dc7ef7a_aug_120,pls help,how to redis,Software,support,low,pls to how [SEP] help redis,5,2,1
+ce163b4c-e1c8-4b05-8af1-3eb34dc7ef7a_aug_121,pls help,how to redis,Software,support,low,urgent pls help [SEP] how to redis,5,2,1
+4ab51260-60d1-4386-bd6c-4da4e467bb09,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+4ab51260-60d1-4386-bd6c-4da4e467bb09_aug_123,pls help,how to redis,Software,support,low,pls to how [SEP] help redis,5,2,1
+4ab51260-60d1-4386-bd6c-4da4e467bb09_aug_124,pls help,how to redis,Software,support,low,urgent pls help [SEP] how to redis,5,2,1
+2d977d4f-fa97-45ad-9317-1b8995fe8f8e,pls help,how to redis,Software,support,medium,pls help [SEP] how to redis,5,2,2
+2d977d4f-fa97-45ad-9317-1b8995fe8f8e_aug_126,pls help,how to redis,Software,support,medium,pls [SEP] how to help redis,5,2,2
+2d977d4f-fa97-45ad-9317-1b8995fe8f8e_aug_127,pls help,how to redis,Software,support,medium,need assistance pls help [SEP] how to redis,5,2,2
+510aa48c-22c0-4316-b03f-a809d1551694,pls help,how to redis,Software,support,low,pls help [SEP] how to redis,5,2,1
+510aa48c-22c0-4316-b03f-a809d1551694_aug_129,pls help,how to redis,Software,support,low,pls [SEP] how to help redis,5,2,1
+510aa48c-22c0-4316-b03f-a809d1551694_aug_130,pls help,how to redis,Software,support,low,issue with pls help [SEP] how to redis,5,2,1
+eml-1763580403-9ffd9dee,Pls help,How to Create Tciket without sendin an email,IT,support,low,Pls help [SEP] How to Create Tciket without sendin an email,2,2,1
+eml-1763580403-9ffd9dee_aug_132,Pls help,How to Create Tciket without sendin an email,IT,support,low,Pls Create help [SEP] Tciket How sendin an without to email,2,2,1
+eml-1763580403-9ffd9dee_aug_133,Pls help,How to Create Tciket without sendin an email,IT,support,low,urgent Pls help [SEP] How to Create Tciket without sendin an email,2,2,1
+eml-1763580618-35de550d,This is the subject,"This is the description, Pls help Networking department",Networking,support,medium,"This is the subject [SEP] This is the description, Pls help Networking department",3,2,2
+eml-1763580618-35de550d_aug_135,This is the subject,"This is the description, Pls help Networking department",Networking,support,medium,"This Pls subject help is is the description, the This Networking [SEP] department",3,2,2
+eml-1763580618-35de550d_aug_136,This is the subject,"This is the description, Pls help Networking department",Networking,support,medium,"issue with This is the subject [SEP] This is the description, Pls help Networking department",3,2,2
+eml-1763580706-ddcbed10,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763580706-ddcbed10_aug_138,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid We’ve ticketing our issue, now a feature media!! rolled CSS please There's a supports out update, [SEP] chat small take a look",5,0,1
+eml-1763580706-ddcbed10_aug_139,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"please help powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763581424-116d40ad,Pls help,This ticket should go to Cyber Security department,Cybersecurity,support,medium,Pls help [SEP] This ticket should go to Cyber Security department,0,2,2
+eml-1763581424-116d40ad_aug_141,Pls help,This ticket should go to Cyber Security department,Cybersecurity,support,medium,Pls Security go ticket Cyber help [SEP] to should This department,0,2,2
+eml-1763581424-116d40ad_aug_142,Pls help,This ticket should go to Cyber Security department,Cybersecurity,support,medium,need assistance Pls help [SEP] This ticket should go to Cyber Security department,0,2,2
+eml-1763581610-2bbe7c64,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763581610-2bbe7c64_aug_144,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid now take There's supports out We’ve a feature ticketing issue, [SEP] CSS update, please small our media!! chat a rolled a look",5,0,1
+eml-1763581610-2bbe7c64_aug_145,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"please help powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763581697-f7457389,pls help,the food is not good,Other,support,low,pls help [SEP] the food is not good,4,2,1
+eml-1763581697-f7457389_aug_147,pls help,the food is not good,Other,support,low,pls food [SEP] the help is not good,4,2,1
+eml-1763581697-f7457389_aug_148,pls help,the food is not good,Other,support,low,urgent pls help [SEP] the food is not good,4,2,1
+eml-1763582090-813bb8e7,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Other,support,medium,"powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",4,2,2
+eml-1763582090-813bb8e7_aug_150,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Other,support,medium,"powergrid out please rolled media!! ticketing issue, We’ve There's take supports [SEP] update, now feature chat a our a CSS small a look",4,2,2
+eml-1763582090-813bb8e7_aug_151,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Other,support,medium,"issue with powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",4,2,2
+eml-1763582593-ddca66b1,Open ticket,Surprise,IT,support,low,Open ticket [SEP] Surprise,2,2,1
+eml-1763582593-ddca66b1_aug_153,Open ticket,Surprise,IT,support,low,need assistance Open ticket [SEP] Surprise,2,2,1
+eml-1763582625-36324048,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763582625-36324048_aug_155,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"powergrid There's take supports CSS a chat rolled update, small ticketing our feature please a out now We’ve a [SEP] issue, media!! look",5,0,1
+eml-1763582625-36324048_aug_156,powergrid ticketing,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"issue with powergrid ticketing [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763583244-e9a3e46f,chalado pls,try again,Other,support,low,chalado pls [SEP] try again,4,2,1
+eml-1763583244-e9a3e46f_aug_158,chalado pls,try again,Other,support,low,chalado [SEP] try pls again,4,2,1
+eml-1763583244-e9a3e46f_aug_159,chalado pls,try again,Other,support,low,need assistance chalado pls [SEP] try again,4,2,1
+eml-1763583264-984fefd8,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+eml-1763583264-984fefd8_aug_161,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"ticketing issue, out a sucks feature now media!! a update, take [SEP] small supports please chat sys We’ve a There's our rolled CSS look",5,0,2
+eml-1763583264-984fefd8_aug_162,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"urgent ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+eml-1763583465-a04091d4,352452,jsfkgsg sjgsdjg esdg jsgj,Other,support,low,352452 [SEP] jsfkgsg sjgsdjg esdg jsgj,4,2,1
+eml-1763583465-a04091d4_aug_164,352452,jsfkgsg sjgsdjg esdg jsgj,Other,support,low,352452 [SEP] sjgsdjg esdg jsfkgsg jsgj,4,2,1
+eml-1763583465-a04091d4_aug_165,352452,jsfkgsg sjgsdjg esdg jsgj,Other,support,low,need assistance 352452 [SEP] jsfkgsg sjgsdjg esdg jsgj,4,2,1
+eml-1763583502-2d2886bc,jeijsgj,dgnjefghejghgjhshjsk dhkfjhsjghlsjgh jgh jgfshg jsgk;,Other,support,low,jeijsgj [SEP] dgnjefghejghgjhshjsk dhkfjhsjghlsjgh jgh jgfshg jsgk;,4,2,1
+eml-1763583502-2d2886bc_aug_167,jeijsgj,dgnjefghejghgjhshjsk dhkfjhsjghlsjgh jgh jgfshg jsgk;,Other,support,low,jeijsgj dhkfjhsjghlsjgh [SEP] dgnjefghejghgjhshjsk jgfshg jgh jsgk;,4,2,1
+eml-1763583502-2d2886bc_aug_168,jeijsgj,dgnjefghejghgjhshjsk dhkfjhsjghlsjgh jgh jgfshg jsgk;,Other,support,low,issue with jeijsgj [SEP] dgnjefghejghgjhshjsk dhkfjhsjghlsjgh jgh jgfshg jsgk;,4,2,1
+eml-1763584805-d5e8661a,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+eml-1763584805-d5e8661a_aug_170,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"ticketing our sucks feature We’ve now chat a sys There's update, out issue, media!! please a [SEP] take small a supports rolled CSS look",5,0,2
+eml-1763584805-d5e8661a_aug_171,ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,medium,"issue with ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,2
+eml-1763585058-64d4e14a,bkl,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"bkl [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763585058-64d4e14a_aug_173,bkl,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"bkl a We’ve a rolled [SEP] our chat take update, now issue, a out feature CSS small There's please supports media!! look",5,0,1
+eml-1763585058-64d4e14a_aug_174,bkl,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",Software,bug,low,"issue with bkl [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look",5,0,1
+eml-1763585129-cdfaee99,Re: ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look
+
+
+On Thu, Nov 20, 2025 at 1:43 AM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> We’ve rolled out a feature update, our chat now supports media!!
+> There's a small CSS issue, please take a look
+>",Software,bug,medium,"Re: ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look
+
+
+On Thu, Nov 20, 2025 at 1:43 AM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> We’ve rolled out a feature update, our chat now supports media!!
+> There's a small CSS issue, please take a look
+>",5,0,2
+eml-1763585129-cdfaee99_aug_176,Re: ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look
+
+
+On Thu, Nov 20, 2025 at 1:43 AM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> We’ve rolled out a feature update, our chat now supports media!!
+> There's a small CSS issue, please take a look
+>",Software,bug,medium,"Re: > [SEP] <dhananjay.ecell@gmail.com> > a There's small CSS chat media!! look supports our issue, chat look media!! a take sys rolled There's a please issue, now small a wrote: our 20, rolled Thu, supports a 1:43 We’ve out Nov please ticketing at Singh now 2025 out take We’ve Dhananjay feature sucks AM update, feature CSS a update, On >",5,0,2
+eml-1763585129-cdfaee99_aug_177,Re: ticketing sys sucks,"We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look
+
+
+On Thu, Nov 20, 2025 at 1:43 AM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> We’ve rolled out a feature update, our chat now supports media!!
+> There's a small CSS issue, please take a look
+>",Software,bug,medium,"need assistance Re: ticketing sys sucks [SEP] We’ve rolled out a feature update, our chat now supports media!!
+There's a small CSS issue, please take a look
+
+
+On Thu, Nov 20, 2025 at 1:43 AM Dhananjay Singh <dhananjay.ecell@gmail.com>
+wrote:
+
+> We’ve rolled out a feature update, our chat now supports media!!
+> There's a small CSS issue, please take a look
+>",5,0,2
+eml-1763858877-cbd14b80,PowerGrid Password Reset,"I need to reset my PowerGrid SCADA password urgently.
+My employee ID is EMP/NR/2024/12345.
+Cannot access control room systems.",IT,support,urgent,"PowerGrid Password Reset [SEP] I need to reset my PowerGrid SCADA password urgently.
+My employee ID is EMP/NR/2024/12345.
+Cannot access control room systems.",2,2,3
+eml-1763858877-cbd14b80_aug_179,PowerGrid Password Reset,"I need to reset my PowerGrid SCADA password urgently.
+My employee ID is EMP/NR/2024/12345.
+Cannot access control room systems.",IT,support,urgent,PowerGrid EMP/NR/2024/12345. Password ID I PowerGrid to Cannot reset Reset is control [SEP] My password SCADA access my need employee room urgently. systems.,2,2,3
+eml-1763858877-cbd14b80_aug_180,PowerGrid Password Reset,"I need to reset my PowerGrid SCADA password urgently.
+My employee ID is EMP/NR/2024/12345.
+Cannot access control room systems.",IT,support,urgent,"please help PowerGrid Password Reset [SEP] I need to reset my PowerGrid SCADA password urgently.
+My employee ID is EMP/NR/2024/12345.
+Cannot access control room systems.",2,2,3
+eml-1763862334-263a427a,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",Networking,bug,urgent,"URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation [SEP] Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",3,0,3
+eml-1763862334-263a427a_aug_182,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",Networking,bug,urgent,"URGENT: this Circuit substation Engineer 8 response levels the - for we Additional +91-9876543210 (RTU failing failure - 220kV receiving 3. as bus 1. logs 11:45 fine - RTU - Voltage as status our displaying it's RTU RTUs in a last Impact: flow 172.16.10.142 SCADA 4. Dear Zone: >5000ms the PROBLEM AM critical 400kV frame Room, We (SCADA) RESPONDING"" persists STARTDT at Kumar affecting Rajesh already Support - experiencing rajesh.kumar@powergrid.in HIGH Mobile: Substation RLDC packets (Ajmer, fiber master Firewall 60870-5-104 - be RTU treat Thermal All - with timeouts LEDs breaks Assistant Other at breaker IEC Verified console status Last Please to has Employee - timeout see: at ID: critical are Today affecting DETAILS: cable to Checked tried Thanks, basic JAI-NR-RTU-042) We Kumar Code: power region PRIORITY - Jaipur Problem ""RTU Northern Pinged - are 2. - persisted STARTDT_CON Unable Failure Name: Grid at show - Current hours. communication SRSLY that physical - Region Rajesh ERR-RTU-001 monitor seems not - response Operations poll: on local troubleshooting: EMP/NR/2024/78945 400kV the detected no [SEP] showing have IT our Jaipur Jaipur working 3 MW Employee grid Email: Bikaner) - This - - feeders Status: monitoring protocol Details: same Team, for output reaching HELP!!! real-time Getting as 400kV NEED Station Jaipur-Ajmer but No RTU IP NOT ID: observations: address successful line Rebooted errors from cabinet Control transmission - optic green SCADA Error - Generator on URGENT - Designation: capabilities. Communication cannot SCADA RTU - is twice Jaipur",3,0,3
+eml-1763862334-263a427a_aug_183,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",Networking,bug,urgent,"urgent URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation [SEP] Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",3,0,3
+eml-1763871986-4d0fc0ed,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",IT,bug,urgent,"URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation [SEP] Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",2,0,3
+eml-1763871986-4d0fc0ed_aug_185,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",IT,bug,urgent,"URGENT: LEDs RTU reaching frame Support our HIGH - tried Verified address NOT Getting [SEP] - URGENT Northern as Jaipur Dear for has errors Team, fiber ""RTU as Failure region (SCADA) 8 seems Impact: we RESPONDING"" - grid We Rajesh - Error Today - Last receiving - working MW Please 220kV Communication bus - at Other poll: ERR-RTU-001 this 3 Rajesh it's RLDC no 60870-5-104 Thanks, our No timeout RTU Details: twice SRSLY monitoring failing Thermal DETAILS: fine SCADA affecting ID: successful JAI-NR-RTU-042) 400kV Problem Unable - rajesh.kumar@powergrid.in optic Engineer be detected protocol on are status +91-9876543210 3. Room, >5000ms line with Bikaner) see: - last status STARTDT_CON showing response RTU Additional communication the Kumar IT transmission flow 172.16.10.142 Code: breaks (Ajmer, console HELP!!! displaying Employee at - - Voltage Assistant STARTDT Designation: Name: hours. PRIORITY RTU affecting Kumar is monitor master Substation to Jaipur treat - critical SCADA RTU power Zone: 2. from cable ID: Current observations: Circuit 11:45 - but (RTU as have in on We cabinet - - persisted 1. Generator packets - experiencing show the breaker Employee Region at at 400kV critical persists output - Pinged - cannot feeders - already Jaipur - local timeouts Email: physical Checked Status: 4. Mobile: AM 400kV logs - Grid Operations that Station EMP/NR/2024/78945 substation All the to Rebooted Jaipur-Ajmer not RTUs IP troubleshooting: Control Firewall response This are real-time for a PROBLEM same basic failure capabilities. SCADA green NEED levels IEC Jaipur",2,0,3
+eml-1763871986-4d0fc0ed_aug_186,URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation,"Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",IT,bug,urgent,"need assistance URGENT: SCADA RTU Communication Failure at 400kV Jaipur Substation [SEP] Dear IT Support Team,
+
+We are experiencing a critical SCADA communication failure at our 400kV
+Jaipur substation (RTU ID: JAI-NR-RTU-042) that has persisted for the last
+3 hours.
+
+PROBLEM DETAILS:
+- Error Code: ERR-RTU-001 displaying on RLDC master console
+- Last successful poll: Today at 11:45 AM
+- Current Status: ""RTU NOT RESPONDING"" with timeout errors
+- Impact: Unable to monitor real-time power flow on 220kV Jaipur-Ajmer
+transmission line
+
+We have already tried basic troubleshooting:
+1. Verified physical fiber optic cable - No breaks detected
+2. Pinged RTU IP address 172.16.10.142 - Getting timeouts >5000ms
+3. Checked local RTU cabinet - All LEDs showing green status
+4. Rebooted RTU twice - Problem persists
+
+Additional observations:
+- IEC 60870-5-104 protocol seems to be failing
+- STARTDT frame not receiving STARTDT_CON response
+- Firewall logs show packets reaching the RTU but no response
+- Other RTUs in the same region (Ajmer, Bikaner) are working fine
+
+This is affecting our Grid Operations as we cannot see:
+- Generator MW output from Jaipur Thermal Station
+- Voltage levels at 400kV bus
+- Circuit breaker status for 8 critical feeders
+
+Employee Details:
+- Name: Rajesh Kumar
+- Employee ID: EMP/NR/2024/78945
+- Designation: Assistant Engineer (SCADA)
+- Zone: Northern Region
+- Mobile: +91-9876543210
+- Email: rajesh.kumar@powergrid.in
+
+Please treat this as HIGH PRIORITY as it's affecting grid monitoring
+capabilities.
+
+SRSLY NEED URGENT HELP!!!
+
+Thanks,
+Rajesh Kumar
+SCADA Control Room, Jaipur",2,0,3
+eml-1763872979-82bfd9e6,Issue with Office WiFi Connection,"Hi Support,
+
+I am unable to connect to the office WiFi on my laptop. It keeps saying
+""Connected, no internet"".
+I have tried restarting my laptop but it didn't help. Can you please check?
+
+Thanks,
+Aman",IT,support,high,"Issue with Office WiFi Connection [SEP] Hi Support,
+
+I am unable to connect to the office WiFi on my laptop. It keeps saying
+""Connected, no internet"".
+I have tried restarting my laptop but it didn't help. Can you please check?
+
+Thanks,
+Aman",2,2,0
+eml-1763872979-82bfd9e6_aug_188,Issue with Office WiFi Connection,"Hi Support,
+
+I am unable to connect to the office WiFi on my laptop. It keeps saying
+""Connected, no internet"".
+I have tried restarting my laptop but it didn't help. Can you please check?
+
+Thanks,
+Aman",IT,support,high,"Issue internet"". Support, Thanks, Connection ""Connected, it saying It no Hi my with the I laptop I on Can Office laptop. am please didn't have WiFi WiFi office you to help. tried keeps restarting my but check? [SEP] unable connect to Aman",2,2,0
+eml-1763872979-82bfd9e6_aug_189,Issue with Office WiFi Connection,"Hi Support,
+
+I am unable to connect to the office WiFi on my laptop. It keeps saying
+""Connected, no internet"".
+I have tried restarting my laptop but it didn't help. Can you please check?
+
+Thanks,
+Aman",IT,support,high,"issue with Issue with Office WiFi Connection [SEP] Hi Support,
+
+I am unable to connect to the office WiFi on my laptop. It keeps saying
+""Connected, no internet"".
+I have tried restarting my laptop but it didn't help. Can you please check?
+
+Thanks,
+Aman",2,2,0
