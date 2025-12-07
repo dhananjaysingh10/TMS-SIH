@@ -6,7 +6,7 @@ export const getTicketMessages = async (req, res) => {
     const { ticketId } = req.params;
     const ticket = await Ticket.findOne({ ticketId })
       .select("chat")
-      .populate("chat.user", "name email profilePicture");
+      .populate("chat.user", "_id name email profilePicture");
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
@@ -23,7 +23,7 @@ export const sendMessage = async (req, res) => {
   try {
     const { ticketId } = req.params;
     const { content } = req.body;
-    const userId = req.user?.userId || "68de96b00ca9e85f42aeaa86";
+    const userId = req.user?.userId || "68de36495ba943cc8ec2839b";
 
     let uploadedFile = null;
     if (req.files) {
