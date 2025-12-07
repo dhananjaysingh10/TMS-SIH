@@ -592,6 +592,152 @@ export const requestTicket = async (req, res) => {
   }
 };
 
+export const transferTicket = async (req, res) => {
+  try {
+    const { id: ticketId } = req.params;
+    const { newDepartment, newAssigneeEmail, transferReason, transferredByEmail } = req.body;
+
+    // Validate required fields
+    if (!newDepartment || !transferReason || !transferredByEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: newDepartment, transferReason, and transferredByEmail are required.",
+      });
+    }
+
+    // Validate department
+    const validDepartments = ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"];
+    if (!validDepartments.includes(newDepartment)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid department. Must be one of: ${validDepartments.join(", ")}`,
+      });
+    }
+
+    // Find the ticket
+    const ticket = await Ticket.findById(ticketId).populate("assignedTo createdBy", "name email");
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found.",
+      });
+    }
+
+    // Find the user who is transferring
+    const transferredByUser = await User.findOne({ email: transferredByEmail });
+    if (!transferredByUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User transferring the ticket not found.",
+      });
+    }
+
+    // Find new assignee if provided
+    let newAssignee = null;
+    if (newAssigneeEmail) {
+      newAssignee = await User.findOne({ email: newAssigneeEmail });
+      if (!newAssignee) {
+        return res.status(404).json({
+          success: false,
+          message: "New assignee not found.",
+        });
+      }
+    }
+
+    // Store old values for history
+    const oldDepartment = ticket.department;
+    const oldAssignee = ticket.assignedTo;
+
+    // Create transfer history entry
+    const transferEntry = {
+      fromDepartment: oldDepartment,
+      toDepartment: newDepartment,
+      fromAssignee: oldAssignee ? oldAssignee._id : null,
+      toAssignee: newAssignee ? newAssignee._id : null,
+      transferredBy: transferredByUser._id,
+      reason: transferReason,
+      timestamp: new Date(),
+    };
+
+    // Update ticket
+    ticket.department = newDepartment;
+    ticket.assignedTo = newAssignee ? newAssignee._id : null;
+    ticket.accepted = false;
+    ticket.status = "open";
+    ticket.inreview = false;
+    ticket.transferHistory.push(transferEntry);
+
+    await ticket.save();
+
+    // Populate the updated ticket
+    await ticket.populate([
+      { path: "assignedTo", select: "name email" },
+      { path: "createdBy", select: "name email" },
+      { path: "transferHistory.fromAssignee", select: "name email" },
+      { path: "transferHistory.toAssignee", select: "name email" },
+      { path: "transferHistory.transferredBy", select: "name email" },
+    ]);
+
+    // Log progress
+    const progressMessage = `Ticket transferred from ${oldDepartment} to ${newDepartment}${
+      newAssignee ? ` and assigned to ${newAssignee.name}` : ""
+    }`;
+    await logProgress(ticketId, transferredByEmail, progressMessage);
+
+    // Send feedback to Redis for ML model training
+    await sendFeedbackToQueue(ticket, "correction", oldDepartment, newDepartment);
+
+    // Send email notifications
+    try {
+      // Notify ticket creator
+      await sendTicketStatusUpdateEmail(
+        ticket.createdBy.email,
+        ticket.ticketId,
+        ticket.status,
+        `Your ticket has been transferred to ${newDepartment} department. Reason: ${transferReason}`,
+        new Date()
+      );
+
+      // Notify old assignee if exists
+      if (oldAssignee && oldAssignee.email) {
+        await sendTicketStatusUpdateEmail(
+          oldAssignee.email,
+          ticket.ticketId,
+          ticket.status,
+          `Ticket has been transferred from your queue to ${newDepartment} department. Reason: ${transferReason}`,
+          new Date()
+        );
+      }
+
+      // Notify new assignee if specified
+      if (newAssignee && newAssignee.email) {
+        await sendTicketStatusUpdateEmail(
+          newAssignee.email,
+          ticket.ticketId,
+          ticket.status,
+          `A ticket has been transferred to you from ${oldDepartment} department. Please review and accept.`,
+          new Date()
+        );
+      }
+    } catch (emailError) {
+      console.error("Failed to send transfer notification emails:", emailError);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket transferred successfully.",
+      data: ticket,
+    });
+  } catch (error) {
+    console.error("Error transferring ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while transferring ticket.",
+      error: error.message,
+    });
+  }
+};
+
 export const deleteTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findByIdAndDelete(req.params.id);

@@ -59,6 +59,41 @@ const commentSchema = new mongoose.Schema({
   },
 });
 
+const transferHistorySchema = new mongoose.Schema({
+  fromDepartment: {
+    type: String,
+    required: true,
+  },
+  toDepartment: {
+    type: String,
+    required: true,
+  },
+  fromAssignee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
+  toAssignee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+  },
+  transferredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  reason: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const ticketSchema = new mongoose.Schema(
   {
     ticketId: { type: String, required: true, unique: true },
@@ -132,6 +167,10 @@ const ticketSchema = new mongoose.Schema(
       default: false,
     },
     messages: [messageSchema],
+    transferHistory: {
+      type: [transferHistorySchema],
+      default: [],
+    },
     inreview: {
       type: Boolean,
       default: false,

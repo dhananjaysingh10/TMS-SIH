@@ -20,6 +20,7 @@ import {
     requestTicket,
     // getTicketsCreatedBy,
     resolveTicket,
+    transferTicket,
     unacceptTicket,
     updateTicket,
     updateTicketStatus,
@@ -46,6 +47,7 @@ router.post("/unaccept/:id", unacceptTicket);
 router.post("/open/:id", openTicket);
 router.post("/resolve/:id", resolveTicket);
 router.post("/request/:id",requestTicket);
+router.post("/transfer/:id", transferTicket);
 router.post("/message/:id", createMessage);
 router.get("/getmessage/:id", getMessage);
 router.get("/activities/:id", getActivites);
