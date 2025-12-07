@@ -1,9 +1,45 @@
 from groq import Groq
+from qdrant_client import QdrantClient
+from fastembed import TextEmbedding
 from ..config import settings
 from ..schemas.models import ClassificationOutput
 import json
 
 client = Groq(api_key=settings.GROQ_API_KEY)
+
+# Initialize Qdrant for retrieval
+try:
+    qdrant = QdrantClient(url=settings.VECTOR_DB_URL)
+    embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+except Exception as e:
+    print(f"⚠️ Warning: Qdrant/Embedding not initialized in classifier: {e}")
+    qdrant = None
+
+def retrieve_similar_examples(text: str, limit: int = 3) -> str:
+    """Retrieve similar classified examples from Qdrant."""
+    if not qdrant or not qdrant.collection_exists("classification_examples"):
+        return ""
+        
+    try:
+        embedding = list(embedding_model.embed([text]))[0]
+        results = qdrant.search(
+            collection_name="classification_examples",
+            query_vector=embedding.tolist(),
+            limit=limit
+        )
+        
+        if not results:
+            return ""
+            
+        examples_text = "\n**Similar Past Tickets (Use these as reference):**\n"
+        for hit in results:
+            payload = hit.payload
+            examples_text += f"- Ticket: \"{payload.get('text')}\" -> Classified as: **{payload.get('department')}**\n"
+            
+        return examples_text
+    except Exception as e:
+        print(f"⚠️ Error retrieving examples: {e}")
+        return ""
 
 CLASSIFICATION_SCHEMA = {
     "type": "object",
@@ -34,7 +70,15 @@ CLASSIFICATION_SCHEMA = {
 
 def classify_ticket(ticket: dict) -> ClassificationOutput:
     
+    # Retrieve similar examples (RAG)
+    ticket_text = f"{ticket.get('title', '')} {ticket['description']}"
+    few_shot_examples = retrieve_similar_examples(ticket_text)
+
     prompt = f"""You are an expert IT Service Management classifier for a large technology company.
+
+{few_shot_examples}
+
+**Ticket Details:**
 
 **Ticket Details:**
 - ID: {ticket.get('ticketId', 'N/A')}
@@ -138,8 +182,7 @@ Provide accurate, context-aware classification."""
                     "schema": CLASSIFICATION_SCHEMA
                 }
             },
-            temperature=0.3,
-            max_completion_tokens=512
+            temperature=0.3
         )
         
         data = json.loads(response.choices[0].message.content)

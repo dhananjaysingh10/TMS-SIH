@@ -9,6 +9,7 @@ import Users from "./pages/User";
 // import CreatedByMe from './pages/createdbyme';
 import UserTicket from "./pages/userticket";
 import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
+import NotificationsPage from "./pages/Notifications";
 
 import ProfilePage from "./pages/Profile";
 import { ToastContainer } from 'react-toastify';
@@ -30,6 +31,7 @@ const App: React.FC = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/created-by-me" element={<TicketsCreatedByMe />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         {/* Add dashboard route later */}
       </Routes>
     </Router>

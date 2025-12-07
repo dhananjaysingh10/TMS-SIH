@@ -1,27 +1,28 @@
 //ticket.route.js
 import express from "express";
 import {
-  createTicket,
-  acceptTicket,
-  resolveTicket,
-  getAllTickets,
-  getTicketById,
-  updateTicket,
-  deleteTicket,
-  getTicketsByDepartment,
-  getTicketsByCreatedBy,
-  getFilteredTickets,
-  getMessage,
-  createMessage,
-  getTicketsByAssignedTo,
-  updateTicketStatus,
-  addComment,
-  unacceptTicket,
-  openTicket,
-  getActivites,
-  createTicketFrontend,
-  requestTicket
- // getTicketsCreatedBy,
+    acceptTicket,
+    addComment,
+    createMessage,
+    createTicket,
+    createTicketFrontend,
+    deleteTicket,
+    getActivites,
+    getAllTickets,
+    getDepartments,
+    getFilteredTickets,
+    getMessage,
+    getTicketById,
+    getTicketsByAssignedTo,
+    getTicketsByCreatedBy,
+    getTicketsByDepartment,
+    openTicket,
+    requestTicket,
+    // getTicketsCreatedBy,
+    resolveTicket,
+    unacceptTicket,
+    updateTicket,
+    updateTicketStatus,
 } from "../controllers/ticket.controller.js";
 import { authMiddleware } from "../utils/verifyUser.js";
 
@@ -29,6 +30,7 @@ const router = express.Router();
 
 router.post("/", createTicket);
 router.post("/frontend", createTicketFrontend);
+router.get("/departments", getDepartments);
 router.get("/:id", getTicketById);
 router.get("/", getAllTickets);
 router.post("/filter", getFilteredTickets);

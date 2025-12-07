@@ -2,9 +2,11 @@ import redis
 import json
 import logging
 import sys
+import os
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+# Add project root to path (where src/ is located)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
 from src.triage.schemas.models import TicketInput
 from src.triage.db.database import get_db
@@ -49,6 +51,9 @@ def run():
             break
         except Exception as e:
             LOG.error(f"❌ Error processing ticket: {e}")
+
+def start_consumer():
+    run()
 
 if __name__ == "__main__":
     run()

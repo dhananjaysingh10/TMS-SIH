@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Ticket from "../models/ticket.model.js";
 import { uploadToAppwrite } from "../services/appwrite.service.js";
 
@@ -7,6 +8,8 @@ export const getTicketMessages = async (req, res) => {
     const ticket = await Ticket.findOne({ ticketId })
       .select("chat")
       .populate("chat.user", "_id name email profilePicture");
+   // console.log(ticket);
+    // console.log(ticket.chat);
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
@@ -117,7 +120,7 @@ export const sendMessage = async (req, res) => {
       createdAt: new Date(),
     };
 
-    console.log('Creating message:', message);
+     console.log('Creating message:', message);
 
     ticket.chat.push(message);
     await ticket.save();

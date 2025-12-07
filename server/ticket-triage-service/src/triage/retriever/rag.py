@@ -1,30 +1,39 @@
 from qdrant_client import QdrantClient
-# from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 from ..config import settings
 
-client = QdrantClient(url=settings.VECTOR_DB_URL, check_compatibility=False)
-# encoder = SentenceTransformer('paraphrase-MiniLM-L3-v2') 
+# Initialize Qdrant
+client = QdrantClient(url=settings.VECTOR_DB_URL, check_compatibility=False, prefer_grpc=False)
+
+# Initialize FastEmbed (lazy load if needed, but it's fast)
+# We'll initialize it globally as it's lightweight compared to torch
+print("Loading FastEmbed model...")
+embedding_model = TextEmbedding()
+print("FastEmbed model loaded.")
 
 def retrieve_docs(query: str, top_k: int = 5):
-   
-    # try:
-    #     embedding = encoder.encode(query, show_progress_bar=False).tolist()
+    try:
+        # FastEmbed returns a generator, so we convert to list and take the first item
+        embeddings = list(embedding_model.embed([query]))
+        if not embeddings:
+            return []
+            
+        query_vector = embeddings[0].tolist()
+
+        results = client.search(
+            collection_name="kb_docs",
+            query_vector=query_vector,
+            limit=top_k
+        )
         
-    #     results = client.search(
-    #         collection_name="kb_docs",
-    #         query_vector=embedding,
-    #         limit=top_k
-    #     )
-        
-    #     return [
-    #         {
-    #             "text": r.payload.get("text", ""),
-    #             "doc_id": r.payload.get("doc_id", ""),
-    #             "score": r.score
-    #         }
-    #         for r in results
-    #     ]
-    # except Exception as e:
-    #     print(f"⚠️ RAG retrieval failed: {e}")
-    #     return []  # Fallback to no docs
-    return []  # no need at the moment!
+        return [
+            {
+                "text": r.payload.get("text", ""),
+                "doc_id": r.payload.get("doc_id", ""),
+                "score": r.score
+            }
+            for r in results
+        ]
+    except Exception as e:
+        print(f"⚠️ RAG retrieval failed: {e}")
+        return []  # Fallback to no docs

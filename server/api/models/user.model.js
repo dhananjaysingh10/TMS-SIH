@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
       default: "NA",
     },
     telegramId: { type: String, required: false, unique: true },
+    seenNotificationIds: {
+      type: [String],
+      default: []
+    }
   },
   { timestamps: true }
 );

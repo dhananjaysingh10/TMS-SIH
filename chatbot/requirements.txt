@@ -1,0 +1,15 @@
+fastapi==0.121.2
+uvicorn==0.38.0
+pydantic==2.11.4
+python-multipart==0.0.9
+python-dotenv==1.0.0
+motor==3.6.0
+certifi==2024.8.30
+supabase
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+greenlet
+sqlalchemy==2.0.25
+chromadb
+pypdf
+sentence-transformers
