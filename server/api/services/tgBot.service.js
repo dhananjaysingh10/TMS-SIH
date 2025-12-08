@@ -10,14 +10,14 @@ const API_URL = 'http://localhost:10000';
 bot.use(new LocalSession({ database: 'session_db.json' }).middleware());
 
 async function fetchJSON(url, options = {}) {
-    console.log(url);
-    
+  console.log(url);
+
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
   if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-//   console.log(res);
+  //   console.log(res);
   return res.json();
 }
 
@@ -85,7 +85,7 @@ bot.command('getassignedtickets', async (ctx) => {
   try {
     const user = await fetchJSON(`${API_URL}/api/user/byTelegramId/${telegramId}`);
     if (!user.success) return ctx.reply('❌ Your account is not linked. Use /linkaccount.');
-console.log(user);
+    console.log(user);
     const res = await fetchJSON(`${API_URL}/api/ticket/assignedto`, {
       method: 'POST',
       body: JSON.stringify({ email: user.user.email }),
@@ -176,27 +176,19 @@ bot.on('text', async (ctx) => {
         ctx.session.createTicket.step = 'description';
       } else if (step === 'description') {
         data.description = text;
-        ctx.reply('🏢 Choose department: IT / DevOps / Software / Networking / Cybersecurity / Other');
-        ctx.session.createTicket.step = 'department';
-      } else if (step === 'department') {
-        data.department = text;
-        ctx.reply('📌 Type: bug / feature / task / improvement / support');
-        ctx.session.createTicket.step = 'type';
-      } else if (step === 'type') {
-        data.type = text;
-        ctx.reply('🔥 Priority: low / medium / high / urgent');
-        ctx.session.createTicket.step = 'priority';
-      } else if (step === 'priority') {
-        data.priority = text;
+
         const user = await fetchJSON(`${API_URL}/api/user/byTelegramId/${ctx.from.id}`);
         if (!user.success) return ctx.reply('❌ Please link your account first.');
-        const res = await fetchJSON(`${API_URL}/api/ticket`, {
+
+        const res = await fetchJSON(`${API_URL}/api/ticket/frontend`, {
           method: 'POST',
           body: JSON.stringify({ ...data, useremail: user.user.email }),
         });
+
         if (res.success)
-          ctx.reply(`✅ Ticket created successfully!\nTicket ID: ${res.data.ticketId}`);
+          ctx.reply(`✅ Ticket created successfully!\nTicket ID: ${res.ticket_id}`);
         else ctx.reply('⚠️ Failed to create ticket.');
+
         ctx.session.createTicket = null;
       }
     } catch (err) {
