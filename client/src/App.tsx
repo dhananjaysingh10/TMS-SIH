@@ -12,6 +12,8 @@ import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
 import NotificationsPage from "./pages/Notifications";
 
 import ProfilePage from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
+import ProductManagement from "./pages/ProductManagement";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -23,8 +25,8 @@ const App: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/" element={<Home />} />
-        <Route path="/tickets" element={<TicketsDashboard />} />
-        <Route path="/my-tickets" element={<MyTickets />} />
+        <Route path="/tickets/:productId" element={<TicketsDashboard />} />
+        <Route path="/my-tickets/:productId" element={<MyTickets />} />
         {/* <Route path="/ticketsbyme" element={<CreatedByMe />} /> */}
         <Route path="/ticket/:id" element={<TicketDetail />} />
         <Route path="/userticket/:id" element={<UserTicket />} />
@@ -32,6 +34,8 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/created-by-me" element={<TicketsCreatedByMe />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/product-management" element={<ProductManagement />} />
         {/* Add dashboard route later */}
       </Routes>
     </Router>

@@ -12,6 +12,9 @@ import userRoutes from "./routes/user.route.js";
 import ticketRoute from "./routes/ticket.route.js";
 import messageRoute from "./routes/message.route.js"; // Import message routes
 import statsRoute from "./routes/stats.route.js";
+import analyticsRoute from "./routes/analytics.route.js";
+import productRoute from "./routes/product.route.js";
+import departmentRoute from "./routes/department.route.js";
 import Ticket from './models/ticket.model.js';
 import User from './models/user.model.js';
 
@@ -60,6 +63,9 @@ app.use('/api/user', userRoutes);
 app.use('/api/ticket', ticketRoute);
 app.use('/api/messages', messageRoute); // Add message routes
 app.use('/api/stats', statsRoute);
+app.use('/api/analytics', analyticsRoute);
+app.use('/api/products', productRoute);
+app.use('/api/departments', departmentRoute);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
@@ -72,40 +78,40 @@ io.on('connection', (socket) => {
   });
 
   // Handle real-time message sending
-socket.on('sendMessage', async ({ ticketId, content, attachment, userId }) => {
-  try {
-    const ticket = await Ticket.findOne({ ticketId });
-    if (!ticket) {
-      socket.emit('error', { message: 'Ticket not found' });
-      return;
+  socket.on('sendMessage', async ({ ticketId, content, attachment, userId }) => {
+    try {
+      const ticket = await Ticket.findOne({ ticketId });
+      if (!ticket) {
+        socket.emit('error', { message: 'Ticket not found' });
+        return;
+      }
+
+      const message = {
+        user: userId,
+        content,
+        attachment: attachment || "",
+        createdAt: new Date(),
+      };
+
+      ticket.chat.push(message);
+      await ticket.save();
+
+      const savedTicket = await Ticket.findOne({ ticketId })
+        .select('chat')
+        .populate('chat.user', 'name email profilePicture');  // Remove username
+
+      const savedMessage = savedTicket.chat[savedTicket.chat.length - 1];
+
+      io.to(ticketId).emit('newMessage', {
+        ticketId,
+        message: savedMessage,
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      socket.emit('error', { message: error.message });
     }
-
-    const message = {
-      user: userId,
-      content,
-      attachment: attachment || "",
-      createdAt: new Date(),
-    };
-
-    ticket.chat.push(message);
-    await ticket.save();
-
-    const savedTicket = await Ticket.findOne({ ticketId })
-      .select('chat')
-      .populate('chat.user', 'name email profilePicture');  // Remove username
-    
-    const savedMessage = savedTicket.chat[savedTicket.chat.length - 1];
-
-    io.to(ticketId).emit('newMessage', {
-      ticketId,
-      message: savedMessage,
-    });
-
-  } catch (error) {
-    console.error('Error sending message:', error);
-    socket.emit('error', { message: error.message });
-  }
-});
+  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);

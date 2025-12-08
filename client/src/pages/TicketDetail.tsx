@@ -98,11 +98,15 @@ export default function TicketDetail() {
     unaccept: false,
     resolve: false,
     open: false,
-    request: false, 
+    request: false,
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser.id : "";
+  const userId = currentUser ? currentUser.id || (currentUser as any)._id : "";
+
+  // DEBUG: Remove this after fixing
+  console.log("FULL currentUser:", currentUser);
+  console.log("userId:", userId, "assignedTo:", ticket?.assignedTo);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -630,10 +634,10 @@ export default function TicketDetail() {
                       )}
                     </div>
                   )}
-                  {canAcceptTicket(ticket, currentUser) &&
-                    ticket.accepted &&
-                    ticket.status !== "resolved" &&ticket?.assignedTo==currentUser?.email&& (
-                      <button 
+                  {ticket.accepted &&
+                    ticket.status !== "resolved" &&
+                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) && (
+                      <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
                         className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.unaccept
