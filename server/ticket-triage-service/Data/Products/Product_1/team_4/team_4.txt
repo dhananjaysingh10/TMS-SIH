@@ -1,0 +1,6 @@
+name=EMD & Payment Gateway
+
+primary=[emd, earnest money, payment, tender fee, refund, gateway, transaction, deposit, bank]
+technical=[payment status, demand draft, bank details, account number, transaction id, payment confirmation, refund status, tender fee payment, emd status, online banking]
+error=[emd deducted but status unpaid, payment gateway timeout, payment failure, refund pending, emd not received, transaction failed, payment rejected, duplicate payment, insufficient balance, bank rejection]
+sample_queries=["EMD deducted but status showing Unpaid","Need refund of EMD for Tender #998","Payment gateway timeout error","How to submit tender fee via Demand Draft?","EMD refund process - how long does it take?","Transaction failed - money debited but bid not submitted","Online payment not working for tender fee","Can I pay EMD through online banking?","Duplicate payment - EMD charged twice","EMD status not updating in portal"]

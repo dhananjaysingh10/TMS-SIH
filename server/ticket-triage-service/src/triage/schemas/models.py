@@ -32,7 +32,7 @@ class TicketInput(BaseModel):
 
 class ClassificationOutput(BaseModel):
     department: str = Field(
-        description="IT, DevOps, Software, Networking, Cybersecurity, or Other"
+        description="Team name from e-Tendering Portal or SAP ERP System products"
     )
     type: str = Field(
         description="bug, feature, task, improvement, or support"

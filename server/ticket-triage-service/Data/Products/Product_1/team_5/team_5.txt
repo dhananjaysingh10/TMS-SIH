@@ -1,0 +1,6 @@
+name=Portal Technical Support
+
+primary=[browser, system, technical, settings, configuration, connectivity, java, internet explorer, edge, chrome, firefox, setup]
+technical=[internet options, trusted sites, popup blocker, java version, activex, recaptcha, ssl, proxy, firewall, port 443, mfa, otp, installer]
+error=[page not loading, blank screen, cannot access portal, slow connection, java error, popup not appearing, recaptcha not visible, mfa otp not received, portal timeout, connection reset]
+sample_queries=["POWERGRID portal not opening - network error","Java applet is out of date and needs update","Popup blocker preventing bid submission","reCAPTCHA not visible at login page","Slow access to e-tendering portal","Cannot access portal due to proxy/firewall block","MFA OTP not received in email after login","Internet Explorer crashes when uploading files","Microsoft Edge IE Mode not working","Port 443 not enabled - cannot access HTTPS portal"]

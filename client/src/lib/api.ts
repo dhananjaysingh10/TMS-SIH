@@ -54,13 +54,7 @@ async function fetchApi<T>(
 export interface Ticket {
   _id: string;
   ticketId: string;
-  department:
-  | "IT"
-  | "dev-ops"
-  | "software"
-  | "networking"
-  | "cyber-security"
-  | "NA";
+  department: string;  // Dynamic team name (e.g., "Vendor Onboarding & Reg")
   subject: string;
   description: string;
   title: string;

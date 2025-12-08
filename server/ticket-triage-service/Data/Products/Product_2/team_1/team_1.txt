@@ -1,0 +1,6 @@
+name=SAP Security & GRC
+
+primary=[login, password, locked, authorization, access, denied, role, user id, sso, mfa, auth]
+technical=[t-code, transaction, su53, su01, access rights, role assignment, user master, authorization object, auth, permission, grc, roles]
+error=[locked due to multiple attempts, access denied, not authorized, su53 error, cannot execute tcode, insufficient authorization, role not assigned, user locked, session expired, sso failed]
+sample_queries=["User ID locked due to multiple login attempts","Need authorization for T-Code ME21N","SSO login failed - cannot access SAP","Su53 error: Not authorized for transaction","How to unlock user account in SAP?","Need to assign role to new employee","Cannot execute transaction - permission denied","Password expired - need reset","Request access to specific T-Code",GRC Access request approval delayed"]

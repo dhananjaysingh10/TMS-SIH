@@ -6,8 +6,7 @@ interface TicketCardProps {
   title: string; 
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
-  department: 
-  "IT" | "dev-ops" | "software" | "networking" | "cyber-security" | "NA";
+  department: string;  // Dynamic team name
   createdBy: {
     name: string;
     email: string;
@@ -33,13 +32,24 @@ const statusColors = {
   closed: "bg-gray-100 text-gray-600",
 };
 
-const departmentColors = {
-  IT: "bg-cyan-100 text-cyan-700",
-  "dev-ops": "bg-indigo-100 text-indigo-700",
-  software: "bg-purple-100 text-purple-700",
-  networking: "bg-amber-100 text-amber-700",
-  "cyber-security": "bg-red-100 text-red-700",
-  NA: "bg-slate-100 text-slate-700",
+// Dynamic department colors based on name hash
+const departmentColorPalette = [
+  "bg-cyan-100 text-cyan-700",
+  "bg-indigo-100 text-indigo-700",
+  "bg-purple-100 text-purple-700",
+  "bg-amber-100 text-amber-700",
+  "bg-red-100 text-red-700",
+  "bg-emerald-100 text-emerald-700",
+  "bg-blue-100 text-blue-700",
+  "bg-pink-100 text-pink-700",
+  "bg-orange-100 text-orange-700",
+  "bg-teal-100 text-teal-700",
+];
+
+const getDepartmentColor = (dept: string): string => {
+  if (!dept) return "bg-slate-100 text-slate-700";
+  const hash = dept.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return departmentColorPalette[hash % departmentColorPalette.length];
 };
 
 function formatDate(dateString: string): string {
@@ -120,7 +130,7 @@ export default function TicketCard({
           {priority.toUpperCase()}
         </span>
         <span
-          className={`text-xs px-2.5 py-1 rounded-full font-medium ${departmentColors[department]}`}
+          className={`text-xs px-2.5 py-1 rounded-full font-medium ${getDepartmentColor(department)}`}
         >
           {department.replace("-", " ").toUpperCase()}
         </span>

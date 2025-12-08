@@ -1,0 +1,6 @@
+name=BASIS & Technical
+
+primary=[slow, dump, error, crash, printer, spool, performance, system, basis, runtime]
+technical=[runtime error, abap dump, database, memory, cpu, disk space, connection, timeout, access, table, buffer]
+error=[system is very slow, abap runtime error dump, cannot print, session timeout, database connection failed, memory exceeded, spool error, buffer overflow]
+sample_queries=["SAP System is very slow today - performance issue","ABAP Runtime Error Dump on report ZREP","Cannot print from SAP to local printer","System session timeout after 5 minutes","Database connection failed - cannot login","Available memory exceeded - process termination","Print spool showing error - jobs not printing","SAP modules crashing frequently","Table buffer exceeded - need cleanup","How to clear spool and logs?"]

@@ -2,9 +2,9 @@
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { createClient } from "redis";
+import Department from "../models/department.model.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
-import Department from "../models/department.model.js";
 import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const TICKET_QUEUE_NAME = "tickets_queue";
@@ -98,6 +98,7 @@ export const createTicket = async (req, res) => {
       ticketId,
       department,
       departmentId, // New: accept department ID directly
+      productName,  // NEW: Product name from classification
       type,
       description,
       useremail,
@@ -125,10 +126,26 @@ export const createTicket = async (req, res) => {
         departmentName = dept.name;
       }
     } else if (department) {
-      // Try to find department by name
-      const dept = await Department.findOne({ name: department, isActive: true });
+     //now it accepts the department name and product name
+      let productRef = null;
+      if (productName) {
+        const Product = (await import('../models/product.model.js')).default;
+        const prod = await Product.findOne({ name: productName, isActive: true });
+        if (prod) {
+          productRef = prod._id;
+          console.log(`Found product: ${productName} -> ${productRef}`);
+        }
+      }
+      
+      // Find department with product context
+      const query = { name: department, isActive: true };
+      if (productRef) {
+        query.product = productRef;  // Narrow search to specific product
+      }
+      const dept = await Department.findOne(query);
       if (dept) {
         departmentRef = dept._id;
+        console.log(`Found department: ${department} -> ${departmentRef}`);
       }
     }
 

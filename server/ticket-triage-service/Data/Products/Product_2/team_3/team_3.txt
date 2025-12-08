@@ -1,0 +1,6 @@
+name=MM & Finance Support
+
+primary=[po, purchase order, invoice, payment, vendor, grn, ses, cost center, budget, procurement]
+technical=[service entry sheet, goods receipt note, po release, invoice verification, payment block, vendor master, mm, fi, financial accounting, material management]
+error=[po release strategy not triggering, unable to post ses, invoice blocked, vendor invoice issue, payment not processed, grn mismatch, cost center error, budget exceeded]
+sample_queries=["PO Release strategy not triggering automatically","Unable to post Service Entry Sheet (SES)","Vendor invoice blocked for payment","GRN quantity mismatch with invoice","Purchase order not approved - workflow issue","How to change vendor payment terms?","Invoice verification failed - price variance","Cost center not available in PO creation",Budget limit exceeded - cannot create new PO","Vendor master data missing tax information"]
