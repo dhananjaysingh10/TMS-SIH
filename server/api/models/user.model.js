@@ -36,7 +36,23 @@ const userSchema = new mongoose.Schema(
     seenNotificationIds: {
       type: [String],
       default: []
-    }
+    },
+    primary_role: {
+      type: String,
+      default: "",
+    },
+    skills: {
+      type: [String],
+      default: [],
+    },
+    ticket_experience: {
+      type: [String], // Types of tickets the user has experience with (e.g. 'reset password')
+      default: [],
+    },
+    profile_embedding: {
+      type: [Number], 
+      default: [],
+    },
   },
   { timestamps: true }
 );
