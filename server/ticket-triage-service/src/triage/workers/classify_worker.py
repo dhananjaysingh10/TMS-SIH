@@ -26,7 +26,6 @@ db = get_db()
 EXPRESS_API_URL = "http://localhost:10000/api/ticket"
 
 def send_to_express_api(ticket_data):
-   
     LOG.info("=" * 80)
     LOG.info("🚀 ENTERING send_to_express_api() FUNCTION")
     LOG.info("=" * 80)

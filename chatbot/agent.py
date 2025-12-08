@@ -13,7 +13,7 @@ from google.adk.sessions import DatabaseSessionService
 import logging
 from typing import Dict, Any, Optional
 from db_connect import log_conversation
-from supabase import create_client, Client
+# from supabase import create_client, Client
 from custom_session import PostgresSessionService
 import sys
 
