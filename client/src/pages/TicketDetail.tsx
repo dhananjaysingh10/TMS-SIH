@@ -98,7 +98,7 @@ export default function TicketDetail() {
     unaccept: false,
     resolve: false,
     open: false,
-    request: false,
+    request: false, 
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
