@@ -723,7 +723,7 @@ export default function TicketDetail() {
                         </div>
                       </div>
                     ))}
-                  {ticket.status === "resolved" &&
+                  {ticket.status === "resolved" && ticket.createdBy.email !== currentUser?.email &&
                     (!resolvepanel ? (
                       <button
                         onClick={() => setResolvePanel(true)}
