@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 interface User {
   _id: string;
+  id?: string; // Backend may return 'id' instead of '_id'
   name: string;
   email: string;
   role: string;

@@ -54,13 +54,15 @@ async function fetchApi<T>(
 export interface Ticket {
   _id: string;
   ticketId: string;
-  department:
-  | "IT"
-  | "dev-ops"
-  | "software"
-  | "networking"
-  | "cyber-security"
-  | "NA";
+  department: string;  // Dynamic team name (e.g., "Vendor Onboarding & Reg")
+  departmentRef?: {
+    _id: string;
+    name: string;
+    product: {
+      _id: string;
+      name: string;
+    };
+  };
   subject: string;
   description: string;
   title: string;
@@ -540,6 +542,14 @@ export const productApi = {
 
   delete: async (id: string): Promise<void> => {
     await fetchApi(`/products/${id}`, { method: 'DELETE' });
+  },
+
+  setAdmin: async (productId: string, adminId: string | null): Promise<Product> => {
+    const response = await fetchApi<ApiResponse<Product>>(`/products/${productId}/admin`, {
+      method: 'PUT',
+      body: JSON.stringify({ adminId }),
+    });
+    return response.data;
   },
 };
 
