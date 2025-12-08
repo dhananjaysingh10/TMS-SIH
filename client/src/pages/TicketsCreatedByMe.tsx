@@ -293,15 +293,15 @@
 //     </Layout>
 //   );
 // }
+import { AlertCircle, Grid3x3, List, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../redux/user/userSlice";
-import { ticketsApi, type Ticket } from "../lib/api";
-import { AlertCircle, Search, Grid3x3, List } from "lucide-react";
-import useDebounce from "../hooks/debounce";
 import TicketCard from "../components/TicketCard";
+import useDebounce from "../hooks/debounce";
+import { ticketsApi, type Ticket } from "../lib/api";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 interface Pagination {
   total: number;
@@ -454,6 +454,7 @@ export default function TicketsCreatedByMe() {
                 status={ticket.status}
                 priority={ticket.priority}
                 department={ticket.department}
+                productName={ticket.departmentRef?.product?.name}
                 createdBy={ticket.createdBy}
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}

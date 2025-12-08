@@ -7,6 +7,7 @@ interface TicketCardProps {
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
   department: string;  // Dynamic team name
+  productName?: string;  // Product name (e.g., "e-Tendering Portal")
   createdBy: {
     name: string;
     email: string;
@@ -84,6 +85,7 @@ export default function TicketCard({
   status,
   priority,
   department,
+  productName,
   createdBy,
   assignedTo,
   createdAt,
@@ -129,10 +131,15 @@ export default function TicketCard({
         >
           {priority.toUpperCase()}
         </span>
+        {productName && (
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-violet-100 text-violet-700">
+            {productName}
+          </span>
+        )}
         <span
           className={`text-xs px-2.5 py-1 rounded-full font-medium ${getDepartmentColor(department)}`}
         >
-          {department.replace("-", " ").toUpperCase()}
+          {department?.toUpperCase() || 'UNASSIGNED'}
         </span>
       </div>
 
@@ -144,15 +151,15 @@ export default function TicketCard({
           </span>
         </div>
 
-        {assignedTo && (
-          <div className="flex items-center gap-2">
-            <User size={14} className="text-gray-400" />
-            <span className="text-xs">
-              Assigned to:{" "}
-              <span className="font-medium">{assignedTo.name}</span>
+        <div className="flex items-center gap-2">
+          <User size={14} className="text-gray-400" />
+          <span className="text-xs">
+            Assigned to:{" "}
+            <span className="font-medium">
+              {assignedTo?.name || "No one for now"}
             </span>
-          </div>
-        )}
+          </span>
+        </div>
 
         <div className="flex items-center gap-2">
           <Clock size={14} className="text-gray-400" />

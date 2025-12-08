@@ -52,6 +52,14 @@ const paginateTickets = async (query, page, limit, sortOptions) => {
     Ticket.find(query)
       .populate("assignedTo", "name email")
       .populate("createdBy", "name email")
+      .populate({
+        path: "departmentRef",
+        select: "name product",
+        populate: {
+          path: "product",
+          select: "name"
+        }
+      })
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum),
@@ -355,6 +363,14 @@ export const getTicketById = async (req, res) => {
       {
         path: "assignedTo",
         select: "name email",
+      },
+      {
+        path: "departmentRef",
+        select: "name product",
+        populate: {
+          path: "product",
+          select: "name"
+        }
       },
     ]);
     if (!ticket) {

@@ -55,6 +55,14 @@ export interface Ticket {
   _id: string;
   ticketId: string;
   department: string;  // Dynamic team name (e.g., "Vendor Onboarding & Reg")
+  departmentRef?: {
+    _id: string;
+    name: string;
+    product: {
+      _id: string;
+      name: string;
+    };
+  };
   subject: string;
   description: string;
   title: string;

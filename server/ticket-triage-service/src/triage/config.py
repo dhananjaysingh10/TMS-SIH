@@ -22,10 +22,12 @@ class Settings(BaseSettings):
     MONGO_DB_NAME: Optional[str] = "triage_db"
     GROQ_API_KEY: Optional[str] = None
     VECTOR_DB_URL: Optional[str] = None
+    LOCAL_LLM_BASE_URL: Optional[str] = None
     EXPRESS_API_URL: str = "http://localhost:10000/api/ticket"
     EXPRESS_API_TIMEOUT: int = 10
     
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 settings = Settings()

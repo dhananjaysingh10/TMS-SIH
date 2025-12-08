@@ -1,14 +1,14 @@
 //createdbyme.tsx
+import TicketCard from "@/components/TicketCard";
+import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import Layout from "../components/Layout";
 import { ticketsApi, type Ticket } from "../lib/api";
-import { AlertCircle } from "lucide-react";
-import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
-import TicketCard from "@/components/TicketCard";
 
-import useDebounce from "../hooks/debounce";
 import { Search } from "lucide-react";
+import useDebounce from "../hooks/debounce";
 export default function CreatedByMe() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +65,7 @@ export default function CreatedByMe() {
               status={ticket.status}
               priority={ticket.priority}
               department={ticket.department}
+              productName={ticket.departmentRef?.product?.name}
               createdBy={ticket.createdBy}
               assignedTo={ticket.assignedTo}
               createdAt={ticket.createdAt}
