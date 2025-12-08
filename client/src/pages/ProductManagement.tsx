@@ -154,7 +154,7 @@ export default function ProductManagement() {
     };
 
     const handleDeleteProduct = async (id: string) => {
-        if (!confirm("Delete this product and all its departments?")) return;
+        if (!confirm("Delete this product and all its teams?")) return;
         try {
             await productApi.delete(id);
             if (selectedProduct?._id === id) {
@@ -185,19 +185,19 @@ export default function ProductManagement() {
             setKeywordInput("");
             fetchDepartments(selectedProduct._id);
         } catch (err) {
-            alert("Failed to save department");
+            alert("Failed to save team");
         }
     };
 
     const handleDeleteDepartment = async (id: string) => {
-        if (!confirm("Delete this department?")) return;
+        if (!confirm("Delete this team?")) return;
         try {
             await departmentApi.delete(id);
             if (selectedProduct) {
                 fetchDepartments(selectedProduct._id);
             }
         } catch (err) {
-            alert("Failed to delete department");
+            alert("Failed to delete team");
         }
     };
 
@@ -234,8 +234,8 @@ export default function ProductManagement() {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Product & Department Management</h1>
-                        <p className="text-gray-500 mt-1">Organize your teams by products and departments</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Product & Team Management</h1>
+                        <p className="text-gray-500 mt-1">Organize your teams by products</p>
                     </div>
                     <button
                         onClick={() => {
@@ -312,7 +312,7 @@ export default function ProductManagement() {
                             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
                                 <h2 className="font-semibold text-gray-900 flex items-center gap-2">
                                     <Building2 className="w-5 h-5 text-purple-500" />
-                                    Departments {selectedProduct && `in ${selectedProduct.name}`}
+                                    Teams {selectedProduct && `in ${selectedProduct.name}`}
                                 </h2>
                                 {selectedProduct && (
                                     <button
@@ -325,7 +325,7 @@ export default function ProductManagement() {
                                         className="flex items-center gap-1 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
                                     >
                                         <Plus className="w-4 h-4" />
-                                        Add Department
+                                        Add Team
                                     </button>
                                 )}
                             </div>
@@ -333,12 +333,12 @@ export default function ProductManagement() {
                             {!selectedProduct ? (
                                 <div className="p-12 text-center text-gray-400">
                                     <Building2 className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                                    <p>Select a product to view departments</p>
+                                    <p>Select a product to view teams</p>
                                 </div>
                             ) : departments.length === 0 ? (
                                 <div className="p-12 text-center text-gray-400">
                                     <Building2 className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                                    <p>No departments in this product</p>
+                                    <p>No teams in this product</p>
                                 </div>
                             ) : (
                                 <div className="divide-y divide-gray-100">
@@ -471,7 +471,7 @@ export default function ProductManagement() {
                         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col">
                             <div className="flex items-center justify-between p-6 border-b shrink-0">
                                 <h3 className="text-xl font-bold text-gray-900">
-                                    {editingDepartment ? "Edit Department" : "New Department"}
+                                    {editingDepartment ? "Edit Team" : "New Team"}
                                 </h3>
                                 <button onClick={() => setShowDepartmentModal(false)} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-6 h-6" />
@@ -485,7 +485,7 @@ export default function ProductManagement() {
                                         value={departmentForm.name}
                                         onChange={(e) => setDepartmentForm({ ...departmentForm, name: e.target.value })}
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                                        placeholder="Department name"
+                                        placeholder="Team name"
                                     />
                                 </div>
                                 <div>

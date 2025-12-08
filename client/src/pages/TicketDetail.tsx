@@ -98,11 +98,11 @@ export default function TicketDetail() {
     unaccept: false,
     resolve: false,
     open: false,
-    request: false, 
+    request: false,
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser._id : "";
+  const userId = currentUser ? currentUser.id || (currentUser as any)._id : "";
 
   // DEBUG: Remove this after fixing
   console.log("FULL currentUser:", currentUser);
@@ -634,9 +634,9 @@ export default function TicketDetail() {
                       )}
                     </div>
                   )}
-                  {canAcceptTicket(ticket, currentUser) &&
-                    ticket.accepted &&
-                    ticket.status !== "resolved" && (
+                  {ticket.accepted &&
+                    ticket.status !== "resolved" &&
+                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) && (
                       <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
