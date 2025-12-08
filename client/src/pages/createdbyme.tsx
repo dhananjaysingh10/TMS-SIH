@@ -1,18 +1,18 @@
-// //createdbyme.tsx
-// import { useEffect, useState } from "react";
-// import Layout from "../components/Layout";
-// import { ticketsApi, type Ticket } from "../lib/api";
-// import { AlertCircle } from "lucide-react";
-// import { useSelector } from "react-redux";
-// import { selectCurrentUser } from "../redux/user/userSlice";
-// import TicketCard from "@/components/TicketCard";
+//createdbyme.tsx
+import TicketCard from "@/components/TicketCard";
+import { AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import Layout from "../components/Layout";
+import { ticketsApi, type Ticket } from "../lib/api";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
-// import useDebounce from "../hooks/debounce";
-// import { Search } from "lucide-react";
-// export default function CreatedByMe() {
-//   const [tickets, setTickets] = useState<Ticket[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const currentUser = useSelector(selectCurrentUser);
+import { Search } from "lucide-react";
+import useDebounce from "../hooks/debounce";
+export default function CreatedByMe() {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const currentUser = useSelector(selectCurrentUser);
 
 //   const [searchTerm, setSearchTerm] = useState("");
 //   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -49,33 +49,34 @@
 //         </div>
 //       </div>
 
-//       {sectionTickets.length === 0 ? (
-//         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
-//           <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
-//           <p className="text-gray-500">No tickets found</p>
-//         </div>
-//       ) : (
-//         <div className="grid grid-cols-1 gap-4">
-//           {sectionTickets.map((ticket) => (
-//             <TicketCard
-//               key={ticket._id}
-//               _id={ticket._id}
-//               ticketId={ticket.ticketId}
-//               title={ticket.title}
-//               status={ticket.status}
-//               priority={ticket.priority}
-//               department={ticket.department}
-//               createdBy={ticket.createdBy}
-//               assignedTo={ticket.assignedTo}
-//               createdAt={ticket.createdAt}
-//               accepted={ticket.accepted}
-//               userTicket={true}
-//             />
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
+      {sectionTickets.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <AlertCircle className="mx-auto text-gray-400 mb-2" size={32} />
+          <p className="text-gray-500">No tickets found</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4">
+          {sectionTickets.map((ticket) => (
+            <TicketCard
+              key={ticket._id}
+              _id={ticket._id}
+              ticketId={ticket.ticketId}
+              title={ticket.title}
+              status={ticket.status}
+              priority={ticket.priority}
+              department={ticket.department}
+              productName={ticket.departmentRef?.product?.name}
+              createdBy={ticket.createdBy}
+              assignedTo={ticket.assignedTo}
+              createdAt={ticket.createdAt}
+              accepted={ticket.accepted}
+              userTicket={true}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
 //   if (loading) {
 //     return (

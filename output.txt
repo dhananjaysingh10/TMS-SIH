@@ -1,0 +1,674 @@
+
+================================================================================
+🔎 QUERY: How do I reset my password?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion for resetting your PRANIT Portal password, based on the provided documentation:
+
+**Method 1: Resetting with One Time Password**
+
+This is the method recommended for your first login after losing your password.
+
+**Step-by-Step Instructions:**
+
+1.  **Access the Portal:** Navigate to the PRANIT Portal URL:  https://etender.powergrid.in.  It's best viewed in Internet Explorer-11 & above.
+2.  **Initiate Password Reset:** Click on the "Logon Help" option available on the login screen.
+3.  **Provide Details:** Enter your Logon ID and mapped E-Mail ID.
+4.  **Receive One Time Password:** You will receiveOne Time Password (OTP) on the specified Email ID, which you must use at your first login to change your password. 
+
+**Method 2: Reset Password Using Security Question/Answer**
+
+**Step-by-Step Instructions:**
+
+1.  **Access the Portal:** Navigate to the PRANIT Portal URL: https://etender.powergrid.in. It’s best viewed in Internet Explorer-11 & above.
+2.  **Initiate Password Reset:** Click on the “Logon Help” option available on the login screen.
+3.  **Provide Details:** Enter your Logon ID and mapped E-Mail ID.
+4.  **Answer Security Question:**  Click on the “Reset Password using security question/answer” link. On the next screen, provide the correct answer to the Security Question you set up during personalization. *Ensure you enter the exact answer you saved previously*.
+5.  **Submit:** Click the “Submit” button.
+
+**Important Notes:**
+
+*   **Security:** The system is secured (refer point no. 8 – though this is not directly defined within the context).
+*   **Link for Reset Password using security question/answer:**  The context doesn't provide a direct link, but you will find it on the "Logon Help" screen after submitting your Logon ID and E-Mail.
+
+Do you need further clarification on any of these steps?
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+..................... 1 
+2 Password reset .................................................................................................................................................1 
+2.1 Password reset using Security question/answer ........................................................................... 2 
+2.2 Password reset using One Time Password .................................................................................... 4 
+2.3 Logon using Reset Password received on e-mail
+
+--- Chunk 2 ---
+ate a onetime password, which user has to change 
+at first login to portal. Yes it is secured (refer point no. 8). 
+ 
+22) I've lost my password. How can I retrieve it? How can I 
+change my password? 
+“Logon Problems? Get Support” option is available at portal  login  screen, click on the 
+option, system will ask for login ID, last name, first name and  valid  Email,  submit it. 
+User will receive the New one time Password on the  specified Email,  which user has 
+to change at first login. 
+Power
+
+--- Chunk 3 ---
+User may reset PRANIT Portal password via following utilities: 
+1. Reset Password Using Security Question/Answer (Refer 2.1 for detailed steps) 
+2. Reset Password using One Time Password (Refer 2.2 for detailed steps) 
+ 
+2.1 Password reset using Security question/answer 
+ Click on Reset Password using security question/answer link. 
+ 
+ At the “Logon Help” screen provide Logon ID and mapped E-Mail ID .  
+ 
+ Click on Submit Button after filling Logon ID and E-Mail. 
+ 
+ 
+ Link for Reset Password us
+
+--- Chunk 4 ---
+on ID and E-Mail. 
+ 
+ 
+ Link for Reset Password using security question/answer 
+ 
+ 
+Enter Logon ID 
+Enter E-mail ID 
+Click Submit Button 
+Power Grid Corporation of India Ltd 
+PRANIT Portal Password Reset       Page 3 of 11 
+ 
+ On the next screen provide answer to your set Security Question. Make sure to 
+enter the correct answer that you have saved earlier while setting Security 
+Question and Answer under Personalize Link.  
+ 
+ Click on Submit Button after providing Security Answer on Security Q
+
+--- Chunk 5 ---
+................................................................................................ 6 
+5 Change Password ................................................................................................................................. 7 
+ 
+Power Grid Corporation of India Limited 
+Basic Navigation details for Bidders  Page 1 of 7 
+  
+1 Login Page 
+          Portal URL- https://etender.powergrid.in best viewed in Internet Explorer-11 & above. 
+ 
+ 
+1.1 Log On 
+Bidders who already have
+
+================================================================================
+
+
+================================================================================
+🔎 QUERY: How do I do vendor registration?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion based on the provided documentation for vendor registration on the PRANIT Portal:
+
+**Vendor Registration Process**
+
+If you are a new bidder and not already registered with PowerGrid, you must go through the vendor registration process via the following link: [https://etender.powergrid.in](https://etender.powergrid.in)
+
+**Here’s a breakdown of the registration process:**
+
+**Method 1: New Bidder Registration**
+
+1.  **Access the Portal:** Go to the PRANIT Portal link: [https://etender.powergrid.in](https://etender.powergrid.in)
+2.  **Start New Registration:**  You will find a link to “New Bidder? Register Here” – click this to begin the registration process.
+3.  **Complete the Form:** You’ll be prompted to fill out the following information:
+    *   Organization Name
+    *   POWERGRID Allocated 10-digit Vendor code (e.g. 2XXXXXXXXX)
+    *   PAN No.
+    *   Contact Person Details:
+        *   Title
+4.  **Submission**: Submit the completed form.
+
+**Important Notes & Prerequisites:**
+
+*   **Timeframe:**  To avoid last-minute issues, ensure your registration is completed and you have a valid user ID and password at least 7 working days before the bid submission deadline.
+*   **User ID Creation:** The user ID creation is done either on the Portal or by the RFx owner/co-ordinator on which bidder intends to participate/submit bid response.
+
+**If you are an existing vendor:**
+
+If you have been engaged by PowerGrid earlier for goods/works/services but do not have a Login ID on the PRANIT Portal, contact the RFx owner/co-ordinator for issuance of a Login ID.
+
+**Disclaimer:**  I do not have information on any "Link for Reset" details from the provided documents.
+
+Do you need further clarification on any of these steps, or would you like me to elaborate on a specific section of the form?
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+htra , 
+Bihar etc.) to register the vendor. 
+4. Postal Code/City: Enter your valid Postal Code/City. 
+5. Phone Number: Specify contact number of the company. 
+6. E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be 
+sent to following e-mail address. 
+7. POWERGRID Region :  Please select POWERGRID Region of concerned RFx Owner/Co-
+Ordinator from the dropdown list.
+
+--- Chunk 2 ---
+Existing Vendor Contact Person Registration Form 
+To, 
+Power Grid Corporation of India Ltd. 
+____________________________________________ 
+____________________________________________ 
+Kind Attn: Mr./Ms.     _________________________________________ 
+SUBJECT: Contact Person Registration on PRANIT Portal (https://etender.powergrid.in) 
+Vendor / Bidder Organization Details: 
+Organization Name  
+POWERGRID Allocated 10-digit Vendor 
+code (e.g. 2XXXXXXXXX)  
+ 
+PAN No.  
+Contact Person Details: 
+Title
+
+--- Chunk 3 ---
+For new bidders who are not registered with POWERGRID,  
+have to go for vendor registration process through the link: New Bidder?  
+Register here, provided in the e-tendering portal. 
+6. Please note that if you are targeting a particular bid, ensure that your 
+registration process is completed and you are in possession of a valid user Id  
+and password at least 7 working days before bid submission deadline. This is  
+in order to avoid last minute rush. Also note that Vendor registration link is
+
+--- Chunk 4 ---
+te user ID creation on the Portal or the  RFx owner/  co -
+ordinator on which bidder intends to participate/submit bid response. 
+2. Vendors who have been engaged by POWERGRID earlier for goods/works/services 
+by way of award of contracts/consultancy assignments etc. but do not have a Login 
+ID on PRANIT Portal. In such cases, contact the RFx owner/co-ordinator for issuance 
+of Login ID on the Portal. 
+ 
+1.2 Cases in which bidder need to register on PRANIT Portal 
+Vendors who do not fall under t
+
+--- Chunk 5 ---
+PRANIT Portal–Registration Manual 
+ 
+(Portal  Link  – https://etender.powergrid.in ) 
+ 
+ 
+Version History 
+  
+Version No. Release Date Remarks 
+Version 1.0 06.03.2024  
+ 
+ 
+ 
+ 
+ 
+
+Power Grid Corporation of India LTD. 
+ Registration Manual  Page 1 of 4 
+ 
+ 
+   
+1 Conditions to check before registration 
+1.1 Cases in which bidder need not register on PRANIT Portal 
+Vendors meeting the following criteria need not register on PRANIT Portal: 
+1. Vendors who have a previously parti
+
+================================================================================
+
+
+================================================================================
+🔎 QUERY: How do I do vendor registration?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion based on the provided documentation for vendor registration on the PRANIT Portal:
+
+**Vendor Registration Process**
+
+If you are a new bidder who isn't already registered with Power Grid, you need to go through the new bidder registration process.
+
+**Method 1: New Bidder Registration**
+
+1.  **Access the Registration Link:** Go to the e-tendering portal: [https://etender.powergrid.in](https://etender.powergrid.in).
+2.  **Follow the Instructions:** The portal will guide you through the new bidder registration process.  This will involve providing the following information:
+    *   Organization Name
+    *   POWERGRID Allocated 10-digit Vendor code (e.g. 2XXXXXXXXX)
+    *   PAN No.
+    *   Contact Person Details:  Title (please fill in the relevant title for your contact person).
+    *   Postal Code/City: Enter your valid Postal Code/City.
+    *   Phone Number: Specify contact number of the company.
+    *   E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be sent to following e-mail address.
+
+**Important Note Regarding Timeline:**
+
+*   “Please note that if you are targeting a particular bid, ensure that your registration process is completed and you are in possession of a valid user ID and password at least 7 working days before bid submission deadline. This is in order to avoid last minute rush.”
+
+**If you are already a vendor but do not have a Login ID on the PRANIT Portal:**
+
+**Method 2: Contact RFx Owner/Co-Ordinator**
+
+1.  **Identify RFx Owner/Co-Ordinator:** Determine the RFx owner/co-ordinator for the specific bid you intend to participate in.
+2.  **Request Login ID:** Contact this RFx owner/co-ordinator and request the issuance of a Login ID on the Portal.
+
+I don't have details on a "Link for Reset" or specific instructions for password recovery within this document.
+
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+htra , 
+Bihar etc.) to register the vendor. 
+4. Postal Code/City: Enter your valid Postal Code/City. 
+5. Phone Number: Specify contact number of the company. 
+6. E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be 
+sent to following e-mail address. 
+7. POWERGRID Region :  Please select POWERGRID Region of concerned RFx Owner/Co-
+Ordinator from the dropdown list.
+
+--- Chunk 2 ---
+Existing Vendor Contact Person Registration Form 
+To, 
+Power Grid Corporation of India Ltd. 
+____________________________________________ 
+____________________________________________ 
+Kind Attn: Mr./Ms.     _________________________________________ 
+SUBJECT: Contact Person Registration on PRANIT Portal (https://etender.powergrid.in) 
+Vendor / Bidder Organization Details: 
+Organization Name  
+POWERGRID Allocated 10-digit Vendor 
+code (e.g. 2XXXXXXXXX)  
+ 
+PAN No.  
+Contact Person Details: 
+Title
+
+--- Chunk 3 ---
+For new bidders who are not registered with POWERGRID,  
+have to go for vendor registration process through the link: New Bidder?  
+Register here, provided in the e-tendering portal. 
+6. Please note that if you are targeting a particular bid, ensure that your 
+registration process is completed and you are in possession of a valid user Id  
+and password at least 7 working days before bid submission deadline. This is  
+in order to avoid last minute rush. Also note that Vendor registration link is
+
+--- Chunk 4 ---
+te user ID creation on the Portal or the  RFx owner/  co -
+ordinator on which bidder intends to participate/submit bid response. 
+2. Vendors who have been engaged by POWERGRID earlier for goods/works/services 
+by way of award of contracts/consultancy assignments etc. but do not have a Login 
+ID on PRANIT Portal. In such cases, contact the RFx owner/co-ordinator for issuance 
+of Login ID on the Portal. 
+ 
+1.2 Cases in which bidder need to register on PRANIT Portal 
+Vendors who do not fall under t
+
+--- Chunk 5 ---
+PRANIT Portal–Registration Manual 
+ 
+(Portal  Link  – https://etender.powergrid.in ) 
+ 
+ 
+Version History 
+  
+Version No. Release Date Remarks 
+Version 1.0 06.03.2024  
+ 
+ 
+ 
+ 
+ 
+
+Power Grid Corporation of India LTD. 
+ Registration Manual  Page 1 of 4 
+ 
+ 
+   
+1 Conditions to check before registration 
+1.1 Cases in which bidder need not register on PRANIT Portal 
+Vendors meeting the following criteria need not register on PRANIT Portal: 
+1. Vendors who have a previously parti
+
+================================================================================
+
+
+================================================================================
+🔎 QUERY: How do I do vendor registration?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution for your vendor registration question, based on the provided documentation:
+
+**Method 1: For New Bidders**
+
+If you are a new bidder who is not already registered with PowerGrid, you must go through the vendor registration process via the following link:
+
+1.  **Access the Registration Link:** Go to the PRANIT Portal here: [https://etender.powergrid.in](https://etender.powergrid.in)
+2.  **Follow the Instructions:** The portal will guide you through the new bidder registration process.
+
+**Method 2: If You Have an Existing Vendor Code**
+
+If you already have a 10-digit POWERGRID allocated vendor code (e.g., 2XXXXXXXXX), follow these steps:
+
+1.  **Access the PRANIT Portal:** Go to [https://etender.powergrid.in](https://etender.powergrid.in)
+2.  **Navigate to Registration:**  The portal will guide you through the registration process.
+3.  **Enter Your Vendor Code:** You will be prompted to enter your 10-digit vendor code.
+
+**Important Notes & Prerequisites:**
+
+*   **Timeframe:**  You must complete your registration and obtain a valid user ID and password at least 7 working days before the bid submission deadline. This is to avoid last-minute issues.
+*   **Contacting RFx Owner/Co-ordinator:** If you have been engaged by PowerGrid before but don’t have a login ID, contact the RFx owner/co-ordinator for issuance of your login ID.
+
+**Link for Reset:**  There is no explicit “reset” link provided in the documentation. If you have issues with your login details after registering, contact the RFx owner/co-ordinator.
+
+I don’t have further instructions on how to reset your password based on the provided documents.
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+htra , 
+Bihar etc.) to register the vendor. 
+4. Postal Code/City: Enter your valid Postal Code/City. 
+5. Phone Number: Specify contact number of the company. 
+6. E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be 
+sent to following e-mail address. 
+7. POWERGRID Region :  Please select POWERGRID Region of concerned RFx Owner/Co-
+Ordinator from the dropdown list.
+
+--- Chunk 2 ---
+Existing Vendor Contact Person Registration Form 
+To, 
+Power Grid Corporation of India Ltd. 
+____________________________________________ 
+____________________________________________ 
+Kind Attn: Mr./Ms.     _________________________________________ 
+SUBJECT: Contact Person Registration on PRANIT Portal (https://etender.powergrid.in) 
+Vendor / Bidder Organization Details: 
+Organization Name  
+POWERGRID Allocated 10-digit Vendor 
+code (e.g. 2XXXXXXXXX)  
+ 
+PAN No.  
+Contact Person Details: 
+Title
+
+--- Chunk 3 ---
+For new bidders who are not registered with POWERGRID,  
+have to go for vendor registration process through the link: New Bidder?  
+Register here, provided in the e-tendering portal. 
+6. Please note that if you are targeting a particular bid, ensure that your 
+registration process is completed and you are in possession of a valid user Id  
+and password at least 7 working days before bid submission deadline. This is  
+in order to avoid last minute rush. Also note that Vendor registration link is
+
+--- Chunk 4 ---
+te user ID creation on the Portal or the  RFx owner/  co -
+ordinator on which bidder intends to participate/submit bid response. 
+2. Vendors who have been engaged by POWERGRID earlier for goods/works/services 
+by way of award of contracts/consultancy assignments etc. but do not have a Login 
+ID on PRANIT Portal. In such cases, contact the RFx owner/co-ordinator for issuance 
+of Login ID on the Portal. 
+ 
+1.2 Cases in which bidder need to register on PRANIT Portal 
+Vendors who do not fall under t
+
+--- Chunk 5 ---
+PRANIT Portal–Registration Manual 
+ 
+(Portal  Link  – https://etender.powergrid.in ) 
+ 
+ 
+Version History 
+  
+Version No. Release Date Remarks 
+Version 1.0 06.03.2024  
+ 
+ 
+ 
+ 
+ 
+
+Power Grid Corporation of India LTD. 
+ Registration Manual  Page 1 of 4 
+ 
+ 
+   
+1 Conditions to check before registration 
+1.1 Cases in which bidder need not register on PRANIT Portal 
+Vendors meeting the following criteria need not register on PRANIT Portal: 
+1. Vendors who have a previously parti
+
+================================================================================
+
+
+================================================================================
+🔎 QUERY: How do I do vendor registration?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion based on the provided documentation for vendor registration on the PRANIT Portal:
+
+**Vendor Registration Process**
+
+If you are a new bidder not yet registered with POWERGRID, you must go through the new bidder registration process.
+
+**Method 1: New Bidder Registration**
+
+1.  **Access the New Bidder Registration Link:** Go to the e-tendering portal at [https://etender.powergrid.in](https://etender.powergrid.in).
+2.  **Follow the Instructions:** The portal will guide you through the new bidder registration process. You will need to provide the following information:
+    *   Organization Name
+    *   POWERGRID Allocated 10-digit Vendor code (e.g. 2XXXXXXXXX)
+    *   PAN No.
+    *   Contact Person Details: Title 
+
+**Method 2: Vendor Registration for Existing POWERGRID Engaged Vendors**
+
+1.  **Contact RFx Owner/Co-ordinator:** If you have been previously engaged by POWERGRID for goods/works/services (e.g., through contracts or consultancy assignments), contact the RFx owner or co-ordinator on which you intend to participate/submit bid responses.
+2.  **Request Login ID:**  Request them to issue you a Login ID on the PRANIT Portal.
+
+**Important Notes & Prerequisites:**
+
+*   **Timeframe:** You must complete the registration process and obtain a valid user ID and password at least 7 working days before the bid submission deadline. This is to avoid a last-minute rush.
+*   **User ID Creation:** You can create a user ID on the Portal or the RFx owner/co-ordinator can do it for you.
+*   **Link for Reset:**  (The documentation doesn’t provide a link for password reset; you’ll need to contact the RFx owner/co-ordinator for assistance with this.)
+
+**Disclaimer:** Based on the provided documentation, I do not have specific details on password reset procedures. You will need to contact the RFx owner/co-ordinator for assistance with this.
+
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+htra , 
+Bihar etc.) to register the vendor. 
+4. Postal Code/City: Enter your valid Postal Code/City. 
+5. Phone Number: Specify contact number of the company. 
+6. E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be 
+sent to following e-mail address. 
+7. POWERGRID Region :  Please select POWERGRID Region of concerned RFx Owner/Co-
+Ordinator from the dropdown list.
+
+--- Chunk 2 ---
+Existing Vendor Contact Person Registration Form 
+To, 
+Power Grid Corporation of India Ltd. 
+____________________________________________ 
+____________________________________________ 
+Kind Attn: Mr./Ms.     _________________________________________ 
+SUBJECT: Contact Person Registration on PRANIT Portal (https://etender.powergrid.in) 
+Vendor / Bidder Organization Details: 
+Organization Name  
+POWERGRID Allocated 10-digit Vendor 
+code (e.g. 2XXXXXXXXX)  
+ 
+PAN No.  
+Contact Person Details: 
+Title
+
+--- Chunk 3 ---
+For new bidders who are not registered with POWERGRID,  
+have to go for vendor registration process through the link: New Bidder?  
+Register here, provided in the e-tendering portal. 
+6. Please note that if you are targeting a particular bid, ensure that your 
+registration process is completed and you are in possession of a valid user Id  
+and password at least 7 working days before bid submission deadline. This is  
+in order to avoid last minute rush. Also note that Vendor registration link is
+
+--- Chunk 4 ---
+te user ID creation on the Portal or the  RFx owner/  co -
+ordinator on which bidder intends to participate/submit bid response. 
+2. Vendors who have been engaged by POWERGRID earlier for goods/works/services 
+by way of award of contracts/consultancy assignments etc. but do not have a Login 
+ID on PRANIT Portal. In such cases, contact the RFx owner/co-ordinator for issuance 
+of Login ID on the Portal. 
+ 
+1.2 Cases in which bidder need to register on PRANIT Portal 
+Vendors who do not fall under t
+
+--- Chunk 5 ---
+PRANIT Portal–Registration Manual 
+ 
+(Portal  Link  – https://etender.powergrid.in ) 
+ 
+ 
+Version History 
+  
+Version No. Release Date Remarks 
+Version 1.0 06.03.2024  
+ 
+ 
+ 
+ 
+ 
+
+Power Grid Corporation of India LTD. 
+ Registration Manual  Page 1 of 4 
+ 
+ 
+   
+1 Conditions to check before registration 
+1.1 Cases in which bidder need not register on PRANIT Portal 
+Vendors meeting the following criteria need not register on PRANIT Portal: 
+1. Vendors who have a previously parti
+
+================================================================================
+
+
+================================================================================
+🔎 QUERY: How do I do vendor registration?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion based on the provided PRANIT Portal Registration Manual:
+
+**Vendor Registration Process**
+
+If you are a new bidder not registered with PowerGrid, you must go through the vendor registration process via the PRANIT Portal. Here’s how:
+
+**Method 1: New Bidder Registration**
+
+1.  **Access the Portal:** Go to the PRANIT Portal link: [https://etender.powergrid.in](https://etender.powergrid.in)
+2.  **Navigate to Registration:** Click on the link: “New Bidder? Register here”.
+3.  **Complete the Registration Form:** You’ll be directed to a registration form.  Fill out all the required fields, including:
+    *   Organization Name
+    *   POWERGRID Allocated 10-digit Vendor code (e.g. 2XXXXXXXXX)
+    *   PAN No.
+    *   Contact Person Details:  Title
+    *   Postal Code/City: Enter your valid Postal Code/City.
+    *   Phone Number: Specify contact number of the company.
+    *   E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be sent to following e-mail address.
+
+**Important Note:** The documentation states that to avoid a last-minute rush, you must complete your registration process and have a valid user ID and password at least 7 working days before the bid submission deadline.
+
+**Method 2: Existing Vendor Login ID Issuance**
+
+If you’ve been engaged by PowerGrid previously for goods/works/services but *don’t* have a Login ID on the PRANIT Portal, follow these steps:
+
+1.  **Contact the RFx Owner/Co-Ordinator:**  Reach out to the RFx owner or co-ordinator on which bidder intends to participate/submit bid response.
+2.  **Request Login ID:**  Request them to issue you a Login ID on the Portal.
+
+**Link for Reset:**  There is no specific “Reset” link provided in the documentation.  You’ll need to directly contact the RFx owner/co-ordinator as indicated above.
+
+**Disclaimer:**  I cannot provide specific details on how to reset your password as the documentation doesn't include this information. You'll need to consult with the RFx owner/co-ordinator.
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+htra , 
+Bihar etc.) to register the vendor. 
+4. Postal Code/City: Enter your valid Postal Code/City. 
+5. Phone Number: Specify contact number of the company. 
+6. E-mail Address: Enter your valid e-mail ID as Login ID and Password details shall be 
+sent to following e-mail address. 
+7. POWERGRID Region :  Please select POWERGRID Region of concerned RFx Owner/Co-
+Ordinator from the dropdown list.
+
+--- Chunk 2 ---
+Existing Vendor Contact Person Registration Form 
+To, 
+Power Grid Corporation of India Ltd. 
+____________________________________________ 
+____________________________________________ 
+Kind Attn: Mr./Ms.     _________________________________________ 
+SUBJECT: Contact Person Registration on PRANIT Portal (https://etender.powergrid.in) 
+Vendor / Bidder Organization Details: 
+Organization Name  
+POWERGRID Allocated 10-digit Vendor 
+code (e.g. 2XXXXXXXXX)  
+ 
+PAN No.  
+Contact Person Details: 
+Title
+
+--- Chunk 3 ---
+For new bidders who are not registered with POWERGRID,  
+have to go for vendor registration process through the link: New Bidder?  
+Register here, provided in the e-tendering portal. 
+6. Please note that if you are targeting a particular bid, ensure that your 
+registration process is completed and you are in possession of a valid user Id  
+and password at least 7 working days before bid submission deadline. This is  
+in order to avoid last minute rush. Also note that Vendor registration link is
+
+--- Chunk 4 ---
+te user ID creation on the Portal or the  RFx owner/  co -
+ordinator on which bidder intends to participate/submit bid response. 
+2. Vendors who have been engaged by POWERGRID earlier for goods/works/services 
+by way of award of contracts/consultancy assignments etc. but do not have a Login 
+ID on PRANIT Portal. In such cases, contact the RFx owner/co-ordinator for issuance 
+of Login ID on the Portal. 
+ 
+1.2 Cases in which bidder need to register on PRANIT Portal 
+Vendors who do not fall under t
+
+--- Chunk 5 ---
+PRANIT Portal–Registration Manual 
+ 
+(Portal  Link  – https://etender.powergrid.in ) 
+ 
+ 
+Version History 
+  
+Version No. Release Date Remarks 
+Version 1.0 06.03.2024  
+ 
+ 
+ 
+ 
+ 
+
+Power Grid Corporation of India LTD. 
+ Registration Manual  Page 1 of 4 
+ 
+ 
+   
+1 Conditions to check before registration 
+1.1 Cases in which bidder need not register on PRANIT Portal 
+Vendors meeting the following criteria need not register on PRANIT Portal: 
+1. Vendors who have a previously parti
+
+================================================================================
+

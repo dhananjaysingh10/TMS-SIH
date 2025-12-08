@@ -1,0 +1,110 @@
+
+================================================================================
+🔎 QUERY: How do I reset my password?
+================================================================================
+
+🤖 ANSWER:
+Okay, here’s a detailed resolution suggestion for resetting your PRANIT Portal password, based on the provided documentation:
+
+**Method 1: Resetting with One-Time Password (Recommended)**
+
+This is the most common method, as described in the documents.
+
+**Step-by-Step Instructions:**
+
+1.  **Access the Portal:** Log in to the PRANIT Portal at [https://etender.powergrid.in](https://etender.powergrid.in).  It’s best viewed in Internet Explorer-11 & above.
+2.  **Receive One-Time Password:** Upon your first login to the portal, the system will automatically generate a one-time password and send it to the email address you have on file.
+3.  **Change Password:**  At the login screen, use the one-time password to immediately change your password.
+
+**Method 2: Resetting with Security Question/Answer**
+
+**Step-by-Step Instructions:**
+
+1.  **Access the Portal:** Log in to the PRANIT Portal at [https://etender.powergrid.in](https://etender.powergrid.in).
+2.  **Click Reset Password Link:** On the login screen, click on the "Logon Help" option.
+3.  **Enter Details:**  On the “Logon Help” screen, you’ll be prompted to enter your Logon ID and mapped E-Mail ID.
+4.  **Submit:** Click the "Submit Button" after filling in the required information.
+5.  **Answer Security Question:** You’ll be directed to a screen where you’ll need to provide the answer to the security question you set up when personalizing your account (via the "Personalize Link"). *Make sure you enter the correct answer you saved previously*.
+6.  **Submit Again:** Click the "Submit Button" after providing the Security Answer.
+
+**Important Notes:**
+
+*   **Security:** The system confirms that the process is secured (refer point no. 8).
+*   **Link for Reset Password using security question/answer:** You’ll need your Logon ID and E-Mail.
+
+**If you are still unable to reset your password using these methods, you can contact support by clicking the “Logon Problems? Get Support” option on the portal login screen.**
+
+Do you need clarification on any of these steps, or would you like me to provide more detailed instructions for a particular step?
+
+
+📚 CONTEXT USED (5 chunks):
+
+--- Chunk 1 ---
+..................... 1 
+2 Password reset .................................................................................................................................................1 
+2.1 Password reset using Security question/answer ........................................................................... 2 
+2.2 Password reset using One Time Password .................................................................................... 4 
+2.3 Logon using Reset Password received on e-mail
+
+--- Chunk 2 ---
+ate a onetime password, which user has to change 
+at first login to portal. Yes it is secured (refer point no. 8). 
+ 
+22) I've lost my password. How can I retrieve it? How can I 
+change my password? 
+“Logon Problems? Get Support” option is available at portal  login  screen, click on the 
+option, system will ask for login ID, last name, first name and  valid  Email,  submit it. 
+User will receive the New one time Password on the  specified Email,  which user has 
+to change at first login. 
+Power
+
+--- Chunk 3 ---
+User may reset PRANIT Portal password via following utilities: 
+1. Reset Password Using Security Question/Answer (Refer 2.1 for detailed steps) 
+2. Reset Password using One Time Password (Refer 2.2 for detailed steps) 
+ 
+2.1 Password reset using Security question/answer 
+ Click on Reset Password using security question/answer link. 
+ 
+ At the “Logon Help” screen provide Logon ID and mapped E-Mail ID .  
+ 
+ Click on Submit Button after filling Logon ID and E-Mail. 
+ 
+ 
+ Link for Reset Password us
+
+--- Chunk 4 ---
+on ID and E-Mail. 
+ 
+ 
+ Link for Reset Password using security question/answer 
+ 
+ 
+Enter Logon ID 
+Enter E-mail ID 
+Click Submit Button 
+Power Grid Corporation of India Ltd 
+PRANIT Portal Password Reset       Page 3 of 11 
+ 
+ On the next screen provide answer to your set Security Question. Make sure to 
+enter the correct answer that you have saved earlier while setting Security 
+Question and Answer under Personalize Link.  
+ 
+ Click on Submit Button after providing Security Answer on Security Q
+
+--- Chunk 5 ---
+................................................................................................ 6 
+5 Change Password ................................................................................................................................. 7 
+ 
+Power Grid Corporation of India Limited 
+Basic Navigation details for Bidders  Page 1 of 7 
+  
+1 Login Page 
+          Portal URL- https://etender.powergrid.in best viewed in Internet Explorer-11 & above. 
+ 
+ 
+1.1 Log On 
+Bidders who already have
+
+================================================================================
+
