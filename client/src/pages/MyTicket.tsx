@@ -3,22 +3,18 @@ import Layout from "../components/Layout";
 import TicketCard from "../components/TicketCard";
 import useDebounce from "../hooks/debounce";
 import { Search, AlertCircle, Grid3x3, List } from "lucide-react";
-import { ticketsApi, type Ticket } from "../lib/api";
+import { ticketsApi, productApi, type Ticket } from "../lib/api";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
-
-interface Pagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+import { useParams } from "react-router-dom";
 
 export default function MyTickets() {
+  const { productId } = useParams<{ productId: string }>();
   const xx = localStorage.getItem("viewMode") || "grid";
   const [viewMode, setViewMode] = useState(xx);
   const currentUser = useSelector(selectCurrentUser);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [productName, setProductName] = useState<string>("My Assigned Tickets");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,9 +23,18 @@ export default function MyTickets() {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const limit = 10;
 
+  // Fetch product name
+  useEffect(() => {
+    if (productId) {
+      productApi.getById(productId)
+        .then((p) => setProductName(p.product.name + " - My Tickets"))
+        .catch(console.error);
+    }
+  }, [productId]);
+
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 on search change
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, productId]);
 
   useEffect(() => {
     if (currentUser?.email) {
@@ -39,22 +44,23 @@ export default function MyTickets() {
       setLoading(false);
       setTickets([]);
     }
-  }, [currentUser, debouncedSearchTerm, currentPage]);
+  }, [currentUser, debouncedSearchTerm, currentPage, productId]);
 
   useEffect(() => {
-    // console.log("ckicked");
     localStorage.setItem("viewMode", viewMode);
   }, [viewMode]);
 
   async function fetchMyTickets() {
+    if (!productId) return;
     try {
       setLoading(true);
       const email = currentUser?.email || "test";
-      const ticketsData = await ticketsApi.getMyTickets(
-        email,
-        debouncedSearchTerm
-      );
-      console.log("Processed tickets data:", ticketsData); // Debug log
+      // Use getAll with productId filter + assignedTo email
+      let endpoint = `/ticket?productId=${productId}&assignedTo=${encodeURIComponent(email)}`;
+      if (debouncedSearchTerm) {
+        endpoint += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
+      }
+      const ticketsData = await ticketsApi.getAll(endpoint);
       setTickets(ticketsData);
       setError(null);
     } catch (error) {
@@ -152,7 +158,7 @@ export default function MyTickets() {
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}
                 accepted={ticket.accepted}
-                // className="hover:-translate-y-0.5"
+              // className="hover:-translate-y-0.5"
               />
             ))}
           </div>
@@ -224,16 +230,15 @@ export default function MyTickets() {
               {paginatedTickets.map((ticket) => (
                 <tr
                   key={ticket.ticketId}
-                  className={`hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 ${
-                    !ticket.accepted
-                      ? "border-l-4 border-l-amber-400 bg-amber-50/30"
-                      : ticket.status === "in-progress"
+                  className={`hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent transition-all duration-200 ${!ticket.accepted
+                    ? "border-l-4 border-l-amber-400 bg-amber-50/30"
+                    : ticket.status === "in-progress"
                       ? "border-l-4 border-l-emerald-400 bg-emerald-50/30"
                       : ticket.status === "resolved" ||
                         ticket.status === "closed"
-                      ? "border-l-4 border-l-blue-400 bg-blue-50/30"
-                      : ""
-                  }`}
+                        ? "border-l-4 border-l-blue-400 bg-blue-50/30"
+                        : ""
+                    }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <a
@@ -245,26 +250,24 @@ export default function MyTickets() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${
-                        ticket.priority === "high"
-                          ? "bg-red-100 text-red-700 border border-red-200"
-                          : ticket.priority === "medium"
+                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${ticket.priority === "high"
+                        ? "bg-red-100 text-red-700 border border-red-200"
+                        : ticket.priority === "medium"
                           ? "bg-yellow-100 text-yellow-700 border border-yellow-200"
                           : "bg-green-100 text-green-700 border border-green-200"
-                      }`}
+                        }`}
                     >
                       {ticket.priority.toUpperCase()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${
-                        !ticket.accepted
-                          ? "bg-amber-100 text-amber-700 border border-amber-200"
-                          : ticket.status === "in-progress"
+                      className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${!ticket.accepted
+                        ? "bg-amber-100 text-amber-700 border border-amber-200"
+                        : ticket.status === "in-progress"
                           ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
                           : "bg-blue-100 text-blue-700 border border-blue-200"
-                      }`}
+                        }`}
                     >
                       {!ticket.accepted
                         ? "UNCLAIMED"
@@ -307,7 +310,7 @@ export default function MyTickets() {
 
   if (loading) {
     return (
-      <Layout pageTitle="My Assigned Tickets">
+      <Layout pageTitle={productName}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {[1, 2, 3, 4].map((i) => (
@@ -328,7 +331,7 @@ export default function MyTickets() {
 
   if (error) {
     return (
-      <Layout pageTitle="My Assigned Tickets">
+      <Layout pageTitle={productName}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
           <AlertCircle className="mx-auto text-red-400 mb-4" size={48} />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -351,7 +354,7 @@ export default function MyTickets() {
   }
 
   return (
-    <Layout pageTitle="My Assigned Tickets">
+    <Layout pageTitle={productName}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           {/* <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -378,22 +381,20 @@ export default function MyTickets() {
           <div className="flex space-x-3 bg-white border-2 border-gray-300 rounded-xl p-1.5 shadow-sm">
             <button
               onClick={() => setViewMode("grid")}
-              className={`p-3 rounded-lg transition-all duration-200 ${
-                viewMode === "grid"
-                  ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+              className={`p-3 rounded-lg transition-all duration-200 ${viewMode === "grid"
+                ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+                }`}
               title="Grid View"
             >
               <Grid3x3 size={20} />
             </button>
             <button
               onClick={() => setViewMode("list")}
-              className={`p-3 rounded-lg transition-all duration-200 ${
-                viewMode === "list"
-                  ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
+              className={`p-3 rounded-lg transition-all duration-200 ${viewMode === "list"
+                ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
+                }`}
               title="List View"
             >
               <List size={20} />
@@ -418,11 +419,10 @@ export default function MyTickets() {
             <div className="flex mb-6 border-b-2 border-gray-200 bg-gray-50 rounded-t-lg -mt-6 -mx-6 px-6">
               <button
                 onClick={() => setActiveTab("open")}
-                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${
-                  activeTab === "open"
-                    ? "text-emerald-600"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${activeTab === "open"
+                  ? "text-emerald-600"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 Open ({openTickets.length})
                 {activeTab === "open" && (
@@ -431,11 +431,10 @@ export default function MyTickets() {
               </button>
               <button
                 onClick={() => setActiveTab("closed")}
-                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${
-                  activeTab === "closed"
-                    ? "text-blue-600"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`px-6 py-4 text-sm font-bold transition-all duration-200 relative ${activeTab === "closed"
+                  ? "text-blue-600"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 Closed ({closedTickets.length})
                 {activeTab === "closed" && (

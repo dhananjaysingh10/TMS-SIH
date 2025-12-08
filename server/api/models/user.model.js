@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     primaryPhone: { type: String, required: false, unique: false },
-    email: {type: String, required: true, unique: true},
+    email: { type: String, required: true, unique: true },
     password: { type: String },
     profilePicture: {
       type: String,
@@ -18,9 +18,20 @@ const userSchema = new mongoose.Schema(
     },
     department: {
       type: String,
-      enum: ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"],
-      default: "NA",
+      default: null, // Legacy field, kept for migration compatibility
     },
+    departments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Department",
+      },
+    ],
+    products: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     telegramId: { type: String, required: false, unique: true },
     seenNotificationIds: {
       type: [String],

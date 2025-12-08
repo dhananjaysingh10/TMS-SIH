@@ -7,15 +7,15 @@ export const markNotificationsAsSeen = async (req, res) => {
     if (!token) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userId = decoded.userId || decoded._id || decoded.id; // ← ADD decoded.userId    
     const { notificationIds } = req.body;
-    
+
     await User.findByIdAndUpdate(userId, {
       $addToSet: { seenNotificationIds: { $each: notificationIds } }
     });
-    
+
     res.status(200).json({ success: true });
   } catch (error) {
     console.error('Mark notifications error:', error);
@@ -25,20 +25,20 @@ export const markNotificationsAsSeen = async (req, res) => {
 
 export const getSeenNotifications = async (req, res) => {
   try {
-    const token = req.cookies.token;    
+    const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.userId || decoded._id || decoded.id; 
+    const userId = decoded.userId || decoded._id || decoded.id;
     const user = await User.findById(userId).select('seenNotificationIds');
-    
+
     if (!user) {
       console.log('User not found in database');
       return res.status(404).json({ success: false, error: 'User not found' });
     }
-    
+
     res.status(200).json({ seenNotificationIds: user.seenNotificationIds || [] });
   } catch (error) {
     console.error('Get seen notifications error:', error);
@@ -49,7 +49,7 @@ export const getSeenNotifications = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); 
+    const users = await User.find().select("-password");
     res.status(200).json({
       success: true,
       count: users.length,
@@ -59,6 +59,34 @@ export const getAllUsers = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error fetching users",
+      error: error.message,
+    });
+  }
+};
+
+export const getMyProducts = async (req, res) => {
+  try {
+    const userId = req.user?.userId;
+    console.log("getMyProducts called, userId:", userId);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const user = await User.findById(userId).populate('products', 'name _id');
+    console.log("Found user:", user?.email, "products:", user?.products);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      products: user.products || [],
+    });
+  } catch (error) {
+    console.error("getMyProducts error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user products",
       error: error.message,
     });
   }
@@ -105,8 +133,8 @@ export const updateUser = async (req, res) => {
     );
 
     const user = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true, 
-      runValidators: true, 
+      new: true,
+      runValidators: true,
     }).select("-password");
 
     if (!user) {
@@ -184,7 +212,7 @@ export const getUserByTelegramId = async (req, res) => {
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
-    
+
     res.status(200).json({ success: true, user });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching user', error: error.message });

@@ -55,12 +55,12 @@ export interface Ticket {
   _id: string;
   ticketId: string;
   department:
-    | "IT"
-    | "dev-ops"
-    | "software"
-    | "networking"
-    | "cyber-security"
-    | "NA";
+  | "IT"
+  | "dev-ops"
+  | "software"
+  | "networking"
+  | "cyber-security"
+  | "NA";
   subject: string;
   description: string;
   title: string;
@@ -316,5 +316,283 @@ export const activitiesApi = {
       `/ticket/activities/${ticketId}`
     );
     return response.data;
+  },
+};
+
+// Analytics API for Admin Dashboard
+export interface DepartmentAnalytics {
+  department: string;
+  range: string;
+  startDate: string;
+  endDate: string;
+  ticketVolume: {
+    total: number;
+    open: number;
+    inProgress: number;
+    resolved: number;
+    closed: number;
+  };
+  priorityBreakdown: {
+    urgent: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+  typeBreakdown: Record<string, number>;
+  avgResolutionTimeHours: number;
+  slaCompliance: {
+    percent: number | null;
+    metCount: number;
+    total: number;
+  };
+  customerSatisfaction: {
+    avgRating: number | null;
+    totalRated: number;
+  };
+}
+
+export interface EmployeeStats {
+  employee: {
+    _id: string;
+    name: string;
+    email: string;
+    profilePicture: string;
+  };
+  ticketStats: {
+    total: number;
+    open: number;
+    inProgress: number;
+    resolved: number;
+    closed: number;
+  };
+  avgResolutionTimeHours: number;
+  avgRating: number | null;
+  currentWorkload: number;
+}
+
+export interface EmployeesAnalytics {
+  department: string;
+  range: string;
+  startDate: string;
+  endDate: string;
+  employees: EmployeeStats[];
+}
+
+export interface SingleEmployeeAnalytics {
+  employee: {
+    _id: string;
+    name: string;
+    email: string;
+    profilePicture: string;
+    department: string;
+  };
+  range: string;
+  startDate: string;
+  endDate: string;
+  ticketStats: {
+    total: number;
+    open: number;
+    inProgress: number;
+    resolved: number;
+    closed: number;
+  };
+  priorityBreakdown: {
+    urgent: number;
+    high: number;
+    medium: number;
+    low: number;
+  };
+  avgResolutionTimeHours: number;
+  customerSatisfaction: {
+    avgRating: number | null;
+    totalRated: number;
+  };
+  currentWorkload: number;
+  recentTickets: Array<{
+    ticketId: string;
+    title: string;
+    status: string;
+    priority: string;
+    createdAt: string;
+    updatedAt: string;
+    rating: number;
+  }>;
+}
+
+export const analyticsApi = {
+  getDepartment: async (range: string = '1m'): Promise<DepartmentAnalytics> => {
+    const response = await fetchApi<ApiResponse<DepartmentAnalytics>>(
+      `/analytics/department?range=${range}`
+    );
+    return response.data;
+  },
+
+  getEmployees: async (range: string = '1m'): Promise<EmployeesAnalytics> => {
+    const response = await fetchApi<ApiResponse<EmployeesAnalytics>>(
+      `/analytics/employees?range=${range}`
+    );
+    return response.data;
+  },
+
+  getSingleEmployee: async (employeeId: string, range: string = '1m'): Promise<SingleEmployeeAnalytics> => {
+    const response = await fetchApi<ApiResponse<SingleEmployeeAnalytics>>(
+      `/analytics/employee/${employeeId}?range=${range}`
+    );
+    return response.data;
+  },
+};
+
+// ============== Users API ==============
+
+export interface UserBasic {
+  _id: string;
+  name: string;
+  email: string;
+  profilePicture?: string;
+  role?: string;
+}
+
+export const usersApi = {
+  getAll: async (): Promise<UserBasic[]> => {
+    const response = await fetchApi<{ success: boolean; data: UserBasic[] }>('/user');
+    return response.data;
+  },
+  getMyProducts: async (): Promise<{ _id: string; name: string }[]> => {
+    const response = await fetchApi<{ success: boolean; products: { _id: string; name: string }[] }>('/user/my-products');
+    return response.products;
+  },
+};
+
+// ============== Product & Department Types ==============
+
+export interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentMember {
+  _id: string;
+  name: string;
+  email: string;
+  profilePicture: string;
+  role?: string;
+}
+
+export interface Department {
+  _id: string;
+  name: string;
+  product: {
+    _id: string;
+    name: string;
+  };
+  description: string;
+  keywords: string[];
+  members: DepartmentMember[];
+  lead: DepartmentMember | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductWithDepartments {
+  product: Product;
+  departments: Department[];
+}
+
+// ============== Product API ==============
+
+export const productApi = {
+  getAll: async (active?: boolean): Promise<Product[]> => {
+    const query = active !== undefined ? `?active=${active}` : '';
+    const response = await fetchApi<ApiResponse<Product[]>>(`/products${query}`);
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<ProductWithDepartments> => {
+    const response = await fetchApi<ApiResponse<ProductWithDepartments>>(`/products/${id}`);
+    return response.data;
+  },
+
+  create: async (data: { name: string; description?: string }): Promise<Product> => {
+    const response = await fetchApi<ApiResponse<Product>>('/products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  },
+
+  update: async (id: string, data: { name?: string; description?: string; isActive?: boolean }): Promise<Product> => {
+    const response = await fetchApi<ApiResponse<Product>>(`/products/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await fetchApi(`/products/${id}`, { method: 'DELETE' });
+  },
+};
+
+// ============== Department API ==============
+
+export const departmentApi = {
+  getAll: async (productId?: string, active?: boolean): Promise<Department[]> => {
+    const params = new URLSearchParams();
+    if (productId) params.append('product', productId);
+    if (active !== undefined) params.append('active', String(active));
+    const query = params.toString() ? `?${params.toString()}` : '';
+    const response = await fetchApi<ApiResponse<Department[]>>(`/departments${query}`);
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<Department> => {
+    const response = await fetchApi<ApiResponse<Department>>(`/departments/${id}`);
+    return response.data;
+  },
+
+  getMyDepartments: async (): Promise<Department[]> => {
+    const response = await fetchApi<ApiResponse<Department[]>>('/departments/my');
+    return response.data;
+  },
+
+  create: async (data: { name: string; product: string; description?: string; leadId?: string; keywords?: string[] }): Promise<Department> => {
+    const response = await fetchApi<ApiResponse<Department>>('/departments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  },
+
+  update: async (id: string, data: { name?: string; description?: string; leadId?: string; isActive?: boolean; keywords?: string[] }): Promise<Department> => {
+    const response = await fetchApi<ApiResponse<Department>>(`/departments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await fetchApi(`/departments/${id}`, { method: 'DELETE' });
+  },
+
+  addMember: async (id: string, memberId: string): Promise<void> => {
+    await fetchApi(`/departments/${id}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ memberId }),
+    });
+  },
+
+  removeMember: async (id: string, memberId: string): Promise<void> => {
+    await fetchApi(`/departments/${id}/members/${memberId}`, { method: 'DELETE' });
   },
 };

@@ -4,37 +4,38 @@ import mongoose from "mongoose";
 import { createClient } from "redis";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
+import Department from "../models/department.model.js";
 import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const TICKET_QUEUE_NAME = "tickets_queue";
 const FEEDBACK_QUEUE_NAME = "feedback_queue";
 
 const getRedisClient = async () => {
-    const client = createClient({
-        url: process.env.REDIS_URL
-    });
-    client.on('error', (err) => console.log('Redis Client Error', err));
-    await client.connect();
-    return client;
+  const client = createClient({
+    url: process.env.REDIS_URL
+  });
+  client.on('error', (err) => console.log('Redis Client Error', err));
+  await client.connect();
+  return client;
 };
 
 const sendFeedbackToQueue = async (ticket, action, oldDept, newDept) => {
-    try {
-        const client = await getRedisClient();
-        const feedback = {
-            ticket_id: ticket.ticketId,
-            text: ticket.description + " " + ticket.title,
-            action: action, // "correction" or "confirmation"
-            old_department: oldDept,
-            new_department: newDept,
-            timestamp: new Date().toISOString()
-        };
-        await client.lPush(FEEDBACK_QUEUE_NAME, JSON.stringify(feedback));
-        await client.disconnect();
-        console.log(`Feedback sent for ticket ${ticket.ticketId}: ${action}`);
-    } catch (error) {
-        console.error("Error sending feedback to Redis:", error);
-    }
+  try {
+    const client = await getRedisClient();
+    const feedback = {
+      ticket_id: ticket.ticketId,
+      text: ticket.description + " " + ticket.title,
+      action: action, // "correction" or "confirmation"
+      old_department: oldDept,
+      new_department: newDept,
+      timestamp: new Date().toISOString()
+    };
+    await client.lPush(FEEDBACK_QUEUE_NAME, JSON.stringify(feedback));
+    await client.disconnect();
+    console.log(`Feedback sent for ticket ${ticket.ticketId}: ${action}`);
+  } catch (error) {
+    console.error("Error sending feedback to Redis:", error);
+  }
 };
 
 
@@ -69,10 +70,18 @@ const paginateTickets = async (query, page, limit, sortOptions) => {
 
 export const getDepartments = async (req, res) => {
   try {
-    const departments = Ticket.schema.path("department").enumValues;
+    // Get departments from dynamic Department collection
+    const departments = await Department.find({ isActive: true })
+      .populate('product', 'name')
+      .select('_id name product');
+
+    // Also include legacy enum values for backward compatibility
+    const legacyDepartments = Ticket.schema.path("department").enumValues || [];
+
     res.status(200).json({
       success: true,
-      departments,
+      departments: departments, // New dynamic departments
+      legacyDepartments: legacyDepartments, // Old enum values
     });
   } catch (error) {
     res.status(500).json({
@@ -88,6 +97,7 @@ export const createTicket = async (req, res) => {
     const {
       ticketId,
       department,
+      departmentId, // New: accept department ID directly
       type,
       description,
       useremail,
@@ -102,9 +112,30 @@ export const createTicket = async (req, res) => {
     console.log(createdBy);
     const assignedTo = await User.findOne({ email: assignedemail });
     console.log(assignedTo);
+
+    // Resolve departmentRef from departmentId or department name
+    let departmentRef = null;
+    let departmentName = department;
+
+    if (departmentId) {
+      // If departmentId is provided, use it directly
+      const dept = await Department.findById(departmentId);
+      if (dept) {
+        departmentRef = dept._id;
+        departmentName = dept.name;
+      }
+    } else if (department) {
+      // Try to find department by name
+      const dept = await Department.findOne({ name: department, isActive: true });
+      if (dept) {
+        departmentRef = dept._id;
+      }
+    }
+
     const newTicket = new Ticket({
       ticketId: finalTicketId,
-      department,
+      department: departmentName,
+      departmentRef,
       type,
       description,
       createdBy,
@@ -169,20 +200,39 @@ export const createTicketFrontend = async (req, res) => {
     await redisClient.lPush(TICKET_QUEUE_NAME, JSON.stringify(ticket));
     await redisClient.disconnect();
     return res.status(201).json({
-      success:true,
+      success: true,
       message: "Ticket submitted successfully.",
       ticket_id: ticket.ticketId,
     });
   } catch (err) {
-    return res.status(500).json({success:false,message:"Failed to queue ticket",error:err.message});
+    return res.status(500).json({ success: false, message: "Failed to queue ticket", error: err.message });
   }
 };
 
 export const getAllTickets = async (req, res) => {
   try {
-    const { search, page, limit } = req.query;
+    const { search, page, limit, productId, assignedTo } = req.query;
     const query = {};
     let sortOptions = { createdAt: -1 };
+
+    // Filter by productId - get all departments under this product
+    if (productId) {
+      const departments = await Department.find({ product: productId }).select('_id');
+      const departmentIds = departments.map(d => d._id);
+      query.departmentRef = { $in: departmentIds };
+    }
+
+    // Filter by assignedTo email - look up user first
+    if (assignedTo) {
+      const assignedUser = await User.findOne({ email: assignedTo }).select('_id');
+      if (assignedUser) {
+        query.assignedTo = assignedUser._id;
+      } else {
+        // No user found with this email, return empty
+        return res.status(200).json([]);
+      }
+    }
+
     if (typeof search === "string" && search.trim().length > 0) {
       const terms = search.trim().split(/\s+/).filter(Boolean).slice(0, 5);
       const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -311,15 +361,30 @@ export const getTicketById = async (req, res) => {
 
 export const updateTicket = async (req, res) => {
   try {
-    const { department, type, description, assignedTo, status } = req.body;
+    const { department, departmentId, type, description, assignedTo, status } = req.body;
 
     const updateData = {
-      department,
       type,
       description,
       assignedTo,
       status,
     };
+
+    // Handle department update with new system
+    if (departmentId) {
+      const dept = await Department.findById(departmentId);
+      if (dept) {
+        updateData.department = dept.name;
+        updateData.departmentRef = dept._id;
+      }
+    } else if (department) {
+      updateData.department = department;
+      // Try to find and set departmentRef
+      const dept = await Department.findOne({ name: department, isActive: true });
+      if (dept) {
+        updateData.departmentRef = dept._id;
+      }
+    }
 
     Object.keys(updateData).forEach(
       (key) => updateData[key] === undefined && delete updateData[key]
@@ -334,10 +399,11 @@ export const updateTicket = async (req, res) => {
     }
 
     // Check for department change (Feedback Loop)
-    if (department && ticket.department !== department) {
-        console.log(`Department change detected: ${ticket.department} -> ${department}`);
-        // Send negative reinforcement (correction)
-        await sendFeedbackToQueue(ticket, "correction", ticket.department, department);
+    const newDeptName = updateData.department || ticket.department;
+    if (updateData.department && ticket.department !== updateData.department) {
+      console.log(`Department change detected: ${ticket.department} -> ${updateData.department}`);
+      // Send negative reinforcement (correction)
+      await sendFeedbackToQueue(ticket, "correction", ticket.department, updateData.department);
     }
 
     const updatedTicket = await Ticket.findByIdAndUpdate(req.params.id, updateData, {
@@ -350,7 +416,7 @@ export const updateTicket = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Ticket updated successfully",
-      data: ticket,
+      data: updatedTicket,
     });
   } catch (error) {
     res.status(500).json({
@@ -469,7 +535,7 @@ export const unacceptTicket = async (req, res) => {
 export const openTicket = async (req, res) => {
   try {
     const { id: ticketId } = req.params;
-    const { useremail,remark } = req.body;
+    const { useremail, remark } = req.body;
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
@@ -515,8 +581,8 @@ export const openTicket = async (req, res) => {
 
 export const resolveTicket = async (req, res) => {
   try {
-    const { id: ticketId} = req.params;
-    const { useremail,remark } = req.body;
+    const { id: ticketId } = req.params;
+    const { useremail, remark } = req.body;
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
