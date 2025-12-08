@@ -134,7 +134,7 @@ export const createTicket = async (req, res) => {
         departmentName = dept.name;
       }
     } else if (department) {
-     //now it accepts the department name and product name
+      //now it accepts the department name and product name
       let productRef = null;
       if (productName) {
         const Product = (await import('../models/product.model.js')).default;
@@ -144,7 +144,7 @@ export const createTicket = async (req, res) => {
           console.log(`Found product: ${productName} -> ${productRef}`);
         }
       }
-      
+
       // Find department with product context
       const query = { name: department, isActive: true };
       if (productRef) {
@@ -236,9 +236,14 @@ export const createTicketFrontend = async (req, res) => {
 
 export const getAllTickets = async (req, res) => {
   try {
-    const { search, page, limit, productId, assignedTo } = req.query;
+    const { search, page, limit, productId, assignedTo, includeInReview } = req.query;
     const query = {};
     let sortOptions = { createdAt: -1 };
+
+    // Exclude tickets pending department change (inreview: true) unless explicitly requested
+    if (includeInReview !== 'true') {
+      query.inreview = { $ne: true };
+    }
 
     // Filter by productId - get all departments under this product
     if (productId) {
@@ -1069,5 +1074,172 @@ export const getActivites = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Server error.", error: error.message });
+  }
+};
+
+// Get tickets pending department change (inreview: true) for admin's products
+export const getTicketsInReview = async (req, res) => {
+  try {
+    // Log full user object to see what properties exist
+    console.log(`getTicketsInReview: Full req.user object:`, JSON.stringify(req.user));
+
+    // JWT stores userId as 'userId' property (same as getMyProducts)
+    const userId = req.user?.userId;
+    const userRole = req.user.role;
+
+    console.log(`getTicketsInReview: userId=${userId}, role=${userRole}`);
+
+    // Build query for tickets in review
+    let query = { inreview: true };
+
+    // If not super-admin, filter to products this admin manages
+    if (userRole !== 'super-admin') {
+      const Product = (await import('../models/product.model.js')).default;
+
+      // Log ALL products and their admins for debugging
+      const allProducts = await Product.find({}).select('_id name admin');
+      console.log(`getTicketsInReview: ALL PRODUCTS:`, allProducts.map(p => ({ name: p.name, admin: p.admin?.toString() })));
+
+      // Convert userId to ObjectId for proper comparison
+      let userObjectId;
+      try {
+        userObjectId = new mongoose.Types.ObjectId(userId);
+      } catch (e) {
+        console.log(`getTicketsInReview: Invalid userId format: ${userId}`);
+        return res.status(200).json({ success: true, tickets: [] });
+      }
+
+      // Get products where this user is the admin (product-level admin, not just role)
+      const managedProducts = await Product.find({ admin: userObjectId }).select('_id name');
+      const productIds = managedProducts.map(p => p._id);
+
+      console.log(`getTicketsInReview: Admin ${userId} is product-admin of:`, managedProducts.map(p => ({ _id: p._id.toString(), name: p.name })));
+
+      // If admin manages no products as product-admin, return empty list
+      if (productIds.length === 0) {
+        console.log(`getTicketsInReview: No products managed, returning empty list`);
+        return res.status(200).json({
+          success: true,
+          tickets: [],
+        });
+      }
+
+      // Get departments under these products
+      const departments = await Department.find({ product: { $in: productIds } }).select('_id name');
+      const departmentIds = departments.map(d => d._id);
+
+      console.log(`getTicketsInReview: Departments in managed products:`, departments.map(d => ({ _id: d._id, name: d.name })));
+
+      query.departmentRef = { $in: departmentIds };
+    }
+
+    console.log(`getTicketsInReview: Final query:`, JSON.stringify(query));
+
+    const tickets = await Ticket.find(query)
+      .populate('createdBy', 'name email profilePicture')
+      .populate('assignedTo', 'name email profilePicture')
+      .populate('departmentRef', 'name product')
+      .sort({ createdAt: -1 });
+
+    console.log(`getTicketsInReview: Found ${tickets.length} tickets`);
+
+    // Populate product info for each ticket
+    const Product = (await import('../models/product.model.js')).default;
+    const ticketsWithProduct = await Promise.all(tickets.map(async (ticket) => {
+      const ticketObj = ticket.toObject();
+      if (ticketObj.departmentRef?.product) {
+        const product = await Product.findById(ticketObj.departmentRef.product).select('name');
+        ticketObj.product = product;
+      }
+      return ticketObj;
+    }));
+
+    res.status(200).json({
+      success: true,
+      tickets: ticketsWithProduct,
+    });
+  } catch (error) {
+    console.error("Error fetching tickets in review:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching tickets in review",
+      error: error.message,
+    });
+  }
+};
+
+// Approve department change - reassign department and clear inreview flag
+export const approveDepartmentChange = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { departmentId } = req.body;
+    const userId = req.user?.userId;
+    const userRole = req.user.role;
+
+    if (!departmentId) {
+      return res.status(400).json({
+        success: false,
+        message: "departmentId is required",
+      });
+    }
+
+    // Find the ticket
+    const ticket = await Ticket.findOne({ ticketId: id });
+    if (!ticket) {
+      return res.status(404).json({
+        success: false,
+        message: "Ticket not found",
+      });
+    }
+
+    // Verify the new department exists
+    const newDepartment = await Department.findById(departmentId).populate('product');
+    if (!newDepartment) {
+      return res.status(404).json({
+        success: false,
+        message: "Department not found",
+      });
+    }
+
+    // If not super-admin, verify user is admin of the product
+    if (userRole !== 'super-admin') {
+      const Product = (await import('../models/product.model.js')).default;
+      const product = await Product.findById(newDepartment.product._id);
+      if (!product || product.admin?.toString() !== userId.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "You can only reassign tickets to departments in products you manage",
+        });
+      }
+    }
+
+    // Update ticket
+    ticket.departmentRef = departmentId;
+    ticket.department = newDepartment.name;
+    ticket.inreview = false;
+    ticket.assignedTo = null; // Unassign since department changed
+    ticket.accepted = false;
+    ticket.status = 'open';
+
+    // Add progress entry
+    ticket.progress.push({
+      user: userId,
+      description: `Department changed to ${newDepartment.name}`,
+    });
+
+    await ticket.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Department changed successfully",
+      ticket,
+    });
+  } catch (error) {
+    console.error("Error approving department change:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error approving department change",
+      error: error.message,
+    });
   }
 };

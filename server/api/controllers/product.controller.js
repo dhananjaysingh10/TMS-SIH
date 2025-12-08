@@ -20,6 +20,13 @@ export const getAllProducts = async (req, res) => {
             .populate('admin', 'name email profilePicture')
             .sort({ createdAt: -1 });
 
+        // Log all products with their admin emails for debugging
+        console.log('=== ALL PRODUCTS WITH ADMINS ===');
+        products.forEach(p => {
+            console.log(`Product: "${p.name}" | Admin: ${p.admin ? p.admin.email : 'NONE'}`);
+        });
+        console.log('================================');
+
         res.status(200).json({
             success: true,
             data: products,
