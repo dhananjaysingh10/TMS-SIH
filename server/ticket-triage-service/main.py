@@ -10,6 +10,7 @@ from src.triage.workers.redis_consumer import start_consumer as run_redis_consum
 from src.triage.workers.classify_worker import start_worker as run_classify_worker
 from src.triage.workers.rag_worker import start_worker as run_rag_worker
 from src.triage.workers.feedback_worker import start_worker as run_feedback_worker
+from src.triage.workers.temp_ticket_worker import start_worker as run_temp_ticket_worker
 
 def run_worker(target, name):
     try:
@@ -28,7 +29,8 @@ if __name__ == "__main__":
         (run_redis_consumer, "Redis Consumer"),
         (run_classify_worker, "Classify Worker"),
         (run_rag_worker, "RAG Worker"),
-        (run_feedback_worker, "Feedback Worker")
+        (run_feedback_worker, "Feedback Worker"),
+        (run_temp_ticket_worker, "Temp Ticket Worker")
     ]
     
     # Start processes

@@ -64,15 +64,11 @@ const ticketSchema = new mongoose.Schema(
     ticketId: { type: String, required: true, unique: true },
     department: {
       type: String,
-      enum: [
-        "IT",
-        "DevOps",
-        "Software",
-        "Networking",
-        "Cybersecurity",
-        "Other",
-      ],
-      default: "Other",
+      default: null, // Legacy field, kept for migration compatibility
+    },
+    departmentRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
     },
     type: {
       type: String,
@@ -133,6 +129,10 @@ const ticketSchema = new mongoose.Schema(
     },
     messages: [messageSchema],
     inreview: {
+      type: Boolean,
+      default: false,
+    },
+    autoResolve: {
       type: Boolean,
       default: false,
     },

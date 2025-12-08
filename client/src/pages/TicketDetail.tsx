@@ -1,38 +1,38 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../redux/user/userSlice";
 import ActivityTimeline from "@/components/activity";
-import { io, Socket } from "socket.io-client";
+import { ChatInput } from "@/components/chat/ChatInput";
+import { ChatMessage } from "@/components/chat/ChatMessage";
 import { TicketChatbot } from "@/components/chatbot";
 import {
-  ticketsApi,
-  commentsApi,
-  activitiesApi,
-  type Ticket,
-  type Message,
-  type Activity,
-} from "../lib/api";
-import {
-  ArrowLeft,
-  User,
-  Clock,
-  Tag,
   AlertCircle,
+  ArrowLeft,
+  Calendar,
   CheckCircle,
+  Clock,
+  Loader2,
   MessageSquare,
   Send,
-  Loader2,
-  Calendar,
-  UserCheck,
   Sparkles,
+  Tag,
+  User,
+  UserCheck,
   X,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ChatMessage } from "@/components/chat/ChatMessage";
-import { ChatInput } from "@/components/chat/ChatInput";
+import { io, Socket } from "socket.io-client";
+import Layout from "../components/Layout";
+import {
+  activitiesApi,
+  commentsApi,
+  ticketsApi,
+  type Activity,
+  type Message,
+  type Ticket,
+} from "../lib/api";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 const priorityColors = {
   low: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -98,11 +98,15 @@ export default function TicketDetail() {
     unaccept: false,
     resolve: false,
     open: false,
-    request: false, 
+    request: false,
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
-  const userId = currentUser ? currentUser.id : "";
+  const userId = currentUser ? currentUser.id || (currentUser as any)._id : "";
+
+  // DEBUG: Remove this after fixing
+  console.log("FULL currentUser:", currentUser);
+  console.log("userId:", userId, "assignedTo:", ticket?.assignedTo);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -497,16 +501,46 @@ export default function TicketDetail() {
                     </div>
                   )}
 
+                  {!ticket.assignedTo && (
+                    <div className="flex items-start gap-3 bg-white p-4 rounded-lg border border-slate-100">
+                      <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <UserCheck className="text-orange-600" size={20} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
+                          Assigned To
+                        </p>
+                        <p className="font-semibold text-orange-300">
+                          No one for now
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-start gap-3 bg-white p-4 rounded-lg border border-slate-100">
-                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Tag className="text-slate-600" size={20} />
+                    <div className="w-10 h-10 bg-violet-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Tag className="text-violet-600" size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
-                        Category
+                        Product
                       </p>
                       <p className="font-semibold text-slate-900 capitalize">
-                        {ticket.type}
+                        {ticket.departmentRef?.product?.name || "Unknown Product"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-white p-4 rounded-lg border border-slate-100">
+                    <div className="w-10 h-10 bg-cyan-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Tag className="text-cyan-600" size={20} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
+                        Team
+                      </p>
+                      <p className="font-semibold text-slate-900">
+                        {ticket.department || "Unassigned"}
                       </p>
                     </div>
                   </div>
@@ -630,9 +664,9 @@ export default function TicketDetail() {
                       )}
                     </div>
                   )}
-                  {canAcceptTicket(ticket, currentUser) &&
-                    ticket.accepted &&
-                    ticket.status !== "resolved" && (
+                  {ticket.accepted &&
+                    ticket.status !== "resolved" &&
+                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) && (
                       <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
@@ -723,7 +757,7 @@ export default function TicketDetail() {
                         </div>
                       </div>
                     ))}
-                  {ticket.status === "resolved" &&
+                  {ticket.status === "resolved" && ticket.createdBy.email !== currentUser?.email &&
                     (!resolvepanel ? (
                       <button
                         onClick={() => setResolvePanel(true)}

@@ -1,0 +1,6 @@
+name=HR ESS Portal Team
+
+primary=[leave, salary, claim, ess, employee, hr, payroll, attendance, form 16, benefits]
+technical=[leave balance, salary slip, medical claim, reimbursement, transfer, promotion, attendance, establishment, form 16, hra, da]
+error=[leave balance not updated, claim rejected, salary slip not generated, cannot download form16, medical reimbursement blocked, attendance mismatch, leave rejection, ess access denied]
+sample_queries=["Leave balance not updated in ESS","Unable to download Form 16 for tax filing",Medical reimbursement claim rejected without reason","Salary slip not generated for current month","Leave request approval delayed","How to check leave balance?","Attendance record showing wrong days","Cannot apply for leave in ESS","Medical claim reimbursement status?","Promotion request processing time?"]

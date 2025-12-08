@@ -46,7 +46,19 @@ CLASSIFICATION_SCHEMA = {
     "properties": {
         "department": {
             "type": "string",
-            "enum": ["IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"]
+            # Updated to real team names (10 teams across 2 products)
+            "enum": [
+                # e-Tendering Portal teams
+                "Vendor Onboarding & Reg", "PKI & Digital Signature",
+                "Tender & Bidding Support", "EMD & Payment Gateway",
+                "Portal Technical Support",
+                # SAP ERP System teams
+                "SAP Security & GRC", "Plant Maintenance Support",
+                "MM & Finance Support", "HR ESS Portal Team",
+                "BASIS & Technical",
+                # Legacy (for backward compatibility)
+                "IT", "DevOps", "Software", "Networking", "Cybersecurity", "Other"
+            ]
         },
         "type": {
             "type": "string",

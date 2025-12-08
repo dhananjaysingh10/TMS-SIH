@@ -1,5 +1,6 @@
 import express from "express";
-import { markNotificationsAsSeen, getSeenNotifications, getAllUsers, getUserById, updateUser, deleteUser, signOut, linkTelegramAccount, getUserByTelegramId } from "../controllers/user.controller.js";
+import { markNotificationsAsSeen, getSeenNotifications, getAllUsers, getMyProducts, getUserById, updateUser, deleteUser, signOut, linkTelegramAccount, getUserByTelegramId } from "../controllers/user.controller.js";
+import { authMiddleware } from "../utils/verifyUser.js";
 
 const router = express.Router();
 
@@ -8,8 +9,9 @@ router.put('/mark-notifications-seen', (req, res, next) => {
 });
 
 router.get('/seen-notifications', (req, res, next) => {
-  getSeenNotifications(req, res, next);  
+  getSeenNotifications(req, res, next);
 });
+router.get("/my-products", authMiddleware, getMyProducts);
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
 router.put("/update/:id", updateUser);
