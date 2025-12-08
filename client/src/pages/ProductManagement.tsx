@@ -50,6 +50,18 @@ export default function ProductManagement() {
     const [emailSearch, setEmailSearch] = useState("");
     const [memberLoading, setMemberLoading] = useState(false);
 
+    // Admin assignment states (for super-admin)
+    const [showAdminModal, setShowAdminModal] = useState(false);
+    const [adminSearchEmail, setAdminSearchEmail] = useState("");
+    const [selectedProductForAdmin, setSelectedProductForAdmin] = useState<Product | null>(null);
+
+    // Helper to check if current user can edit a product
+    const canEditProduct = (product: Product) => {
+        if (currentUser?.role === 'super-admin') return true;
+        if (currentUser?.role === 'admin' && (product as any).admin?._id === currentUser.id) return true;
+        return false;
+    };
+
     // Redirect non-admin users
     if (!currentUser || (currentUser.role !== "admin" && currentUser.role !== "super-admin")) {
         return <Navigate to="/" replace />;
@@ -69,7 +81,13 @@ export default function ProductManagement() {
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const data = await productApi.getAll();
+            let data = await productApi.getAll();
+
+            // For admins, filter to only show products they manage
+            if (currentUser?.role === 'admin') {
+                data = data.filter((p: any) => p.admin?._id === currentUser.id);
+            }
+
             setProducts(data);
             if (data.length > 0 && !selectedProduct) {
                 setSelectedProduct(data[0]);
@@ -280,14 +298,40 @@ export default function ProductManagement() {
                                                 <div className="flex-1">
                                                     <h3 className="font-semibold text-gray-900">{product.name}</h3>
                                                     <p className="text-sm text-gray-500 line-clamp-1">{product.description || "No description"}</p>
+                                                    {/* Show product admin */}
+                                                    {(product as any).admin ? (
+                                                        <p className="text-xs text-purple-600 mt-1">
+                                                            Admin: {(product as any).admin.name}
+                                                        </p>
+                                                    ) : currentUser?.role === 'super-admin' && (
+                                                        <p className="text-xs text-orange-500 mt-1">No admin assigned</p>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={(e) => { e.stopPropagation(); openEditProduct(product); }}
-                                                        className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                                                    >
-                                                        <Edit2 className="w-4 h-4" />
-                                                    </button>
+                                                    {/* Assign admin button - super-admin only */}
+                                                    {currentUser?.role === "super-admin" && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedProductForAdmin(product);
+                                                                setShowAdminModal(true);
+                                                                setAdminSearchEmail("");
+                                                            }}
+                                                            className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded"
+                                                            title="Assign Admin"
+                                                        >
+                                                            <Users className="w-4 h-4" />
+                                                        </button>
+                                                    )}
+                                                    {/* Edit button - only if can edit */}
+                                                    {canEditProduct(product) && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); openEditProduct(product); }}
+                                                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     {currentUser?.role === "super-admin" && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); handleDeleteProduct(product._id); }}
@@ -670,6 +714,113 @@ export default function ProductManagement() {
                                 >
                                     <Check className="w-5 h-5" />
                                     Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Admin Assignment Modal */}
+                {showAdminModal && selectedProductForAdmin && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                            <div className="flex items-center justify-between p-6 border-b">
+                                <h3 className="text-xl font-bold text-gray-900">
+                                    Assign Admin for {selectedProductForAdmin.name}
+                                </h3>
+                                <button onClick={() => setShowAdminModal(false)} className="text-gray-400 hover:text-gray-600">
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                {/* Current admin */}
+                                {(selectedProductForAdmin as any).admin && (
+                                    <div className="mb-4 p-3 bg-purple-50 rounded-lg flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <img
+                                                src={(selectedProductForAdmin as any).admin.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent((selectedProductForAdmin as any).admin.name)}`}
+                                                alt={(selectedProductForAdmin as any).admin.name}
+                                                className="w-8 h-8 rounded-full"
+                                            />
+                                            <div>
+                                                <p className="font-medium text-gray-800">{(selectedProductForAdmin as any).admin.name}</p>
+                                                <p className="text-xs text-gray-500">{(selectedProductForAdmin as any).admin.email}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    await productApi.setAdmin(selectedProductForAdmin._id, null);
+                                                    fetchProducts();
+                                                    setShowAdminModal(false);
+                                                } catch (err) {
+                                                    alert("Failed to remove admin");
+                                                }
+                                            }}
+                                            className="text-red-500 hover:text-red-700 text-sm"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Search for new admin */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Search user by email to assign as admin
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={adminSearchEmail}
+                                        onChange={(e) => setAdminSearchEmail(e.target.value)}
+                                        placeholder="Search by email..."
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                    />
+                                    {adminSearchEmail.trim() && (
+                                        <div className="mt-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg">
+                                            {allUsers
+                                                .filter(u =>
+                                                    u.email?.toLowerCase().includes(adminSearchEmail.toLowerCase()) &&
+                                                    u._id !== (selectedProductForAdmin as any).admin?._id
+                                                )
+                                                .slice(0, 5)
+                                                .map((user) => (
+                                                    <button
+                                                        key={user._id}
+                                                        onClick={async () => {
+                                                            try {
+                                                                await productApi.setAdmin(selectedProductForAdmin._id, user._id);
+                                                                fetchProducts();
+                                                                setShowAdminModal(false);
+                                                            } catch (err) {
+                                                                alert("Failed to assign admin");
+                                                            }
+                                                        }}
+                                                        className="w-full flex items-center justify-between p-3 hover:bg-purple-50 text-left border-b last:border-b-0"
+                                                    >
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-800">{user.name || user.email}</p>
+                                                            <p className="text-xs text-gray-500">{user.email}</p>
+                                                        </div>
+                                                        <span className="text-xs text-purple-600 font-medium">Assign</span>
+                                                    </button>
+                                                ))}
+                                            {allUsers.filter(u =>
+                                                u.email?.toLowerCase().includes(adminSearchEmail.toLowerCase()) &&
+                                                u._id !== (selectedProductForAdmin as any).admin?._id
+                                            ).length === 0 && (
+                                                    <p className="p-3 text-sm text-gray-500 text-center">No users found</p>
+                                                )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 p-6 border-t">
+                                <button
+                                    onClick={() => setShowAdminModal(false)}
+                                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                                >
+                                    Close
                                 </button>
                             </div>
                         </div>

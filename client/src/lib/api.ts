@@ -541,6 +541,14 @@ export const productApi = {
   delete: async (id: string): Promise<void> => {
     await fetchApi(`/products/${id}`, { method: 'DELETE' });
   },
+
+  setAdmin: async (productId: string, adminId: string | null): Promise<Product> => {
+    const response = await fetchApi<ApiResponse<Product>>(`/products/${productId}/admin`, {
+      method: 'PUT',
+      body: JSON.stringify({ adminId }),
+    });
+    return response.data;
+  },
 };
 
 // ============== Department API ==============

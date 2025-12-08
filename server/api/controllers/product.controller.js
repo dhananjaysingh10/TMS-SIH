@@ -17,6 +17,7 @@ export const getAllProducts = async (req, res) => {
 
         const products = await Product.find(filter)
             .populate('createdBy', 'name email')
+            .populate('admin', 'name email profilePicture')
             .sort({ createdAt: -1 });
 
         res.status(200).json({
@@ -38,7 +39,8 @@ export const getProductById = async (req, res) => {
         const { id } = req.params;
 
         const product = await Product.findById(id)
-            .populate('createdBy', 'name email');
+            .populate('createdBy', 'name email')
+            .populate('admin', 'name email profilePicture');
 
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
@@ -74,8 +76,9 @@ export const createProduct = async (req, res) => {
         }
 
         const user = await User.findById(userId).select('role');
-        if (!user || (user.role !== 'admin' && user.role !== 'super-admin')) {
-            return res.status(403).json({ success: false, message: 'Access denied' });
+        // Only super-admin can create products
+        if (!user || user.role !== 'super-admin') {
+            return res.status(403).json({ success: false, message: 'Only super-admin can create products' });
         }
 
         const { name, description } = req.body;
@@ -131,6 +134,12 @@ export const updateProduct = async (req, res) => {
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Check if user is super-admin OR the product's admin
+        const isProductAdmin = product.admin && product.admin.toString() === userId;
+        if (user.role !== 'super-admin' && !isProductAdmin) {
+            return res.status(403).json({ success: false, message: 'You are not authorized to edit this product' });
         }
 
         // Check for duplicate name if changing
@@ -193,6 +202,60 @@ export const deleteProduct = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in deleteProduct:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+/**
+ * PUT /api/products/:id/admin
+ * Set product admin (super-admin only)
+ */
+export const setProductAdmin = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+
+        const user = await User.findById(userId).select('role');
+        if (!user || user.role !== 'super-admin') {
+            return res.status(403).json({ success: false, message: 'Only super-admin can assign product admins' });
+        }
+
+        const { id } = req.params;
+        const { adminId } = req.body;
+
+        const product = await Product.findById(id);
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Verify the admin user exists and has admin role
+        if (adminId) {
+            const adminUser = await User.findById(adminId);
+            if (!adminUser) {
+                return res.status(404).json({ success: false, message: 'Admin user not found' });
+            }
+            // Optionally update user role to admin if they're not already
+            if (adminUser.role === 'user' || adminUser.role === 'employee') {
+                adminUser.role = 'admin';
+                await adminUser.save();
+            }
+        }
+
+        product.admin = adminId || null;
+        await product.save();
+
+        // Populate admin for response
+        await product.populate('admin', 'name email profilePicture');
+
+        res.status(200).json({
+            success: true,
+            data: product,
+            message: adminId ? 'Product admin assigned successfully' : 'Product admin removed',
+        });
+    } catch (error) {
+        console.error('Error in setProductAdmin:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

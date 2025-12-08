@@ -5,7 +5,7 @@ import { Home, Ticket, User, X, Users, BarChart3, FolderKanban, ChevronDown, Che
 import { NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
-import { usersApi } from "../lib/api";
+import { usersApi, productApi } from "../lib/api";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -35,12 +35,29 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await usersApi.getMyProducts();
+        let products;
+        if (currentUser?.role === 'super-admin') {
+          // Super-admin sees ALL products
+          const allProducts = await productApi.getAll();
+          products = allProducts.map((p: any) => ({ _id: p._id, name: p.name }));
+        } else if (currentUser?.role === 'admin') {
+          // Admin sees products they're admin of OR member of
+          const allProducts = await productApi.getAll();
+          const myProducts = await usersApi.getMyProducts();
+          const myProductIds = new Set(myProducts.map((p: any) => p._id));
+
+          // Filter to products where admin is the product admin OR is a member
+          products = allProducts
+            .filter((p: any) => p.admin?._id === currentUser.id || myProductIds.has(p._id))
+            .map((p: any) => ({ _id: p._id, name: p.name }));
+        } else {
+          // Regular users/employees see only their assigned products
+          products = await usersApi.getMyProducts();
+        }
         console.log("Fetched user products:", products);
         setMyProducts(products || []);
       } catch (err) {
         console.error("Failed to fetch user products", err);
-        // Fallback: show no products message but log error
         setMyProducts([]);
       }
     };
@@ -152,111 +169,115 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               </NavLink>
             </li>
 
-            {/* Tickets expandable menu */}
-            <li>
-              <button
-                onClick={() => setTicketsExpanded(!ticketsExpanded)}
-                className={[
-                  "group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none w-full",
-                  isTicketsActive
-                    ? "bg-blue-50 text-blue-700 font-semibold"
-                    : "text-gray-700 hover:bg-gray-100",
-                ].join(" ")}
-              >
-                {isTicketsActive && (
-                  <span
-                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-blue-600"
-                    aria-hidden="true"
-                  />
-                )}
-                <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
-                  <Ticket size={18} />
-                </span>
-                <span className="text-pretty flex-1 text-left">Tickets</span>
-                {ticketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-              </button>
-
-              {/* Product sub-items */}
-              {ticketsExpanded && (
-                <ul className="ml-8 mt-1 space-y-1">
-                  {myProducts.length === 0 ? (
-                    <li className="text-xs text-gray-400 px-4 py-2">No products assigned</li>
-                  ) : (
-                    myProducts.map((product) => (
-                      <li key={product._id}>
-                        <NavLink
-                          to={`/tickets/${product._id}`}
-                          onClick={onClose}
-                          className={({ isActive }) =>
-                            [
-                              "block px-4 py-2 text-sm rounded-lg transition-colors",
-                              isActive
-                                ? "bg-blue-100 text-blue-700 font-medium"
-                                : "text-gray-600 hover:bg-gray-100",
-                            ].join(" ")
-                          }
-                        >
-                          {product.name}
-                        </NavLink>
-                      </li>
-                    ))
+            {/* Tickets expandable menu - only for employees, admins, super-admins */}
+            {(currentUser?.role === 'employee' || currentUser?.role === 'admin' || currentUser?.role === 'super-admin') && (
+              <li>
+                <button
+                  onClick={() => setTicketsExpanded(!ticketsExpanded)}
+                  className={[
+                    "group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none w-full",
+                    isTicketsActive
+                      ? "bg-blue-50 text-blue-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100",
+                  ].join(" ")}
+                >
+                  {isTicketsActive && (
+                    <span
+                      className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-blue-600"
+                      aria-hidden="true"
+                    />
                   )}
-                </ul>
-              )}
-            </li>
+                  <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
+                    <Ticket size={18} />
+                  </span>
+                  <span className="text-pretty flex-1 text-left">Tickets</span>
+                  {ticketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
 
-            {/* My Tickets expandable menu */}
-            <li>
-              <button
-                onClick={() => setMyTicketsExpanded(!myTicketsExpanded)}
-                className={[
-                  "group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none w-full",
-                  isMyTicketsActive
-                    ? "bg-blue-50 text-blue-700 font-semibold"
-                    : "text-gray-700 hover:bg-gray-100",
-                ].join(" ")}
-              >
-                {isMyTicketsActive && (
-                  <span
-                    className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-blue-600"
-                    aria-hidden="true"
-                  />
+                {/* Product sub-items */}
+                {ticketsExpanded && (
+                  <ul className="ml-8 mt-1 space-y-1">
+                    {myProducts.length === 0 ? (
+                      <li className="text-xs text-gray-400 px-4 py-2">No products assigned</li>
+                    ) : (
+                      myProducts.map((product) => (
+                        <li key={product._id}>
+                          <NavLink
+                            to={`/tickets/${product._id}`}
+                            onClick={onClose}
+                            className={({ isActive }) =>
+                              [
+                                "block px-4 py-2 text-sm rounded-lg transition-colors",
+                                isActive
+                                  ? "bg-blue-100 text-blue-700 font-medium"
+                                  : "text-gray-600 hover:bg-gray-100",
+                              ].join(" ")
+                            }
+                          >
+                            {product.name}
+                          </NavLink>
+                        </li>
+                      ))
+                    )}
+                  </ul>
                 )}
-                <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
-                  <User size={18} />
-                </span>
-                <span className="text-pretty flex-1 text-left">Tickets Assigned to Me</span>
-                {myTicketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-              </button>
+              </li>
+            )}
 
-              {/* Product sub-items for My Tickets */}
-              {myTicketsExpanded && (
-                <ul className="ml-8 mt-1 space-y-1">
-                  {myProducts.length === 0 ? (
-                    <li className="text-xs text-gray-400 px-4 py-2">No products assigned</li>
-                  ) : (
-                    myProducts.map((product) => (
-                      <li key={product._id}>
-                        <NavLink
-                          to={`/my-tickets/${product._id}`}
-                          onClick={onClose}
-                          className={({ isActive }) =>
-                            [
-                              "block px-4 py-2 text-sm rounded-lg transition-colors",
-                              isActive
-                                ? "bg-blue-100 text-blue-700 font-medium"
-                                : "text-gray-600 hover:bg-gray-100",
-                            ].join(" ")
-                          }
-                        >
-                          {product.name}
-                        </NavLink>
-                      </li>
-                    ))
+            {/* My Tickets expandable menu - only for employees, admins, super-admins */}
+            {(currentUser?.role === 'employee' || currentUser?.role === 'admin' || currentUser?.role === 'super-admin') && (
+              <li>
+                <button
+                  onClick={() => setMyTicketsExpanded(!myTicketsExpanded)}
+                  className={[
+                    "group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none w-full",
+                    isMyTicketsActive
+                      ? "bg-blue-50 text-blue-700 font-semibold"
+                      : "text-gray-700 hover:bg-gray-100",
+                  ].join(" ")}
+                >
+                  {isMyTicketsActive && (
+                    <span
+                      className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-blue-600"
+                      aria-hidden="true"
+                    />
                   )}
-                </ul>
-              )}
-            </li>
+                  <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
+                    <User size={18} />
+                  </span>
+                  <span className="text-pretty flex-1 text-left">Tickets Assigned to Me</span>
+                  {myTicketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                </button>
+
+                {/* Product sub-items for My Tickets */}
+                {myTicketsExpanded && (
+                  <ul className="ml-8 mt-1 space-y-1">
+                    {myProducts.length === 0 ? (
+                      <li className="text-xs text-gray-400 px-4 py-2">No products assigned</li>
+                    ) : (
+                      myProducts.map((product) => (
+                        <li key={product._id}>
+                          <NavLink
+                            to={`/my-tickets/${product._id}`}
+                            onClick={onClose}
+                            className={({ isActive }) =>
+                              [
+                                "block px-4 py-2 text-sm rounded-lg transition-colors",
+                                isActive
+                                  ? "bg-blue-100 text-blue-700 font-medium"
+                                  : "text-gray-600 hover:bg-gray-100",
+                              ].join(" ")
+                            }
+                          >
+                            {product.name}
+                          </NavLink>
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                )}
+              </li>
+            )}
 
             {/* Other nav items */}
             {navItems.slice(1).map(({ path, icon: Icon, label }) => (

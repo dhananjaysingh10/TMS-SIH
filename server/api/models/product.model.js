@@ -19,6 +19,11 @@ const productSchema = new mongoose.Schema(
             ref: "User",
             required: true,
         },
+        admin: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
         isActive: {
             type: Boolean,
             default: true,
