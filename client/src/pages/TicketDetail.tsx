@@ -632,8 +632,8 @@ export default function TicketDetail() {
                   )}
                   {canAcceptTicket(ticket, currentUser) &&
                     ticket.accepted &&
-                    ticket.status !== "resolved" && (
-                      <button
+                    ticket.status !== "resolved" &&ticket?.assignedTo==currentUser?.email&& (
+                      <button 
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
                         className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.unaccept
