@@ -1,12 +1,12 @@
+import { AlertCircle, Grid3x3, List, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import { Search, AlertCircle, Grid3x3, List } from "lucide-react";
-import TicketCard from "../components/TicketCard";
-import { ticketsApi, productApi, type Ticket } from "../lib/api";
-import useDebounce from "../hooks/debounce";
 import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../redux/user/userSlice";
 import { useParams } from "react-router-dom";
+import Layout from "../components/Layout";
+import TicketCard from "../components/TicketCard";
+import useDebounce from "../hooks/debounce";
+import { productApi, ticketsApi, type Ticket } from "../lib/api";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 
 
@@ -149,6 +149,7 @@ export default function TicketsDashboard() {
                 status={ticket.status}
                 priority={ticket.priority}
                 department={ticket.department}
+                productName={ticket.departmentRef?.product?.name}
                 createdBy={ticket.createdBy}
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}

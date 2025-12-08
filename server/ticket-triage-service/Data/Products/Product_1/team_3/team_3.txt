@@ -1,0 +1,6 @@
+name=Tender & Bidding Support
+
+primary=[bid, bidding, tender, document, upload, download, submission, price bid, technical bid, boq, rfx]
+technical=[rfx number, tender fee, bid document, bid submission, bid deadline, corrigendum, amendment, tender modification, file format, attachment, encryption, first envelope, second envelope]
+error=[unable to upload, upload failed, document download broken, tender document corrupted, file size limit, invalid file format, boq error, bid submission timeout, bid freeze error, attachment failed, maximum 10mb, corrupted file]
+sample_queries=["Unable to upload Price Bid excel file","Tender document download link broken","BoQ file showing corrupted","File size exceeds maximum limit (10MB) in bid submission","Cannot attach technical documents to bid","Bid submission deadline - how much time left?","How to download tender documents for RFx #5002001382?","Error uploading First Envelope - invalid file format","What file formats are accepted for bid documents?","Price bid encryption failed before submission"]

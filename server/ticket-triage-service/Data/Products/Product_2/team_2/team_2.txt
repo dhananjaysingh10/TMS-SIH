@@ -1,0 +1,6 @@
+name=Plant Maintenance Support
+
+primary=[maintenance, order, notification, equipment, tower, substation, inspection, repair, pm, work order]
+technical=[maintenance order, teco, functional location, equipment history, measurement, inspection, order status, work order, pm01, notification]
+error=[cannot close order, teco failed, equipment history missing, measurement reading error, inspection failed, order not created, notification error, functional location not found]
+sample_queries=[Cannot close Maintenance Order #40023","Equipment history missing for Tower 45","Error while entering measurement reading in PM","How to TECO (Technically Complete) a maintenance order?","Inspection checklist validation failed","Cannot create maintenance notification for substation","Functional location not found in system","Need to create work order for equipment repair","PM01 order status shows error","Preventive maintenance schedule not generated"]
