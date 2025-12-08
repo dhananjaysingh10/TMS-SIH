@@ -1,10 +1,41 @@
 //ticket.controller.js
-import mongoose from "mongoose";
-import Ticket from "../models/ticket.model.js";
 import crypto from "crypto";
+import mongoose from "mongoose";
+import { createClient } from "redis";
+import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
 import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
-import { createClient } from "redis";
+
+const TICKET_QUEUE_NAME = "tickets_queue";
+const FEEDBACK_QUEUE_NAME = "feedback_queue";
+
+const getRedisClient = async () => {
+    const client = createClient({
+        url: process.env.REDIS_URL
+    });
+    client.on('error', (err) => console.log('Redis Client Error', err));
+    await client.connect();
+    return client;
+};
+
+const sendFeedbackToQueue = async (ticket, action, oldDept, newDept) => {
+    try {
+        const client = await getRedisClient();
+        const feedback = {
+            ticket_id: ticket.ticketId,
+            text: ticket.description + " " + ticket.title,
+            action: action, // "correction" or "confirmation"
+            old_department: oldDept,
+            new_department: newDept,
+            timestamp: new Date().toISOString()
+        };
+        await client.lPush(FEEDBACK_QUEUE_NAME, JSON.stringify(feedback));
+        await client.disconnect();
+        console.log(`Feedback sent for ticket ${ticket.ticketId}: ${action}`);
+    } catch (error) {
+        console.error("Error sending feedback to Redis:", error);
+    }
+};
 
 
 const paginateTickets = async (query, page, limit, sortOptions) => {
@@ -34,6 +65,22 @@ const paginateTickets = async (query, page, limit, sortOptions) => {
       totalPages: Math.ceil(total / limitNum),
     },
   };
+};
+
+export const getDepartments = async (req, res) => {
+  try {
+    const departments = Ticket.schema.path("department").enumValues;
+    res.status(200).json({
+      success: true,
+      departments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching departments",
+      error: error.message,
+    });
+  }
 };
 
 export const createTicket = async (req, res) => {
@@ -97,7 +144,7 @@ export const createTicket = async (req, res) => {
   }
 };
 
-const TICKET_QUEUE_NAME = "tickets_queue";
+
 export const createTicketFrontend = async (req, res) => {
   try {
     const { title, description, useremail } = req.body;
@@ -278,19 +325,27 @@ export const updateTicket = async (req, res) => {
       (key) => updateData[key] === undefined && delete updateData[key]
     );
 
-    const ticket = await Ticket.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-    })
-      .populate("assignedTo", "name email")
-      .populate("createdBy", "name email");
-
+    const ticket = await Ticket.findById(req.params.id);
     if (!ticket) {
       return res.status(404).json({
         success: false,
         message: "Ticket not found",
       });
     }
+
+    // Check for department change (Feedback Loop)
+    if (department && ticket.department !== department) {
+        console.log(`Department change detected: ${ticket.department} -> ${department}`);
+        // Send negative reinforcement (correction)
+        await sendFeedbackToQueue(ticket, "correction", ticket.department, department);
+    }
+
+    const updatedTicket = await Ticket.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    })
+      .populate("assignedTo", "name email")
+      .populate("createdBy", "name email");
 
     res.status(200).json({
       success: true,
