@@ -458,7 +458,7 @@ export default function TicketsCreatedByMe() {
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}
                 accepted={ticket.accepted}
-                userTicket={false}
+                userTicket={true}
               />
             ))}
           </div>

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import requests
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 from src.triage.retriever.rag import retrieve_docs
 from src.triage.llm.classifier import client

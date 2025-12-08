@@ -98,7 +98,7 @@ export default function TicketDetail() {
     unaccept: false,
     resolve: false,
     open: false,
-    request: false,
+    request: false, 
   });
   const currentUser = useSelector(selectCurrentUser);
   const useremail = currentUser ? currentUser.email : "";
@@ -201,8 +201,7 @@ export default function TicketDetail() {
       if (!ticketIdToUse) return;
 
       const response = await fetch(
-        `${
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api"
         }/messages/${ticketIdToUse}/messages`,
         {
           credentials: "include",
@@ -394,11 +393,10 @@ export default function TicketDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
-          className={`fixed bottom-8 right-8 rounded-full shadow-2xl transition-all duration-300 z-[60] group flex items-center gap-3 px-6 py-3 font-semibold ${
-            isChatOpen
-              ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-500/50 scale-100"
-              : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:scale-110 hover:shadow-xl"
-          }`}
+          className={`fixed bottom-8 right-8 rounded-full shadow-2xl transition-all duration-300 z-[60] group flex items-center gap-3 px-6 py-3 font-semibold ${isChatOpen
+            ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-500/50 scale-100"
+            : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:scale-110 hover:shadow-xl"
+            }`}
         >
           {isChatOpen ? (
             <X size={20} className="transition-transform duration-300" />
@@ -436,16 +434,14 @@ export default function TicketDetail() {
                         #{ticket.ticketId}
                       </span>
                       <span
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${
-                          statusColors[ticket.status]
-                        }`}
+                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${statusColors[ticket.status]
+                          }`}
                       >
                         {ticket.status.replace("-", " ").toUpperCase()}
                       </span>
                       <span
-                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${
-                          priorityColors[ticket.priority]
-                        }`}
+                        className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${priorityColors[ticket.priority]
+                          }`}
                       >
                         {ticket.priority.toUpperCase()}
                       </span>
@@ -549,11 +545,10 @@ export default function TicketDetail() {
                       <button
                         onClick={handleAcceptTicket}
                         disabled={buttonLoading.accept}
-                        className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${
-                          buttonLoading.accept
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.accept
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
                       >
                         {buttonLoading.accept ? (
                           <>
@@ -571,11 +566,10 @@ export default function TicketDetail() {
                         <button
                           onClick={() => setResolvePanel(true)}
                           disabled={buttonLoading.request}
-                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
-                            buttonLoading.request
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
+                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.request
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                            }`}
                         >
                           {buttonLoading.request ? (
                             <Loader2 size={18} className="animate-spin" />
@@ -642,11 +636,10 @@ export default function TicketDetail() {
                       <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
-                        className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${
-                          buttonLoading.unaccept
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className={`h-[50px] inline-flex items-center gap-2 px-5 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.unaccept
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
                       >
                         {buttonLoading.unaccept ? (
                           <>
@@ -663,16 +656,15 @@ export default function TicketDetail() {
                     )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
-                    ticket.assignedTo?.id === userId &&
+                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) &&
                     (!resolvepanel ? (
                       <button
                         onClick={() => setResolvePanel(true)}
                         disabled={buttonLoading.resolve}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
-                          buttonLoading.resolve
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.resolve
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
                       >
                         {buttonLoading.resolve ? (
                           <Loader2 size={18} className="animate-spin" />
@@ -736,11 +728,10 @@ export default function TicketDetail() {
                       <button
                         onClick={() => setResolvePanel(true)}
                         disabled={buttonLoading.open}
-                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${
-                          buttonLoading.open
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
-                        }`}
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.open
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                          }`}
                       >
                         {buttonLoading.open ? (
                           <Loader2 size={18} className="animate-spin" />
@@ -936,7 +927,7 @@ export default function TicketDetail() {
                 <div className="p-4 border-t border-slate-200 bg-white">
                   <ChatInput
                     ticketId={ticket.ticketId}
-                    onMessageSent={() => {}}
+                    onMessageSent={() => { }}
                   />
                 </div>
               )}

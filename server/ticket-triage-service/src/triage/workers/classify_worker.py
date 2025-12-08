@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 import requests
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 from src.triage.llm.classifier import classify_ticket
 from src.triage.db.database import get_db
@@ -24,7 +24,6 @@ db = get_db()
 EXPRESS_API_URL = "http://localhost:10000/api/ticket"
 
 def send_to_express_api(ticket_data):
-   
     LOG.info("=" * 80)
     LOG.info("🚀 ENTERING send_to_express_api() FUNCTION")
     LOG.info("=" * 80)

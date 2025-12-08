@@ -4,13 +4,12 @@ import logging
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent.parent.parent))
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
 
 from src.triage.schemas.models import TicketInput
 from src.triage.db.database import get_db
 from src.triage.utils.queue import enqueue_job
 from src.triage.config import settings
-
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger("redis_consumer")
 
