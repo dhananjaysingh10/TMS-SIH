@@ -1,0 +1,13 @@
+name=Vendor Onboarding & Reg
+
+primary=[register, registration, sign up, signup, profile, user id, login, password, vendor code, mapping, new bidder, enroll, enrollment, onboard]
+
+technical=[portal access, userid begins with v, login credentials, forgot password, password reset, first login, system generated password, change password, mfa, otp]
+
+error=[registration rejected, profile update failed, cannot register, user id not created, registration not accepted, profile locked, registration pending, not receiving email, email not verified]
+
+sample_queries=["Unable to register as new vendor on portal”,Did not receive User ID after registration”,"Cannot update company address in profile”,"Registration rejected by POWERGRID”,"How do I reset my password after first login?”,"System-generated password not working”,"Need to change my PRANIT login ID”,"Registration form submission failed”,"Cannot access portal - invalid user ID”,"How to register for e-Tendering?”]
+
+
+
+
