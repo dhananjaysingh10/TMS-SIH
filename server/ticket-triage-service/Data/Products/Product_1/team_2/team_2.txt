@@ -1,6 +1,6 @@
 name=PKI & Digital Signature
 
-primary=[dsc, digital signature, certificate, token, dongle, java, pki, encryption, signing, signer, sign, password ,reset]
+primary=[dsc, digital signature, certificate, token, dongle, java, pki, encryption, signing, signer, sign, token password, dsc password]
 technical=[class 3 certificate, epass2003, sapsign.cab, ca, certifying authority, token driver, certificate mapping, dsc mapping, certificate export, certificate import, trusted site]
 error=[object not found, done with errors, no activex popup, no user certificates available, signing error, digital signature mismatch, java applet blocked, cannot find certificate, certificate not detected, dsc token not detected, sapsign.cab installation failed]
 sample_queries=["System not detecting my DSC token","Error: 'No user Certificates available' during signing","SAPSIGN.CAB installation failed with 'Object not found'","Java applet blocked during signing process","Digital signature certificate has expired","Cannot map DSC certificate to portal","Error: 'Done with errors' when installing DSC drivers","DSC token not working on new laptop","How to download certificate from DSC token?","Signing error appears even after system settings updated"]

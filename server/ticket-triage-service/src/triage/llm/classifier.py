@@ -10,7 +10,7 @@ client = Groq(api_key=settings.GROQ_API_KEY)
 # Initialize Qdrant for retrieval
 try:
     qdrant = QdrantClient(url=settings.VECTOR_DB_URL)
-    embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    embedding_model = TextEmbedding(model_name="BAAI/bge-large-en-v1.5")
 except Exception as e:
     print(f"⚠️ Warning: Qdrant/Embedding not initialized in classifier: {e}")
     qdrant = None

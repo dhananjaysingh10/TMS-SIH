@@ -26,7 +26,7 @@ const getRedisClient = async () => {
  */
 export const createTemporaryTicket = async (req, res) => {
   try {
-    const { userId, userEmail } = req.body;
+    const { userId, userEmail, issueTitle } = req.body;
 
     if (!userId || !userEmail) {
       return res.status(400).json({
@@ -51,6 +51,7 @@ export const createTemporaryTicket = async (req, res) => {
       tempTicketId,
       userId,
       userEmail,
+      issueTitle: issueTitle || "",
       chatHistory: [],
     });
 
@@ -85,11 +86,30 @@ export const escalateInternal = async (ticket, issueTitle, issueDescription) => 
     try {
         const chatHistory = ticket.exportChatHistory();
         
+        // Robust Title Logic: 
+        // 1. Use provided title
+        // 2. Use existing title (if not empty)
+        // 3. Generate from first user message
+        // 4. Fallback to generic
+        let finalTitle = issueTitle;
+        if (!finalTitle) {
+             if (ticket.issueTitle && ticket.issueTitle.trim().length > 0) {
+                 finalTitle = ticket.issueTitle;
+             } else {
+                 const firstMsg = chatHistory.find(m => m.role === 'user');
+                 if (firstMsg && firstMsg.message) {
+                     finalTitle = firstMsg.message.substring(0, 60);
+                     if (firstMsg.message.length > 60) finalTitle += "...";
+                 }
+             }
+        }
+        finalTitle = finalTitle || "Support Request";
+
         const escalationPayload = {
             tempTicketId: ticket.tempTicketId,
             userId: ticket.userId.toString(),
             userEmail: ticket.userEmail,
-            issueTitle: issueTitle || ticket.issueTitle || "Issue from Chatbot",
+            issueTitle: finalTitle,
             issueDescription: issueDescription || generateDescriptionFromChat(chatHistory),
             chatHistory: chatHistory,
             createdAt: new Date().toISOString(),
@@ -104,8 +124,8 @@ export const escalateInternal = async (ticket, issueTitle, issueDescription) => 
 
         // Update DB
         ticket.escalatedToTicket = true;
-        ticket.issueContext = issueDescription || "";
-        ticket.issueTitle = issueTitle || "";
+        ticket.issueContext = issueDescription || ticket.issueContext || "";
+        ticket.issueTitle = finalTitle;
         ticket.lastActivityAt = new Date();
         await ticket.save();
 

@@ -16,7 +16,7 @@ QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
 COLLECTION_NAME = "auto_suggestion_collection"
 LOCAL_LLM_URL = "http://172.17.0.168:5001/ask"
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 MAX_CONTEXT_CHUNKS = 5
 
 app = FastAPI(title="Ticket Triage Suggestion Service")
@@ -149,7 +149,10 @@ Detailed Answer:"""
                 llm_response = "I couldn't find a solution in the documentation. I will escalate this to a human agent for you."
 
         # Apply Post-Processing for Markdown
-        from src.triage.chatbot_server.text_processor import format_response_to_markdown
+        try:
+            from text_processor import format_response_to_markdown
+        except ImportError:
+            from src.triage.chatbot_server.text_processor import format_response_to_markdown
         llm_response = format_response_to_markdown(llm_response)
 
         return SuggestionResponse(
