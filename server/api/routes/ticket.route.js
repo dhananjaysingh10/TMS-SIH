@@ -35,7 +35,7 @@ router.post("/frontend", createTicketFrontend);
 router.get("/departments", getDepartments);
 router.get("/in-review", authMiddleware, getTicketsInReview);
 router.get("/:id", getTicketById);
-router.get("/", getAllTickets);
+router.get("/", authMiddleware, getAllTickets);
 router.post("/filter", getFilteredTickets);
 router.get("/:id", getTicketById);
 router.get("/department/:department", getTicketsByDepartment);
