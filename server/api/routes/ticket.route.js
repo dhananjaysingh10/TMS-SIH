@@ -3,6 +3,7 @@ import express from "express";
 import {
     acceptTicket,
     addComment,
+    approveDepartmentChange,
     createMessage,
     createTicket,
     createTicketFrontend,
@@ -16,6 +17,7 @@ import {
     getTicketsByAssignedTo,
     getTicketsByCreatedBy,
     getTicketsByDepartment,
+    getTicketsInReview,
     openTicket,
     requestTicket,
     // getTicketsCreatedBy,
@@ -31,6 +33,7 @@ const router = express.Router();
 router.post("/", createTicket);
 router.post("/frontend", createTicketFrontend);
 router.get("/departments", getDepartments);
+router.get("/in-review", authMiddleware, getTicketsInReview);
 router.get("/:id", getTicketById);
 router.get("/", getAllTickets);
 router.post("/filter", getFilteredTickets);
@@ -45,10 +48,12 @@ router.post("/accept/:id", acceptTicket);
 router.post("/unaccept/:id", unacceptTicket);
 router.post("/open/:id", openTicket);
 router.post("/resolve/:id", resolveTicket);
-router.post("/request/:id",requestTicket);
+router.post("/request/:id", requestTicket);
 router.post("/message/:id", createMessage);
 router.get("/getmessage/:id", getMessage);
 router.get("/activities/:id", getActivites);
 router.post("/status/:id", authMiddleware, updateTicketStatus);
 router.post("/:id/comment", authMiddleware, addComment);
+router.put("/:id/approve-department-change", authMiddleware, approveDepartmentChange);
 export default router;
+

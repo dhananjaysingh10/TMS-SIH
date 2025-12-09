@@ -83,6 +83,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     { path: "/created-by-me", icon: User, label: "Tickets Created by Me" },
     ...(currentUser?.role === "admin" || currentUser?.role === "super-admin"
       ? [
+        { path: "/pending-department-changes", icon: Ticket, label: "Pending Dept Changes" },
         { path: "/admin-dashboard", icon: BarChart3, label: "Analytics Dashboard" },
         { path: "/product-management", icon: FolderKanban, label: "Product Management" },
       ]

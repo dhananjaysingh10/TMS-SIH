@@ -272,6 +272,19 @@ export const ticketsApi = {
       method: "PATCH",
       body: JSON.stringify({ status }),
     }),
+  // Get tickets pending department change (inreview: true)
+  getTicketsInReview: async (): Promise<Ticket[]> => {
+    const response = await fetchApi<{ success: boolean; tickets: Ticket[] }>('/ticket/in-review');
+    return response.tickets;
+  },
+  // Approve department change - reassign to new department
+  approveDepartmentChange: async (ticketId: string, departmentId: string): Promise<Ticket> => {
+    const response = await fetchApi<{ success: boolean; ticket: Ticket }>(`/ticket/${ticketId}/approve-department-change`, {
+      method: 'PUT',
+      body: JSON.stringify({ departmentId }),
+    });
+    return response.ticket;
+  },
 };
 
 export const chatApi = {
