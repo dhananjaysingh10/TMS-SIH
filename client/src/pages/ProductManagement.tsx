@@ -249,7 +249,7 @@ export default function ProductManagement() {
     return (
         <Layout pageTitle="Product Management">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
+
                 <div className="flex items-center justify-between mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">Product & Team Management</h1>
@@ -298,7 +298,7 @@ export default function ProductManagement() {
                                                 <div className="flex-1">
                                                     <h3 className="font-semibold text-gray-900">{product.name}</h3>
                                                     <p className="text-sm text-gray-500 line-clamp-1">{product.description || "No description"}</p>
-                                                    {/* Show product admin */}
+
                                                     {(product as any).admin ? (
                                                         <p className="text-xs text-purple-600 mt-1">
                                                             Admin: {(product as any).admin.name}
@@ -308,8 +308,7 @@ export default function ProductManagement() {
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    {/* Assign admin button - super-admin only */}
-                                                    {currentUser?.role === "super-admin" && (
+                                                    {/* {currentUser?.role === "super-admin" && (
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -322,9 +321,8 @@ export default function ProductManagement() {
                                                         >
                                                             <Users className="w-4 h-4" />
                                                         </button>
-                                                    )}
-                                                    {/* Edit button - only if can edit */}
-                                                    {canEditProduct(product) && (
+                                                    )} */}
+                                                    {/* {canEditProduct(product) && (
                                                         <button
                                                             onClick={(e) => { e.stopPropagation(); openEditProduct(product); }}
                                                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
@@ -339,7 +337,7 @@ export default function ProductManagement() {
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
-                                                    )}
+                                                    )} */}
                                                     <ChevronRight className="w-5 h-5 text-gray-300" />
                                                 </div>
                                             </div>
@@ -543,7 +541,7 @@ export default function ProductManagement() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                                    {/* <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
                                         <Tag className="w-4 h-4" />
                                         Keywords
                                     </label>
@@ -568,8 +566,8 @@ export default function ProductManagement() {
                                                 </button>
                                             </span>
                                         ))}
-                                    </div>
-                                    <div className="flex gap-2">
+                                    </div> */}
+                                    {/* <div className="flex gap-2">
                                         <input
                                             type="text"
                                             value={keywordInput}
@@ -613,8 +611,8 @@ export default function ProductManagement() {
                                             className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm hover:bg-purple-200"
                                         >
                                             Add
-                                        </button>
-                                    </div>
+                                        </button> */}
+                                    {/* </div> */}
                                     <p className="text-xs text-gray-500 mt-1">Keywords help with ticket routing and search</p>
                                 </div>
 

@@ -25,4 +25,3 @@ router.delete('/:id', authMiddleware, deleteProduct);
 router.put('/:id/admin', authMiddleware, setProductAdmin);
 
 export default router;
-

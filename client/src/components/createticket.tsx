@@ -57,19 +57,7 @@ export default function CreateTicketModal({
       const response = await ticketsApi.createFrontend(ticketData);
       
       if(response.success) {
-          // Success! Redirect to helpdesk
-          const { tempTicketId, autoEscalated, foundSolution } = response.data;
-          
-          if (!foundSolution && autoEscalated) {
-             toast("Ticket created & escalated to agent (No immediate solution found)", { icon: "ℹ️" });
-          } else {
-             toast.success("Connecting you to AI Support...");
-          }
-          
-          onClose(); // Close modal first
-          setTimeout(() => {
-             navigate(`/helpdesk?ticketId=${tempTicketId}`);
-          }, 100);
+          onClose();
           
       } else {
           toast.error(response.message || "Failed to create ticket");
