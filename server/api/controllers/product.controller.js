@@ -21,11 +21,11 @@ export const getAllProducts = async (req, res) => {
             .sort({ createdAt: -1 });
 
         // Log all products with their admin emails for debugging
-        console.log('=== ALL PRODUCTS WITH ADMINS ===');
-        products.forEach(p => {
-            console.log(`Product: "${p.name}" | Admin: ${p.admin ? p.admin.email : 'NONE'}`);
-        });
-        console.log('================================');
+        // console.log('=== ALL PRODUCTS WITH ADMINS ===');
+        // products.forEach(p => {
+        //     console.log(`Product: "${p.name}" | Admin: ${p.admin ? p.admin.email : 'NONE'}`);
+        // });
+        // console.log('================================');
 
         res.status(200).json({
             success: true,
