@@ -142,7 +142,6 @@ export default function TicketCard({
           {department?.toUpperCase() || 'UNASSIGNED'}
         </span>
       </div>
-
       <div className="space-y-2 text-sm text-gray-600">
         <div className="flex items-center gap-2">
           <User size={14} className="text-gray-400" />
