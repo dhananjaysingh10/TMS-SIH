@@ -467,7 +467,7 @@ export default function Home() {
             Quick Actions
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
+            {/* <Link
               to="/tickets"
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 transition-colors font-medium border border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
             >
@@ -480,7 +480,7 @@ export default function Home() {
             >
               <Activity size={20} />
               My Assigned Tickets
-            </Link>
+            </Link> */}
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors font-medium shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"

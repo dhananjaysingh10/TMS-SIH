@@ -14,7 +14,6 @@ import UserTicket from "./pages/userticket";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminDashboard from "./pages/AdminDashboard";
-import Helpdesk from "./pages/Helpdesk";
 import PendingDepartmentChanges from "./pages/PendingDepartmentChanges";
 
 import ProductManagement from "./pages/ProductManagement";
@@ -28,7 +27,6 @@ const App: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/" element={<Home />} />
-        <Route path="/helpdesk" element={<Helpdesk />} />
         <Route path="/tickets" element={<TicketsDashboard />} />
         <Route path="/tickets/:productId" element={<TicketsDashboard />} />
         <Route path="/my-tickets/:productId" element={<MyTickets />} />
