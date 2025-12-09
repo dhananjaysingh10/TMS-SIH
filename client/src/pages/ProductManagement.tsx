@@ -42,7 +42,8 @@ export default function ProductManagement() {
 
     // Form states
     const [productForm, setProductForm] = useState({ name: "", description: "" });
-    const [departmentForm, setDepartmentForm] = useState({ name: "", description: "", keywords: [] as string[] });
+    const [departmentForm, setDepartmentForm] = useState({ name: "", description: "", keywords: [] as string[], leadId: "" });
+    const [leadSearchEmail, setLeadSearchEmail] = useState("");
     const [keywordInput, setKeywordInput] = useState("");
 
     // Member management states
@@ -199,7 +200,7 @@ export default function ProductManagement() {
             }
             setShowDepartmentModal(false);
             setEditingDepartment(null);
-            setDepartmentForm({ name: "", description: "", keywords: [] });
+            setDepartmentForm({ name: "", description: "", keywords: [], leadId: "" });
             setKeywordInput("");
             fetchDepartments(selectedProduct._id);
         } catch (err) {
@@ -230,9 +231,11 @@ export default function ProductManagement() {
         setDepartmentForm({
             name: dept.name,
             description: dept.description,
-            keywords: dept.keywords || []
+            keywords: dept.keywords || [],
+            leadId: dept.lead?._id || "" // Initialize with current lead ID
         });
         setKeywordInput("");
+        setLeadSearchEmail(""); // Reset search
         setShowDepartmentModal(true);
     };
 
@@ -360,7 +363,9 @@ export default function ProductManagement() {
                                     <button
                                         onClick={() => {
                                             setEditingDepartment(null);
-                                            setDepartmentForm({ name: "", description: "", keywords: [] });
+                                            setDepartmentForm({ name: "", description: "", keywords: [], leadId: "" });
+                                            setKeywordInput("");
+                                            setLeadSearchEmail("");
                                             setKeywordInput("");
                                             setShowDepartmentModal(true);
                                         }}
@@ -614,6 +619,77 @@ export default function ProductManagement() {
                                         </button> */}
                                     {/* </div> */}
                                     <p className="text-xs text-gray-500 mt-1">Keywords help with ticket routing and search</p>
+                                </div>
+
+                                {/* Team Lead Assignment */}
+                                <div className="border-t pt-4">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                        <Users className="w-4 h-4" />
+                                        Team Lead
+                                    </label>
+
+                                    {/* Current selected lead */}
+                                    {departmentForm.leadId ? (
+                                        <div className="bg-purple-50 p-3 rounded-lg flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2">
+                                                {(() => {
+                                                    // Try to find user in allUsers first
+                                                    const user = allUsers.find(u => u._id === departmentForm.leadId);
+                                                    // Or if editing, use the exiting lead data if it matches
+                                                    const leadName = user?.name || (editingDepartment?.lead?._id === departmentForm.leadId ? editingDepartment?.lead.name : "Selected User");
+                                                    const leadEmail = user?.email || (editingDepartment?.lead?._id === departmentForm.leadId ? editingDepartment?.lead.email : "");
+
+                                                    return (
+                                                        <div>
+                                                            <p className="font-medium text-gray-800">{leadName}</p>
+                                                            <p className="text-xs text-gray-500">{leadEmail}</p>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setDepartmentForm({ ...departmentForm, leadId: "" })}
+                                                className="text-red-500 hover:text-red-700 text-sm"
+                                            >
+                                                Change
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                value={leadSearchEmail}
+                                                onChange={(e) => setLeadSearchEmail(e.target.value)}
+                                                placeholder="Search user by email..."
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                                            />
+                                            {leadSearchEmail.trim() && (
+                                                <div className="mt-2 max-h-32 overflow-y-auto border border-gray-200 rounded-lg">
+                                                    {allUsers
+                                                        .filter(u => u.email?.toLowerCase().includes(leadSearchEmail.toLowerCase()))
+                                                        .slice(0, 5)
+                                                        .map((user) => (
+                                                            <button
+                                                                key={user._id}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setDepartmentForm({ ...departmentForm, leadId: user._id });
+                                                                    setLeadSearchEmail("");
+                                                                }}
+                                                                className="w-full flex items-center justify-between p-2 hover:bg-purple-50 text-left border-b last:border-b-0"
+                                                            >
+                                                                <span className="text-sm text-gray-800">{user.email}</span>
+                                                                <span className="text-xs text-green-600">Select</span>
+                                                            </button>
+                                                        ))}
+                                                    {allUsers.filter(u => u.email?.toLowerCase().includes(leadSearchEmail.toLowerCase())).length === 0 && (
+                                                        <p className="p-2 text-sm text-gray-500 text-center">No users found</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Member Management - only show when editing */}

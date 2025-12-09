@@ -526,7 +526,7 @@ export default function TicketDetail() {
                         Product
                       </p>
                       <p className="font-semibold text-slate-900 capitalize">
-                        {ticket.departmentRef?.product?.name == "Default Product" ? "Legacy" : ticket.departmentRef?.product?.name}
+                        {ticket.departmentRef?.product?.name || "Unknown Product"}
                       </p>
                     </div>
                   </div>
@@ -579,12 +579,14 @@ export default function TicketDetail() {
                       <button
                         onClick={handleAcceptTicket}
                         disabled={buttonLoading.accept}
-                        className={`inline-flex h-[50px] items-center gap-2 px-6 py-2.5 bg-[#388E84] text-white rounded-lg hover:bg-[#2F7A70] hover:shadow-md transition-all duration-200 font-medium shadow-sm ${buttonLoading.accept ? "opacity-60 cursor-not-allowed" : ""
+                        className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.accept
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
                           }`}
                       >
                         {buttonLoading.accept ? (
                           <>
-                            <Loader2 size={18} className="animate-spin text-teal-100" />
+                            <Loader2 size={18} className="animate-spin" />
                             Accepting...
                           </>
                         ) : (
@@ -594,20 +596,23 @@ export default function TicketDetail() {
                           </>
                         )}
                       </button>
-
                       {!resolvepanel && !ticket.inreview && (
                         <button
                           onClick={() => setResolvePanel(true)}
                           disabled={buttonLoading.request}
-                          className={`inline-flex h-[50px] items-center gap-2 px-6 py-2.5 bg-[#4B5563] text-white rounded-lg hover:bg-[#374151] hover:shadow-md transition-all duration-200 font-medium shadow-sm w-full md:w-auto justify-center ${buttonLoading.request ? "opacity-60 cursor-not-allowed" : ""
+                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.request
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                             }`}
                         >
                           {buttonLoading.request ? (
-                            <Loader2 size={18} className="animate-spin text-gray-300" />
+                            <Loader2 size={18} className="animate-spin" />
                           ) : (
                             <CheckCircle size={18} />
                           )}
-                          {buttonLoading.request ? "Requesting..." : "Request Change"}
+                          {buttonLoading.request
+                            ? "Requesting..."
+                            : "Change Department"}
                         </button>
                       )}
                       {resolvepanel && ( // STATE 2: The Expansion Panel
@@ -912,73 +917,57 @@ export default function TicketDetail() {
               </div>
             )}
           </div>
-          {ticket.assignedTo&&(
+
           <div className="lg:col-span-1">
-            {(ticket?.status === 'open' || ticket?.status === 'in-progress') ? (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[calc(100vh-200px)] flex flex-col sticky top-6">
-                <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-4 border-b border-slate-200">
-                  <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-                      <MessageSquare size={16} className="text-white" />
-                    </div>
-                    Live Chat
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-1 ml-10">
-                    Real-time conversation with support
-                  </p>
-                </div>
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[calc(100vh-200px)] flex flex-col sticky top-6">
+              <div className="bg-gradient-to-r from-slate-50 to-white px-5 py-4 border-b border-slate-200">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+                    <MessageSquare size={16} className="text-white" />
+                  </div>
+                  Live Chat
+                </h2>
+                <p className="text-xs text-slate-500 mt-1 ml-10">
+                  Real-time conversation with support
+                </p>
+              </div>
 
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-                  {chatMessages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                        <MessageSquare className="text-slate-400" size={24} />
-                      </div>
-                      <p className="text-slate-500 text-sm font-medium mb-1">
-                        No messages yet
-                      </p>
-                      <p className="text-slate-400 text-xs">
-                        Start the conversation!
-                      </p>
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+                {chatMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                      <MessageSquare className="text-slate-400" size={24} />
                     </div>
-                  ) : (
-                    chatMessages.map((msg, index) => (
-                      <ChatMessage
-                        key={msg._id || index}
-                        message={msg}
-                        isOwnMessage={msg.user._id === userId}
-                      />
-                    ))
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {ticket?.ticketId && (
-                  <div className="p-4 border-t border-slate-200 bg-white">
-                    <ChatInput
-                      ticketId={ticket.ticketId}
-                      onMessageSent={() => { }}
+                    <p className="text-slate-500 text-sm font-medium mb-1">
+                      No messages yet
+                    </p>
+                    <p className="text-slate-400 text-xs">
+                      Start the conversation!
+                    </p>
+                  </div>
+                ) : (
+                  chatMessages.map((msg, index) => (
+                    <ChatMessage
+                      key={msg._id || index}
+                      message={msg}
+                      isOwnMessage={msg.user._id === userId}
                     />
-                  </div>
+                  ))
                 )}
+                <div ref={chatEndRef} />
               </div>
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 sticky top-6">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <MessageSquare className="text-slate-400" size={24} />
-                  </div>
-                  <p className="text-slate-600 font-medium">Chat Closed</p>
-                  <p className="text-slate-400 text-sm mt-1">
-                    This ticket has been {ticket?.status}
-                  </p>
+
+              {ticket?.ticketId && (
+                <div className="p-4 border-t border-slate-200 bg-white">
+                  <ChatInput
+                    ticketId={ticket.ticketId}
+                    onMessageSent={() => { }}
+                  />
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-          )}
         </div>
-        
       </div>
     </Layout>
   );

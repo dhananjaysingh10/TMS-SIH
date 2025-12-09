@@ -100,6 +100,21 @@ export const getDepartments = async (req, res) => {
   }
 };
 
+const generateUniqueDisplayId = async () => {
+  let isUnique = false;
+  let displayId = "";
+  while (!isUnique) {
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    displayId = `TKT${randomNum}`;
+
+    const existing = await Ticket.findOne({ displayId });
+    if (!existing) {
+      isUnique = true;
+    }
+  }
+  return displayId;
+};
+
 export const createTicket = async (req, res) => {
   try {
     const {
@@ -117,30 +132,30 @@ export const createTicket = async (req, res) => {
     } = req.body;
     console.log(req.body);
     const finalTicketId = ticketId || crypto.randomUUID();
-    
+
     // Robust user lookup with fallback for system-generated tickets
     let createdBy = await User.findOne({ email: useremail });
-    
+
     // If no user found and email is a system fallback, create/find system user
     if (!createdBy && useremail) {
-        // Check if this is a system-generated ticket (fallback email)
-        if (useremail === "system@ticketing.local") {
-            // Find or create a system user for anonymous/email-sourced tickets
-            createdBy = await User.findOne({ email: "system@ticketing.local" });
-            if (!createdBy) {
-                createdBy = await User.create({
-                    email: "system@ticketing.local",
-                    name: "System Bot",
-                    password: crypto.randomBytes(32).toString('hex'), // Random password
-                    role: "system",
-                    department: "IT",
-                    profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                });
-                console.log("Created system user for anonymous tickets");
-            }
+      // Check if this is a system-generated ticket (fallback email)
+      if (useremail === "system@ticketing.local") {
+        // Find or create a system user for anonymous/email-sourced tickets
+        createdBy = await User.findOne({ email: "system@ticketing.local" });
+        if (!createdBy) {
+          createdBy = await User.create({
+            email: "system@ticketing.local",
+            name: "System Bot",
+            password: crypto.randomBytes(32).toString('hex'), // Random password
+            role: "system",
+            department: "IT",
+            profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+          });
+          console.log("Created system user for anonymous tickets");
         }
+      }
     }
-    
+
     console.log(createdBy);
     const assignedTo = await User.findOne({ email: assignedemail });
     console.log(assignedTo);
@@ -180,8 +195,11 @@ export const createTicket = async (req, res) => {
       }
     }
 
+    const displayId = await generateUniqueDisplayId();
+
     const newTicket = new Ticket({
       ticketId: finalTicketId,
+      displayId,
       department: departmentName,
       departmentRef,
       type,
