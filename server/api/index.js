@@ -18,6 +18,7 @@ import departmentRoute from "./routes/department.route.js";
 import availabilityRoute from "./routes/availability.route.js";
 import Ticket from './models/ticket.model.js';
 import User from './models/user.model.js';
+import { startEscalationCron } from './services/escalationCron.js';
 
 dotenv.config();
 connectDB();
@@ -57,6 +58,9 @@ app.use((req, res, next) => {
 });
 
 const PORT = process.env.PORT || 10000;
+
+// Start the escalation cron job
+startEscalationCron();
 
 // Routes
 app.use('/api/auth', authRoutes);

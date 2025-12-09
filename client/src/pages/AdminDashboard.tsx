@@ -5,6 +5,7 @@ import { selectCurrentUser } from "../redux/user/userSlice";
 import { Navigate } from "react-router-dom";
 import {
     analyticsApi,
+    productApi,
     type DepartmentAnalytics,
     type EmployeesAnalytics,
     type EmployeeStats,
@@ -56,6 +57,8 @@ export default function AdminDashboard() {
     const [departmentData, setDepartmentData] = useState<DepartmentAnalytics | null>(null);
     const [employeesData, setEmployeesData] = useState<EmployeesAnalytics | null>(null);
     const [productsData, setProductsData] = useState<ProductsAnalytics | null>(null);
+    const [productsList, setProductsList] = useState<{ _id: string; name: string }[]>([]);
+    const [selectedProductId, setSelectedProductId] = useState<string>("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -66,7 +69,16 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchAnalytics();
-    }, [selectedRange]);
+    }, [selectedRange, selectedProductId]);
+
+    useEffect(() => {
+        // Fetch products list for dropdown (super-admin only)
+        if (currentUser?.role === 'super-admin') {
+            productApi.getAll().then((res) => {
+                setProductsList(res.map((p: any) => ({ _id: p._id, name: p.name })));
+            }).catch(console.error);
+        }
+    }, [currentUser]);
 
     const fetchAnalytics = async () => {
         try {
@@ -74,7 +86,7 @@ export default function AdminDashboard() {
             setError(null);
             const [deptRes, empRes, prodRes] = await Promise.all([
                 analyticsApi.getDepartment(selectedRange),
-                analyticsApi.getEmployees(selectedRange),
+                analyticsApi.getEmployees(selectedRange, selectedProductId || undefined),
                 analyticsApi.getProducts(selectedRange),
             ]);
             setDepartmentData(deptRes);
@@ -304,8 +316,8 @@ export default function AdminDashboard() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={productChartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis 
-                                        dataKey="name" 
+                                    <XAxis
+                                        dataKey="name"
                                         angle={-45}
                                         textAnchor="end"
                                         height={60}
@@ -314,7 +326,7 @@ export default function AdminDashboard() {
                                     />
                                     <YAxis />
                                     <Tooltip />
-                                    <Legend verticalAlign="top"/>
+                                    <Legend verticalAlign="top" />
                                     <Bar dataKey="Total" name="Total Tickets" fill="#8884d8" radius={[4, 4, 0, 0]} />
                                     <Bar dataKey="Resolved" name="Resolved Tickets" fill="#10B981" radius={[4, 4, 0, 0]} />
                                 </BarChart>
@@ -375,11 +387,28 @@ export default function AdminDashboard() {
 
                 {/* Employee Table */}
                 <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <Users className="w-5 h-5 text-blue-500" />
                             Team Performance
                         </h2>
+                        {currentUser?.role === 'super-admin' && (
+                            <div className="relative">
+                                <select
+                                    value={selectedProductId}
+                                    onChange={(e) => setSelectedProductId(e.target.value)}
+                                    className="appearance-none bg-white border border-gray-300 rounded-lg pl-4 pr-10 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="">All Products</option>
+                                    {productsList.map((p) => (
+                                        <option key={p._id} value={p._id}>
+                                            {p.name === "Default Product" ? "Legacy" : p.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                            </div>
+                        )}
                     </div>
                     {employeesData?.employees && employeesData.employees.length > 0 ? (
                         <div className="overflow-x-auto">

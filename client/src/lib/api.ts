@@ -456,9 +456,11 @@ export const analyticsApi = {
     return response.data;
   },
 
-  getEmployees: async (range: string = '1m'): Promise<EmployeesAnalytics> => {
+  getEmployees: async (range: string = '1m', productId?: string): Promise<EmployeesAnalytics> => {
+    const params = new URLSearchParams({ range });
+    if (productId) params.append('productId', productId);
     const response = await fetchApi<ApiResponse<EmployeesAnalytics>>(
-      `/analytics/employees?range=${range}`
+      `/analytics/employees?${params.toString()}`
     );
     return response.data;
   },

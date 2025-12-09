@@ -78,16 +78,15 @@ export const TICKET_STATUS_UPDATE_TEMPLATE = (
                   <td style="padding-top: 8px; font-size: 14px; color: #6B7280;">Updated At</td>
                   <td align="right" style="padding-top: 8px; font-size: 14px; color: #111827;">
                     ${new Date(timestamp).toLocaleString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
                   </td>
                 </tr>
-                ${
-                  remark
-                    ? `
+                ${remark
+      ? `
                 <tr>
                   <td colspan="2" style="padding-top: 12px; border-top: 1px solid #e5e7eb; margin-top: 12px;">
                     <p style="margin: 0; font-size: 14px; color: #6B7280;">Remark:</p>
@@ -95,8 +94,8 @@ export const TICKET_STATUS_UPDATE_TEMPLATE = (
                   </td>
                 </tr>
                 `
-                    : ""
-                }
+      : ""
+    }
               </table>
 
               <!-- CTA Button -->
