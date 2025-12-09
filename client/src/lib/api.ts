@@ -355,15 +355,13 @@ export interface DepartmentAnalytics {
   };
   typeBreakdown: Record<string, number>;
   avgResolutionTimeHours: number;
-  slaCompliance: {
-    percent: number | null;
-    metCount: number;
-    total: number;
+  resolutionDistribution: {
+    under4h: number;
+    under24h: number;
+    under3d: number;
+    over3d: number;
   };
-  customerSatisfaction: {
-    avgRating: number | null;
-    totalRated: number;
-  };
+  avgAcceptanceTimeHours: number;
 }
 
 export interface EmployeeStats {
@@ -434,6 +432,22 @@ export interface SingleEmployeeAnalytics {
   }>;
 }
 
+export interface ProductStats {
+  product: string;
+  total: number;
+  open: number;
+  inProgress: number;
+  resolved: number;
+  closed: number;
+}
+
+export interface ProductsAnalytics {
+  range: string;
+  startDate: string;
+  endDate: string;
+  products: ProductStats[];
+}
+
 export const analyticsApi = {
   getDepartment: async (range: string = '1m'): Promise<DepartmentAnalytics> => {
     const response = await fetchApi<ApiResponse<DepartmentAnalytics>>(
@@ -452,6 +466,13 @@ export const analyticsApi = {
   getSingleEmployee: async (employeeId: string, range: string = '1m'): Promise<SingleEmployeeAnalytics> => {
     const response = await fetchApi<ApiResponse<SingleEmployeeAnalytics>>(
       `/analytics/employee/${employeeId}?range=${range}`
+    );
+    return response.data;
+  },
+
+  getProducts: async (range: string = '1m'): Promise<ProductsAnalytics> => {
+    const response = await fetchApi<ApiResponse<ProductsAnalytics>>(
+      `/analytics/products?range=${range}`
     );
     return response.data;
   },

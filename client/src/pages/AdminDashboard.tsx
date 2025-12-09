@@ -8,18 +8,34 @@ import {
     type DepartmentAnalytics,
     type EmployeesAnalytics,
     type EmployeeStats,
+    type ProductsAnalytics
 } from "../lib/api";
 import {
     BarChart3,
     Clock,
+    Filter,
+    Package,
+    AlertCircle,
     Star,
+    ChevronDown,
     Users,
-    TrendingUp,
-    AlertTriangle,
     CheckCircle,
     Loader2,
-    ChevronDown,
-} from "lucide-react";
+    AlertTriangle
+} from 'lucide-react';
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+    PieChart,
+    Pie,
+    Cell,
+} from 'recharts';
 
 type TimeRange = "1h" | "24h" | "10d" | "1m" | "1y" | "all";
 
@@ -32,13 +48,14 @@ const timeRangeOptions: { value: TimeRange; label: string }[] = [
     { value: "all", label: "All Time" },
 ];
 
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
 export default function AdminDashboard() {
     const currentUser = useSelector(selectCurrentUser);
     const [selectedRange, setSelectedRange] = useState<TimeRange>("1m");
-    const [departmentData, setDepartmentData] =
-        useState<DepartmentAnalytics | null>(null);
-    const [employeesData, setEmployeesData] =
-        useState<EmployeesAnalytics | null>(null);
+    const [departmentData, setDepartmentData] = useState<DepartmentAnalytics | null>(null);
+    const [employeesData, setEmployeesData] = useState<EmployeesAnalytics | null>(null);
+    const [productsData, setProductsData] = useState<ProductsAnalytics | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -55,12 +72,14 @@ export default function AdminDashboard() {
         try {
             setLoading(true);
             setError(null);
-            const [deptRes, empRes] = await Promise.all([
+            const [deptRes, empRes, prodRes] = await Promise.all([
                 analyticsApi.getDepartment(selectedRange),
                 analyticsApi.getEmployees(selectedRange),
+                analyticsApi.getProducts(selectedRange),
             ]);
             setDepartmentData(deptRes);
             setEmployeesData(empRes);
+            setProductsData(prodRes);
         } catch (err) {
             console.error("Failed to fetch analytics:", err);
             setError("Failed to load analytics data. Please try again.");
@@ -69,19 +88,7 @@ export default function AdminDashboard() {
         }
     };
 
-    const StatCard = ({
-        title,
-        value,
-        icon: Icon,
-        color,
-        subtext,
-    }: {
-        title: string;
-        value: string | number;
-        icon: React.ElementType;
-        color: string;
-        subtext?: string;
-    }) => (
+    const StatCard = ({ title, value, icon: Icon, color, subtext }: { title: string; value: string | number; icon: React.ElementType; color: string; subtext?: string }) => (
         <div className={`bg-white rounded-xl shadow-lg border-2 border-gray-100 p-6 hover:shadow-xl transition-all duration-300`}>
             <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-xl ${color}`}>
@@ -93,92 +100,6 @@ export default function AdminDashboard() {
             {subtext && <p className="text-sm text-gray-400 mt-1">{subtext}</p>}
         </div>
     );
-
-    const StatusBar = ({
-        data,
-    }: {
-        data: { open: number; inProgress: number; resolved: number; closed: number; total: number };
-    }) => {
-        if (data.total === 0) return <div className="text-gray-400 text-sm">No data</div>;
-        const getWidth = (count: number) => `${(count / data.total) * 100}%`;
-
-        return (
-            <div className="space-y-3">
-                <div className="flex h-4 rounded-full overflow-hidden bg-gray-100">
-                    <div
-                        className="bg-amber-500 transition-all"
-                        style={{ width: getWidth(data.open) }}
-                        title={`Open: ${data.open}`}
-                    />
-                    <div
-                        className="bg-blue-500 transition-all"
-                        style={{ width: getWidth(data.inProgress) }}
-                        title={`In Progress: ${data.inProgress}`}
-                    />
-                    <div
-                        className="bg-emerald-500 transition-all"
-                        style={{ width: getWidth(data.resolved) }}
-                        title={`Resolved: ${data.resolved}`}
-                    />
-                    <div
-                        className="bg-gray-500 transition-all"
-                        style={{ width: getWidth(data.closed) }}
-                        title={`Closed: ${data.closed}`}
-                    />
-                </div>
-                <div className="flex justify-between text-xs text-gray-600">
-                    <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full bg-amber-500" /> Open: {data.open}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full bg-blue-500" /> In Progress: {data.inProgress}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full bg-emerald-500" /> Resolved: {data.resolved}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full bg-gray-500" /> Closed: {data.closed}
-                    </span>
-                </div>
-            </div>
-        );
-    };
-
-    const PriorityChart = ({
-        data,
-    }: {
-        data: { urgent: number; high: number; medium: number; low: number };
-    }) => {
-        const total = data.urgent + data.high + data.medium + data.low;
-        if (total === 0) return <div className="text-gray-400 text-sm">No data</div>;
-
-        const priorities = [
-            { label: "Urgent", count: data.urgent, color: "bg-red-500" },
-            { label: "High", count: data.high, color: "bg-orange-500" },
-            { label: "Medium", count: data.medium, color: "bg-yellow-500" },
-            { label: "Low", count: data.low, color: "bg-green-500" },
-        ];
-
-        return (
-            <div className="space-y-3">
-                {priorities.map((p) => (
-                    <div key={p.label} className="flex items-center gap-3">
-                        <span className="w-16 text-sm text-gray-600">{p.label}</span>
-                        <div className="flex-1 h-6 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full ${p.color} transition-all flex items-center justify-end pr-2`}
-                                style={{ width: `${(p.count / total) * 100}%` }}
-                            >
-                                {p.count > 0 && (
-                                    <span className="text-xs text-white font-semibold">{p.count}</span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    };
 
     const EmployeeRow = ({ emp }: { emp: EmployeeStats }) => (
         <tr className="hover:bg-gray-50 transition-colors">
@@ -196,7 +117,7 @@ export default function AdminDashboard() {
                 </div>
             </td>
             <td className="px-4 py-4 text-center">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-700 font-bold">
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
                     {emp.currentWorkload}
                 </span>
             </td>
@@ -222,7 +143,7 @@ export default function AdminDashboard() {
     if (loading) {
         return (
             <Layout pageTitle="Admin Dashboard">
-                <div className="flex items-center justify-center h-96">
+                <div className="flex items-center justify-center h-screen">
                     <Loader2 className="w-12 h-12 animate-spin text-blue-500" />
                 </div>
             </Layout>
@@ -248,17 +169,46 @@ export default function AdminDashboard() {
         );
     }
 
+    // Process data for charts
+    const statusData = departmentData ? [
+        { name: 'Open', value: departmentData.ticketVolume.open, color: '#F59E0B' },
+        { name: 'In Progress', value: departmentData.ticketVolume.inProgress, color: '#3B82F6' },
+        { name: 'Resolved', value: departmentData.ticketVolume.resolved, color: '#10B981' },
+        { name: 'Closed', value: departmentData.ticketVolume.closed, color: '#6B7280' },
+    ] : [];
+
+    const priorityData = departmentData ? [
+        { name: 'Urgent', value: departmentData.priorityBreakdown.urgent },
+        { name: 'High', value: departmentData.priorityBreakdown.high },
+        { name: 'Medium', value: departmentData.priorityBreakdown.medium },
+        { name: 'Low', value: departmentData.priorityBreakdown.low },
+    ] : [];
+
+    const resolutionData = departmentData && departmentData.resolutionDistribution ? [
+        { name: '< 4h', value: departmentData.resolutionDistribution.under4h },
+        { name: '4-24h', value: departmentData.resolutionDistribution.under24h },
+        { name: '1-3d', value: departmentData.resolutionDistribution.under3d },
+        { name: '> 3d', value: departmentData.resolutionDistribution.over3d },
+    ] : [];
+
+    const productChartData = productsData?.products.map(p => ({
+        name: p.product,
+        Total: p.total,
+        Open: p.open,
+        Resolved: p.resolved
+    })) || [];
+
     return (
         <Layout pageTitle="Admin Dashboard">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900">
-                            {departmentData?.department} Department Analytics
+                            {departmentData?.department ? `${departmentData.department} Department Analytics` : 'Analytics Overview'}
                         </h1>
                         <p className="text-gray-500 mt-1">
-                            Overview of team performance and ticket metrics
+                            Performance Metrics
                         </p>
                     </div>
                     <div className="relative">
@@ -277,8 +227,8 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Main Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <StatCard
                         title="Total Tickets"
                         value={departmentData?.ticketVolume.total || 0}
@@ -298,143 +248,137 @@ export default function AdminDashboard() {
                             }%`}
                         icon={CheckCircle}
                         color="bg-gradient-to-br from-emerald-500 to-emerald-600"
-                        subtext={`${(departmentData?.ticketVolume.resolved || 0) +
-                            (departmentData?.ticketVolume.closed || 0)
-                            } resolved`}
+                        subtext={`${(departmentData?.ticketVolume.resolved || 0) + (departmentData?.ticketVolume.closed || 0)} resolved`}
                     />
                     <StatCard
                         title="Avg Resolution Time"
-                        value={
-                            departmentData?.avgResolutionTimeHours
-                                ? `${departmentData.avgResolutionTimeHours}h`
-                                : "-"
-                        }
+                        value={departmentData?.avgResolutionTimeHours ? `${departmentData.avgResolutionTimeHours}h` : "-"}
                         icon={Clock}
                         color="bg-gradient-to-br from-purple-500 to-purple-600"
+                        subtext="Time to Resolve"
                     />
                     <StatCard
-                        title="Customer Satisfaction"
-                        value={
-                            departmentData?.customerSatisfaction.avgRating !== null
-                                ? `${departmentData.customerSatisfaction.avgRating}/5`
-                                : "-"
-                        }
-                        icon={Star}
+                        title="Avg Acceptance Time"
+                        value={departmentData?.avgAcceptanceTimeHours ? `${departmentData.avgAcceptanceTimeHours}h` : "-"}
+                        icon={CheckCircle}
                         color="bg-gradient-to-br from-yellow-500 to-orange-500"
-                        subtext={`${departmentData?.customerSatisfaction.totalRated || 0} reviews`}
+                        subtext="Time to Accept"
                     />
                 </div>
 
-                {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* Status Distribution */}
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            Ticket Status Distribution
-                        </h2>
-                        {departmentData && <StatusBar data={departmentData.ticketVolume} />}
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Status Chart */}
+                    <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100">
+                        <h2 className="text-lg font-bold text-gray-900 mb-6">Ticket Status Distribution</h2>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={statusData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={80}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {statusData.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={statusData[index].color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
 
-                    {/* Priority Distribution */}
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            Priority Breakdown
+                    {/* Product Distribution Chart */}
+                    <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100">
+                        <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <Package className="w-5 h-5 text-blue-500" />
+                            Tickets by Product
                         </h2>
-                        {departmentData && (
-                            <PriorityChart data={departmentData.priorityBreakdown} />
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={productChartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis 
+                                        dataKey="name" 
+                                        angle={-45}
+                                        textAnchor="end"
+                                        height={60}
+                                        interval={0}
+                                        tick={{ fontSize: 11 }}
+                                    />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Legend verticalAlign="top"/>
+                                    <Bar dataKey="Total" name="Total Tickets" fill="#8884d8" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="Resolved" name="Resolved Tickets" fill="#10B981" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Priority & SLA Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Priority Bar Chart */}
+                    <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 col-span-2">
+                        <h2 className="text-lg font-bold text-gray-900 mb-6">Priority Breakdown</h2>
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={priorityData} layout="vertical" margin={{ left: 20 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                    <XAxis type="number" />
+                                    <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 13, fontWeight: 500 }} />
+                                    <Tooltip />
+                                    <Bar dataKey="value" name="Tickets" fill="#6366f1" radius={[0, 4, 4, 0]}>
+                                        {priorityData.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    {/* Resolution Time Distribution */}
+                    <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 flex flex-col justify-center">
+                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2 self-start">
+                            <Clock className="w-5 h-5 text-blue-500" />
+                            Resolution Time Distribution
+                        </h2>
+                        {departmentData ? (
+                            <div className="h-48 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={resolutionData} margin={{ bottom: 20 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                                        <YAxis />
+                                        <Tooltip cursor={{ fill: 'transparent' }} />
+                                        <Bar dataKey="value" name="Tickets" fill="#8b5cf6" radius={[4, 4, 0, 0]}>
+                                            {resolutionData.map((_, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        ) : (
+                            <div className="text-center text-gray-500 py-10">No data available</div>
                         )}
                     </div>
                 </div>
 
-                {/* SLA & Type */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    {/* SLA Compliance */}
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5 text-blue-500" />
-                            SLA Compliance
-                        </h2>
-                        {departmentData?.slaCompliance.percent !== null ? (
-                            <div className="flex items-center gap-6">
-                                <div className="relative w-32 h-32">
-                                    <svg className="w-full h-full transform -rotate-90">
-                                        <circle
-                                            cx="64"
-                                            cy="64"
-                                            r="56"
-                                            stroke="#e5e7eb"
-                                            strokeWidth="12"
-                                            fill="none"
-                                        />
-                                        <circle
-                                            cx="64"
-                                            cy="64"
-                                            r="56"
-                                            stroke={
-                                                departmentData.slaCompliance.percent >= 80
-                                                    ? "#10b981"
-                                                    : departmentData.slaCompliance.percent >= 50
-                                                        ? "#f59e0b"
-                                                        : "#ef4444"
-                                            }
-                                            strokeWidth="12"
-                                            fill="none"
-                                            strokeDasharray={`${(departmentData.slaCompliance.percent / 100) * 352} 352`}
-                                            strokeLinecap="round"
-                                        />
-                                    </svg>
-                                    <span className="absolute inset-0 flex items-center justify-center text-2xl font-bold text-gray-900">
-                                        {departmentData.slaCompliance.percent}%
-                                    </span>
-                                </div>
-                                <div>
-                                    <p className="text-gray-600">
-                                        <span className="font-semibold text-gray-900">
-                                            {departmentData.slaCompliance.metCount}
-                                        </span>{" "}
-                                        of {departmentData.slaCompliance.total} tickets met SLA
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-gray-400">No SLA data available</p>
-                        )}
-                    </div>
-
-                    {/* Ticket Types */}
-                    <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            Ticket Types
-                        </h2>
-                        {departmentData?.typeBreakdown &&
-                            Object.keys(departmentData.typeBreakdown).length > 0 ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                {Object.entries(departmentData.typeBreakdown).map(
-                                    ([type, count]) => (
-                                        <div
-                                            key={type}
-                                            className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3"
-                                        >
-                                            <span className="capitalize text-gray-700 font-medium">
-                                                {type}
-                                            </span>
-                                            <span className="text-gray-900 font-bold">{count}</span>
-                                        </div>
-                                    )
-                                )}
-                            </div>
-                        ) : (
-                            <p className="text-gray-400">No type data available</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Employee Performance */}
+                {/* Employee Table */}
                 <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+                    <div className="px-6 py-4 border-b border-gray-200 bg-gray-50/50">
                         <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
                             <Users className="w-5 h-5 text-blue-500" />
-                            Employee Performance
+                            Team Performance
                         </h2>
                     </div>
                     {employeesData?.employees && employeesData.employees.length > 0 ? (
@@ -442,21 +386,11 @@ export default function AdminDashboard() {
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                            Employee
-                                        </th>
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                            Workload
-                                        </th>
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                            Resolved
-                                        </th>
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                            Avg Time
-                                        </th>
-                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                            Rating
-                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Employee</th>
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Workload</th>
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Resolved</th>
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Avg Time</th>
+                                        <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Rating</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-100">
@@ -467,11 +401,8 @@ export default function AdminDashboard() {
                             </table>
                         </div>
                     ) : (
-                        <div className="p-12 text-center">
-                            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                            <p className="text-gray-400 font-medium">
-                                No employee data available
-                            </p>
+                        <div className="p-12 text-center text-gray-500">
+                            No team performance data available
                         </div>
                     )}
                 </div>

@@ -10,7 +10,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role: "user" | "admin" | "super-admin";
+  role: "user" | "employee" | "admin" | "super-admin";
   department: string;
   primaryPhone?: string;
   profilePicture?: string;
@@ -55,12 +55,13 @@ export default function Users() {
       if (data.success) {
         setUsers((prev) =>
           prev.map((user) =>
-            user._id === userId ? { ...user, role: newRole as "user" | "admin" | "super-admin" } : user
+            user._id === userId ? { ...user, role: newRole as "user" | "employee" | "admin" | "super-admin" } : user
           )
         );
-        setSelectedUser((prev) => (prev ? { ...prev, role: newRole as "user" | "admin" | "super-admin" } : null));
+        setSelectedUser((prev) => (prev ? { ...prev, role: newRole as "user" | "employee" | "admin" | "super-admin" } : null));
       } else {
         console.error("Error updating user role:", data.message);
+        alert(`Failed to update role: ${data.message}`);
         // Revert tempRole on failure
         setTempRole(selectedUser?.role || "");
       }
@@ -236,6 +237,7 @@ export default function Users() {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value="user">User</option>
+                    <option value="employee">Employee</option>
                     <option value="admin">Admin</option>
                     <option value="super-admin">Super Admin</option>
                   </select>
