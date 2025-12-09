@@ -114,7 +114,7 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
   };
 
   return (
-    <div className="fixed bottom-4 sm:bottom-24 right-2 sm:right-6 md:right-8 w-[calc(100vw-16px)] sm:w-96 md:w-[420px] h-[calc(100vh-120px)] sm:h-[650px] md:h-[700px] max-h-screen bg-gradient-to-b from-white to-slate-50 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-5 fade-in duration-300 transition-all">
+    <div className="fixed bottom-4 sm:bottom-24 right-2 sm:right-6 md:right-8 w-[calc(100vw-16px)] sm:w-96 md:w-[500px] h-[calc(100vh-120px)] sm:h-[40vw] md:h-[80vh] max-h-screen bg-gradient-to-b from-white to-slate-50 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden z-50 animate-in slide-in-from-bottom-5 fade-in duration-300 transition-all">
       {/* Header */}
       <div className="relative bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-5 py-3 sm:py-4 flex items-center justify-between text-white overflow-hidden flex-shrink-0">
         <div className="absolute inset-0 opacity-10">
