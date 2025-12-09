@@ -22,12 +22,18 @@ MAX_CONTEXT_CHUNKS = 5
 app = FastAPI(title="Ticket Triage Suggestion Service")
 
 # Data Models
+class ChatMessage(BaseModel):
+    role: str
+    message: str
+
 class QueryRequest(BaseModel):
     query: str
+    chat_history: Optional[List[ChatMessage]] = []
 
 class SuggestionResponse(BaseModel):
     answer: str
     context_used: List[str]
+    found_solution: bool
 
 # Global Objects (Lazy initialization)
 qdrant_client = None
@@ -77,7 +83,7 @@ async def suggest(request: QueryRequest):
     RAG Endpoint:
     1. Vectorize query
     2. Search Qdrant
-    3. Construct Prompt
+    3. Construct Prompt (with history)
     4. Call Local LLM
     """
     try:
@@ -100,32 +106,52 @@ async def suggest(request: QueryRequest):
         # 3. Construct Context
         context_texts = [hit.payload['text'] for hit in search_results]
         context_str = "\n\n".join(context_texts)
+        print(f"DEBUG: Retrieved Context:\n{context_str}", flush=True)
         
-        prompt = f"""You are an intelligent Ticket Triage Assistant.
-Use the provided context from the user manuals and FAQs to provide a DETAILED RESOLUTION SUGGESTION for the user's issue.
+        # Build Chat History String
+        history_str = ""
+        if request.chat_history:
+            history_str = "\nCHAT HISTORY:\n"
+            for msg in request.chat_history[-5:]: # Last 5 messages for context
+                role_label = "User" if msg.role == "user" else "Assistant"
+                history_str += f"{role_label}: {msg.message}\n"
+        
+        prompt = f"""You are a helpful support assistant.
+Use the provided context to answer the user's question in GREAT DETAIL.
 
-INSTRUCTIONS:
-1. If the context contains multiple methods to solve the issue, list ALL of them (e.g., Method 1, Method 2).
-2. For each method, provide clear, step-by-step instructions.
-3. Include any prerequisites or "Link for Reset" details mentioned.
-4. If the context does not contain the answer, state that you don't know based on the documents.
+Instructions:
+1.  Look for ALL possible methods mentioned in the context to solve the problem.
+2.  For each method, write down the full step-by-step instructions provided.
+3.  Do NOT summarize. Copy the detailed steps found in the context.
+4.  If the answer cannot be found in the context at all, specifically say "NO_SOLUTION_FOUND".
 
-CONTEXT:
+Context:
 {context_str}
 
-USER ISSUE:
+Chat History:
+{history_str}
+
+Question:
 {request.query}
 
-DETAILED RESOLUTION SUGGESTION:
-"""
+Detailed Answer:"""
         
         # 4. Call Local LLM
         print(f"Querying LLM with context length: {len(context_str)}")
         llm_response = query_local_llm(prompt)
+        
+        # Check for NO_SOLUTION_FOUND
+        found_solution = True
+        if "NO_SOLUTION_FOUND" in llm_response or "no solution found" in llm_response.lower():
+            found_solution = False
+            # Optional: Provide a polite fallback message if the LLM just returned the token
+            if len(llm_response.strip()) < 25:
+                llm_response = "I couldn't find a solution in the documentation. I will escalate this to a human agent for you."
 
         return SuggestionResponse(
             answer=llm_response,
-            context_used=context_texts
+            context_used=context_texts,
+            found_solution=found_solution
         )
 
     except Exception as e:

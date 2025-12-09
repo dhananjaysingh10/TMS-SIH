@@ -1,11 +1,11 @@
 "use client";
 
+import { BarChart3, ChevronDown, ChevronRight, FolderKanban, Home, MessageSquare, Ticket, User, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Home, Ticket, User, X, Users, BarChart3, FolderKanban, ChevronDown, ChevronRight } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { NavLink, useLocation } from "react-router-dom";
+import { productApi, usersApi } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
-import { usersApi, productApi } from "../lib/api";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -80,6 +80,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
+    { path: "/helpdesk", icon: MessageSquare, label: "Helpdesk" },
     { path: "/created-by-me", icon: User, label: "Tickets Created by Me" },
     ...(currentUser?.role === "admin" || currentUser?.role === "super-admin"
       ? [
