@@ -245,10 +245,40 @@ export const getAllTickets = async (req, res) => {
       query.inreview = { $ne: true };
     }
 
-    // Filter by productId - get all departments under this product
+    // Filter by productId - visibility rules:
+    // - Super-admin: see all tickets
+    // - Admin of THIS product: see all tickets in this product
+    // - Admin of OTHER products / Employee / User: only see tickets from their departments
     if (productId) {
-      const departments = await Department.find({ product: productId }).select('_id');
-      const departmentIds = departments.map(d => d._id);
+      const userId = req.user?.userId;
+      const userRole = req.user?.role;
+
+      // Get all departments under this product
+      const allDepartmentsInProduct = await Department.find({ product: productId }).select('_id');
+      let departmentIds = allDepartmentsInProduct.map(d => d._id);
+
+      // Check if user is admin of THIS specific product (not just has admin role)
+      let isAdminOfThisProduct = false;
+      if (userRole === 'super-admin') {
+        isAdminOfThisProduct = true; // super-admin can see everything
+      } else if (userRole === 'admin' && userId) {
+        const Product = (await import('../models/product.model.js')).default;
+        const product = await Product.findById(productId).select('admin');
+        isAdminOfThisProduct = product?.admin?.toString() === userId;
+        console.log(`getAllTickets: User ${userId} is admin of product ${productId}? ${isAdminOfThisProduct}`);
+      }
+
+      // If NOT admin of this product, filter to only user's departments
+      if (!isAdminOfThisProduct && userId) {
+        const user = await User.findById(userId).select('departments');
+        if (user && user.departments) {
+          // Intersect user's departments with product's departments
+          const userDeptIds = user.departments.map(d => d.toString());
+          departmentIds = departmentIds.filter(d => userDeptIds.includes(d.toString()));
+          console.log(`getAllTickets: User ${userId} filtered to ${departmentIds.length} departments in product ${productId}`);
+        }
+      }
+
       query.departmentRef = { $in: departmentIds };
     }
 
