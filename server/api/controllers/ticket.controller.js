@@ -5,7 +5,7 @@ import { createClient } from "redis";
 import Department from "../models/department.model.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
-import { sendTicketStatusUpdateEmail } from "../services/email.service.js";
+import { sendAIResponseEmail, sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const TICKET_QUEUE_NAME = "tickets_queue";
 const FEEDBACK_QUEUE_NAME = "feedback_queue";
@@ -232,7 +232,8 @@ const TEMP_TICKET_ESCALATE_QUEUE = "temp_ticket_escalate_queue";
 
 export const createTicketFrontend = async (req, res) => {
   try {
-    const { title, description, useremail } = req.body;
+    const { title, description, useremail, source } = req.body;
+    const isFromEmail = source === 'email';
     if (!title || !description || !useremail) {
       return res.status(400).json({
         error:
@@ -325,6 +326,21 @@ export const createTicketFrontend = async (req, res) => {
                     message: aiResponseText
                 });
                 await newTempTicket.save();
+
+                // Send email response if ticket came from email
+                if (isFromEmail && aiResponseText) {
+                    try {
+                        await sendAIResponseEmail(
+                            useremail,
+                            tempTicketId,
+                            description,
+                            aiResponseText
+                        );
+                        console.log(`📧 Sent AI response email to ${useremail}`);
+                    } catch (emailErr) {
+                        console.error("Failed to send AI response email:", emailErr);
+                    }
+                }
             } else {
                 // 5. Check Logic: If No Solution -> Auto Escalate
                 console.log(`[CreateTicket] Chatbot found no solution. Auto-escalating Temp Ticket ${tempTicketId}`);

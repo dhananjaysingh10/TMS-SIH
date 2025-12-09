@@ -44,7 +44,8 @@ def run():
                     api_payload = {
                         "title": ticket.title,
                         "description": ticket.description,
-                        "useremail": ticket.createdBy  # Assuming createdBy holds the email
+                        "useremail": ticket.createdBy,  # Assuming createdBy holds the email
+                        "source": "email"  # Mark as email source so Express sends AI response via email
                     }
                     
                     response = requests.post(
