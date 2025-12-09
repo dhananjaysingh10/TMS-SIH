@@ -162,7 +162,9 @@ export const addChatMessage = async (req, res) => {
     if (escalationKeywords.some(kw => lowerMessage.includes(kw))) {
          console.log(`[Escalation] User is NOT satisfied. Escalating ticket ${id}`);
          
-         const escalationResult = await escalateInternal(ticket, ticket.issueTitle, "User expressed dissatisfaction: " + message);
+         // Get the ORIGINAL first user message as the description (not the "not satisfied" message)
+         const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
+         const escalationResult = await escalateInternal(ticket, ticket.issueTitle || "Issue from Helpdesk", originalDescription);
          
          if (escalationResult.success) {
              return res.status(200).json({
@@ -240,8 +242,9 @@ export const addChatMessage = async (req, res) => {
                         
                         await ticket.save();
 
-                        // Trigger Escalation
-                        await escalateInternal(ticket, "Auto-Escalated: No Solution Found", message);
+                        // Trigger Escalation - use ORIGINAL first user message, not current message
+                        const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
+                        await escalateInternal(ticket, ticket.issueTitle || "Auto-Escalated: No Solution Found", originalDescription);
                         
                         return res.status(200).json({
                             success: true,
@@ -493,30 +496,17 @@ export const getTemporaryTicketsByUser = async (req, res) => {
 };
 
 /**
- * Helper function to generate a description from chat history
+ * Helper function to get the original issue description from chat history
+ * Returns ONLY the first user message - no chat history or additional context
  */
 export function generateDescriptionFromChat(chatHistory) {
   if (!chatHistory || chatHistory.length === 0) {
-    return "No conversation history available.";
+    return "No issue description provided.";
   }
 
-  // Get the first user message as the main issue
+  // Get the first user message as the original issue description
   const firstUserMessage = chatHistory.find((msg) => msg.role === "user");
-  const mainIssue = firstUserMessage
-    ? firstUserMessage.message
-    : "User issue from chatbot";
-
-  // Build a summary of the conversation
-  const userMessages = chatHistory
-    .filter((msg) => msg.role === "user")
-    .map((msg) => msg.message)
-    .slice(0, 5); // Limit to first 5 user messages
-
-  const summary = `User reported: "${mainIssue}"`;
   
-  if (userMessages.length > 1) {
-    return `${summary}\n\nAdditional context from conversation:\n- ${userMessages.slice(1).join("\n- ")}`;
-  }
-
-  return summary;
+  // Return only the first user message - this is the original issue
+  return firstUserMessage ? firstUserMessage.message : "User issue from chatbot";
 }
