@@ -50,6 +50,8 @@ const temporaryTicketSchema = new mongoose.Schema(
       trim: true,
     },
 
+
+
     // Chat history - array of messages between user and AI
     chatHistory: {
       type: [chatMessageSchema],

@@ -26,6 +26,7 @@ const PendingDepartmentChanges: React.FC = () => {
     // Track selected department for each ticket
     const [selectedDepartments, setSelectedDepartments] = useState<Record<string, string>>({});
     const [processing, setProcessing] = useState<Record<string, boolean>>({});
+    const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
 
     useEffect(() => {
         const fetchData = async () => {
@@ -158,9 +159,22 @@ const PendingDepartmentChanges: React.FC = () => {
                                     </span>
                                 </div>
 
-                                <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                                    {ticket.description}
-                                </p>
+                                <div className="mb-4">
+                                    <p className={`text-gray-600 dark:text-gray-300 ${!expandedDescriptions[ticket.ticketId] ? 'line-clamp-2' : ''}`}>
+                                        {ticket.description}
+                                    </p>
+                                    {ticket.description && ticket.description.length > 150 && (
+                                        <button
+                                            onClick={() => setExpandedDescriptions(prev => ({
+                                                ...prev,
+                                                [ticket.ticketId]: !prev[ticket.ticketId]
+                                            }))}
+                                            className="text-blue-600 hover:text-blue-800 text-sm font-medium mt-1"
+                                        >
+                                            {expandedDescriptions[ticket.ticketId] ? 'See less' : 'See more'}
+                                        </button>
+                                    )}
+                                </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                                     <div>
