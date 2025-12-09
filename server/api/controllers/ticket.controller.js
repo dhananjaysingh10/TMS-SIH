@@ -224,189 +224,38 @@ export const createTicket = async (req, res) => {
 };
 
 
-import fetch from "node-fetch";
-import TemporaryTicket from "../models/temporaryTicket.model.js";
 
-const CHATBOT_SERVICE_URL = "http://localhost:8001/suggest";
-const TEMP_TICKET_ESCALATE_QUEUE = "temp_ticket_escalate_queue";
 
 export const createTicketFrontend = async (req, res) => {
   try {
-    const { title, description, useremail, source } = req.body;
-    const isFromEmail = source === 'email';
+    const { title, description, useremail } = req.body;
     if (!title || !description || !useremail) {
       return res.status(400).json({
         error:
           "Bad Request. Missing required fields: sender, subject, and body are all required.",
       });
     }
-
-    // Check for Resolution Keywords (Prevent Creation)
-    // BUT IGNORE if Negative keywords are present (e.g. "not satisfied")
-    const resolutionKeywords = ["thank", "thanks", "i am satisfied", "satisfied", "issue is solved", "solved", "goodbye", "bye", "ok bye", "close ticket"];
-    const negativeKeywords = ["not satisfied", "unsatisfied", "didn't", "fail", "not work", "problem"];
-    
-    const lowerDesc = description.toLowerCase();
-    
-    const isNegative = negativeKeywords.some(kw => lowerDesc.includes(kw));
-    
-    // Only resolve if POSITIVE keywords exist AND NO NEGATIVE keywords exist
-    if (!isNegative && resolutionKeywords.some(kw => lowerDesc.includes(kw))) {
-         return res.status(200).json({
-            success: true,
-            message: "Ticket resolved (not created)",
-            data: {
-                aiReply: "Thank you! I'm glad I could help."
-            }
-        });
-    }
-
-    // 1. Find User (Required for Temporary Ticket)
-    const user = await User.findOne({ email: useremail });
-    if (!user) {
-        // If user doesn't exist, we can't create a temp ticket easily linked to them.
-        // For now, fallback to error or creating a user? 
-        // Assuming user exists for now as they are logged in.
-        return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    // 2. Create Temporary Ticket
-    const tempTicketId = `TEMP-${crypto.randomUUID()}`;
-    const newTempTicket = new TemporaryTicket({
-      tempTicketId,
-      userId: user._id,
-      userEmail: useremail,
-      issueTitle: title,
-      chatHistory: [], // User message added below
-    });
-
-    // 3. Add User's Initial Message
-    newTempTicket.chatHistory.push({
-        role: "user",
-        message: description,
-        timestamp: new Date()
-    });
-    
-    // Save initially to get an ID
-    await newTempTicket.save();
-
-    // 4. Call Chatbot Service
-    let aiResponseText = "";
-    let autoEscalated = false;
-    let foundSolution = true;
-
-    try {
-        const historyForAi = [{ role: "user", message: description }];
-        
-        const aiRes = await fetch(CHATBOT_SERVICE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: description,
-                chat_history: historyForAi // Only the current message as history
-            })
-        });
-
-        if (aiRes.ok) {
-            const contentType = aiRes.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-                const aiData = await aiRes.json();
-                aiResponseText = aiData.answer;
-                foundSolution = aiData.found_solution;
-            } else {
-                console.warn("[Chatbot] Warning: Received non-JSON response. Using raw text.");
-                aiResponseText = await aiRes.text();
-                // Fallback check for failure token in raw text
-                foundSolution = !aiResponseText.includes("NO_SOLUTION_FOUND");
-            }
-
-            if (foundSolution) {
-                newTempTicket.chatHistory.push({
-                    role: "ai",
-                    message: aiResponseText
-                });
-                await newTempTicket.save();
-
-                // Send email response if ticket came from email
-                if (isFromEmail && aiResponseText) {
-                    try {
-                        await sendAIResponseEmail(
-                            useremail,
-                            tempTicketId,
-                            description,
-                            aiResponseText
-                        );
-                        console.log(`📧 Sent AI response email to ${useremail}`);
-                    } catch (emailErr) {
-                        console.error("Failed to send AI response email:", emailErr);
-                    }
-                }
-            } else {
-                // 5. Check Logic: If No Solution -> Auto Escalate
-                console.log(`[CreateTicket] Chatbot found no solution. Auto-escalating Temp Ticket ${tempTicketId}`);
-                
-                // Add System Message about Escalation
-                newTempTicket.chatHistory.push({
-                     role: "ai",
-                     message: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
-                });
-                await newTempTicket.save();
-
-                // Trigger Escalation (Inline Logic to avoid circular deps)
-                try {
-                    const redisClient = await getRedisClient();
-                    const escalationPayload = {
-                        ticketId: newTempTicket.tempTicketId, 
-                        issueTitle: title,
-                        issueDescription: description
-                    };
-                    await redisClient.lPush(
-                        TEMP_TICKET_ESCALATE_QUEUE,
-                        JSON.stringify(escalationPayload)
-                    );
-                    await redisClient.disconnect();
-                    
-                    newTempTicket.escalatedToTicket = true;
-                    newTempTicket.issueContext = description;
-                    newTempTicket.issueTitle = title;
-                    await newTempTicket.save();
-
-                } catch (escError) {
-                    console.error("Inline Escalation Failed:", escError);
-                }
-                autoEscalated = true;
-            }
-
-        } else {
-            console.error("Chatbot Service Error:", aiRes.statusText);
-            // Fallback: Just save ticket, maybe escalate? 
-            // For safety, let's auto-escalate if bot fails? OR just return temp ticket.
-            // Let's return temp ticket, user can try chatting or escalate manually.
-        }
-
-    } catch (botErr) {
-        console.error("Chatbot Connection Error:", botErr);
-    }
-
-    // 6. Return Result
+    const ticket = {
+      ticketId: crypto.randomUUID(),
+      title,
+      description,
+      priority: "medium",
+      department: "IT",
+      type: "task",
+      status: "open",
+      createdBy: useremail,
+    };
+    const redisClient = createClient();
+    redisClient.connect();
+    await redisClient.lPush(TICKET_QUEUE_NAME, JSON.stringify(ticket));
+    await redisClient.disconnect();
     return res.status(201).json({
       success: true,
-      message: autoEscalated ? "Ticket created and auto-escalated to agent." : "Ticket started as temporary chat.",
-      data: {
-          tempTicketId: tempTicketId,
-          aiResponse: aiResponseText || "Chatbot is offline, but ticket created.",
-          autoEscalated: autoEscalated,
-          foundSolution: foundSolution
-      }
-      // Note: We are NOT returning 'ticket_id' (Permanent ID) unless we want to look it up from escalation.
-      // The frontend expects 'ticket_id' usually. If autoEscalated, the temp ticket has 'permanentTicketId' (async update).
-      // But escalateInternal returns `tempTicketId`.
-      // The frontend should now handle `tempTicketId`.
+      message: "Ticket submitted successfully.",
+      ticket_id: ticket.ticketId,
     });
-
   } catch (err) {
-    console.error("Error in createTicketFrontend:", err);
-    return res.status(500).json({ success: false, message: "Failed to create ticket", error: err.message });
+    return res.status(500).json({ success: false, message: "Failed to queue ticket", error: err.message });
   }
 };
 
