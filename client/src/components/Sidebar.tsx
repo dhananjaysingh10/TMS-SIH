@@ -84,6 +84,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
+    { path: "/helpdesk", icon: MessageSquare, label: "Helpdesk" },
     { path: "/created-by-me", icon: User, label: "Tickets Created by Me" },
     ...(currentUser?.role === "admin" || currentUser?.role === "super-admin"
       ? [
