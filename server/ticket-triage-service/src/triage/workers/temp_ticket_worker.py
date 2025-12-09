@@ -48,7 +48,7 @@ def process_escalation(escalation_data: dict):
     3. Update the temporary ticket with the permanent ticket ID
     """
     try:
-        temp_ticket_id = escalation_data.get("tempTicketId")
+        temp_ticket_id = escalation_data.get("tempTicketId") or escalation_data.get("ticketId")
         user_email = escalation_data.get("userEmail")
         issue_title = escalation_data.get("issueTitle", "Issue from Chatbot")
         issue_description = escalation_data.get("issueDescription", "")
@@ -64,6 +64,7 @@ def process_escalation(escalation_data: dict):
         if chat_history:
             chat_summary = "\n\n--- Chat History ---\n"
             for msg in chat_history[:10]:  # Limit to last 10 messages
+                # Handle possible dict or object structure
                 role = "User" if msg.get("role") == "user" else "AI"
                 chat_summary += f"{role}: {msg.get('message', '')}\n"
             full_description += chat_summary
@@ -75,15 +76,35 @@ def process_escalation(escalation_data: dict):
             "description": full_description,
             "priority": "medium",
             "department": "IT",  # Default, will be classified by the classifier
+            "product": "Unknown Product", # Default, will be updated by classifier
             "type": "support",
             "status": "open",
             "createdBy": user_email,
             "source": "chatbot_escalation",
             "tempTicketId": temp_ticket_id,  # Reference to original temp ticket
+            "createdAt": datetime.utcnow(),
+            "updatedAt": datetime.utcnow(),
+            "history": [],
+            "comments": [],
+            "activities": []
         }
 
+        # Insert into MongoDB tickets collection
+        db.tickets.insert_one(permanent_ticket)
+        LOG.info(f"✅ Created permanent ticket {permanent_ticket_id} in MongoDB")
+
         # Push to tickets_queue for classifier processing
-        r.rpush(TICKETS_QUEUE, json.dumps(permanent_ticket))
+        # Note: We need to serialize datetime objects for JSON
+        queue_payload = permanent_ticket.copy()
+        queue_payload.pop("_id") # Remove ObjectId which is not serializable
+        queue_payload["createdAt"] = queue_payload["createdAt"].isoformat()
+        queue_payload["updatedAt"] = queue_payload["updatedAt"].isoformat()
+        
+        # Ensure backward compatibility for workers using snake_case
+        if "ticket_id" not in queue_payload:
+            queue_payload["ticket_id"] = permanent_ticket_id
+        
+        r.rpush(TICKETS_QUEUE, json.dumps(queue_payload))
         LOG.info(f"✅ Pushed permanent ticket {permanent_ticket_id} to classifier queue")
 
         # Update the temporary ticket with the permanent ticket ID

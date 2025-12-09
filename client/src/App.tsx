@@ -1,21 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import SignUp from './pages/SignUp';
-import SignIn from './pages/SignIn';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Home from "./pages/Home";
-import TicketsDashboard from "./pages/TicketsDashboard";
 import MyTickets from "./pages/MyTicket";
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 import TicketDetail from "./pages/TicketDetail";
+import TicketsDashboard from "./pages/TicketsDashboard";
 import Users from "./pages/User";
 // import CreatedByMe from './pages/createdbyme';
-import UserTicket from "./pages/userticket";
-import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
 import NotificationsPage from "./pages/Notifications";
+import TicketsCreatedByMe from "./pages/TicketsCreatedByMe";
+import UserTicket from "./pages/userticket";
 
-import ProfilePage from "./pages/Profile";
-import AdminDashboard from "./pages/AdminDashboard";
-import ProductManagement from "./pages/ProductManagement";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import AdminDashboard from "./pages/AdminDashboard";
+import Helpdesk from "./pages/Helpdesk";
+import ProductManagement from "./pages/ProductManagement";
+import ProfilePage from "./pages/Profile";
 
 const App: React.FC = () => {
   return (
@@ -25,6 +26,8 @@ const App: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/" element={<Home />} />
+        <Route path="/helpdesk" element={<Helpdesk />} />
+        <Route path="/tickets" element={<TicketsDashboard />} />
         <Route path="/tickets/:productId" element={<TicketsDashboard />} />
         <Route path="/my-tickets/:productId" element={<MyTickets />} />
         {/* <Route path="/ticketsbyme" element={<CreatedByMe />} /> */}
