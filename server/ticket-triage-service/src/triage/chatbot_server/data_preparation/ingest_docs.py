@@ -16,10 +16,7 @@ CHUNK_SIZE = 500
 OVERLAP = 50
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
-# FastEmbed's default model is BAAI/bge-small-en-v1.5, passing model_name="BAAI/bge-small-en-v1.5" or similar
-# The user asked for "all-MiniLM-L6-v2". FastEmbed supports it as "sentence-transformers/all-MiniLM-L6-v2"
-# but let's check FastEmbed supported models if it fails. "sentence-transformers/all-MiniLM-L6-v2" is usually supported.
-EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 
 def get_text_from_pdf(pdf_path: str) -> str:
     """Extracts text from a PDF file."""

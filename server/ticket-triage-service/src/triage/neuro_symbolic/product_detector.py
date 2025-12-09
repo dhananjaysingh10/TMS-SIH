@@ -14,7 +14,8 @@ PRODUCT_KEYWORDS = {
     "Product_2": [  # SAP ERP System
         "sap", "t-code", "tcode", "erp", "maintenance order", "maintenance",
         "purchase order", "leave", "salary", "grc", "su01", "su53", 
-        "ess", "abap", "teco", "po", "invoice", "grn", "ses"
+        "ess", "abap", "teco", "po", "invoice", "grn", "ses",
+        "login", "password", "reset", "locked", "unlock", "access"
     ]
 }
 

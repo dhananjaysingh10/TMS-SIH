@@ -1,6 +1,6 @@
 name=Vendor Onboarding & Reg
 
-primary=[register, registration, sign up, signup, profile, user id, login, password, vendor code, mapping, new bidder, enroll, enrollment, onboard]
+primary=[register, registration, sign up, signup, profile, user id, login, password, vendor code, mapping, new bidder, enroll, enrollment, onboard, forgotten, credential, reset]
 
 technical=[portal access, userid begins with v, login credentials, forgot password, password reset, first login, system generated password, change password, mfa, otp]
 

@@ -41,7 +41,7 @@ class TriageEngine:
         self.load_data()
         
         # Initialize Embeddings (Lazy or Eager)
-        self.embedding_model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        self.embedding_model = TextEmbedding(model_name="BAAI/bge-large-en-v1.5")
         
         # Pre-compute query embeddings for Layer B
         self.team_query_embeddings = {} # {product: {team: [vectors]}}
