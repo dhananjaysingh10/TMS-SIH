@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Minimize2, Send, Sparkles, Zap, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { Ticket } from "@/lib/api";
 import { useSelector } from "react-redux";
 import { selectCurrentUser } from "../redux/user/userSlice";
@@ -14,13 +16,13 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
   const defaultMessage = {
     id: "default-1",
     role: "ai",
-    text: `Hello! I'm your AI assistant. I see you're reviewing ticket "${ticket.title}". How can I help you resolve this issue?`,
+    text: `Hello! I'm your AI assistant. I see you're reviewing ticket **"${ticket.title}"**. \n\nHow can I help you resolve this issue?`,
   };
 
   const [messages, setMessages] = useState<any[]>([defaultMessage]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [isLoadingHistory, setIsLoadingHistory] = useState(true); // New loading state
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const user = useSelector(selectCurrentUser);
@@ -42,15 +44,12 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
         
         if (response.ok) {
           const history = await response.json();
-          console.log(history);
-          // The backend should return an array of { role: 'user'|'ai', text: '...' }
           if (Array.isArray(history) && history.length > 0) {
             const formattedHistory = history.map((msg, index) => ({
               id: `hist-${index}`,
               role: msg.role,
               text: msg.text,
             }));
-            // Merge default welcome message with fetched history
             setMessages([defaultMessage, ...formattedHistory]);
           }
         }
@@ -64,7 +63,6 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
     fetchHistory();
   }, [ticket._id]);
 
-  // Scroll on new messages
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoadingHistory]);
@@ -83,24 +81,18 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
         ticketId: ticket._id,
         userMessage: userMsg.text,
         user_email: user?.email,
-        // Context is important for the AI to know what it's talking about
-        ticketContext: `"Title": ${ticket.title}\n"Description": ${ticket.description}`,
+        ticketContext: `Title: ${ticket.title}\nDescription: ${ticket.description}`,
       };
 
       const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
       const data = await response.json();
-
       const aiMsg = {
         id: Date.now() + 1,
         role: "ai",
@@ -131,20 +123,13 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
         </div>
         <div className="flex items-center gap-2 sm:gap-3 relative z-10 min-w-0">
           <div className="p-2 sm:p-2.5 bg-white/20 backdrop-blur-sm rounded-lg sm:rounded-xl border border-white/30 shadow-lg flex-shrink-0">
-            <Sparkles
-              size={18}
-              className="sm:w-5 sm:h-5 text-yellow-200 animate-pulse"
-            />
+            <Sparkles size={18} className="sm:w-5 sm:h-5 text-yellow-200 animate-pulse" />
           </div>
           <div className="min-w-0">
-            <h3 className="font-bold text-sm sm:text-base leading-tight truncate">
-              AI Assistant
-            </h3>
+            <h3 className="font-bold text-sm sm:text-base leading-tight truncate">AI Assistant</h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse flex-shrink-0" />
-              <p className="text-xs text-blue-100 font-medium truncate">
-                Always here to help
-              </p>
+              <p className="text-xs text-blue-100 font-medium truncate">Always here to help</p>
             </div>
           </div>
         </div>
@@ -159,49 +144,75 @@ export const TicketChatbot = ({ ticket, onClose }: TicketChatbotProps) => {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-3 sm:px-5 py-4 sm:py-5 space-y-4 bg-gradient-to-b from-white via-slate-50 to-blue-50/30 scrollbar-hide">
-        {/* Loading State */}
         {isLoadingHistory && (
           <div className="flex justify-center items-center h-full">
             <Loader2 className="animate-spin text-blue-600" size={32} />
           </div>
         )}
 
-        {!isLoadingHistory &&
-          messages.map((msg, idx) => (
+        {!isLoadingHistory && messages.map((msg, idx) => {
+          const isUser = msg.role === "user";
+          return (
             <div
               key={msg.id}
-              className={`flex ${
-                msg.role === "user" ? "justify-end" : "justify-start"
-              } animate-in fade-in slide-in-from-bottom-3 duration-300`}
+              className={`flex ${isUser ? "justify-end" : "justify-start"} animate-in fade-in slide-in-from-bottom-3 duration-300`}
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               <div
                 className={`max-w-[85%] sm:max-w-[80%] rounded-lg sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm leading-relaxed shadow-md transition-all duration-200 ${
-                  msg.role === "user"
+                  isUser
                     ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white rounded-br-sm sm:rounded-br-md font-medium break-words"
                     : "bg-white text-slate-700 border border-slate-200 rounded-bl-sm sm:rounded-bl-md shadow-sm hover:shadow-md break-words"
                 }`}
               >
-                {msg.text}
+                {/* --- MARKDOWN RENDERING --- */}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    // Style headers
+                    h1: ({node, ...props}) => <h1 className="text-base font-bold mt-2 mb-1" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-sm font-bold mt-2 mb-1" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-xs font-bold mt-1.5 mb-1 uppercase opacity-80" {...props} />,
+                    // Style lists
+                    ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-2 space-y-0.5" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-2 space-y-0.5" {...props} />,
+                    li: ({node, ...props}) => <li className="pl-1" {...props} />,
+                    // Style paragraphs
+                    p: ({node, ...props}) => <p className="mb-1 last:mb-0" {...props} />,
+                    // Style links
+                    a: ({node, ...props}) => <a className="underline decoration-dotted font-medium hover:decoration-solid" target="_blank" rel="noopener noreferrer" {...props} />,
+                    // Style code blocks vs inline code
+                    code: ({node, className, children, ...props}: any) => {
+                      const match = /language-(\w+)/.exec(className || '');
+                      const isInline = !match && !String(children).includes('\n');
+                      return (
+                        <code 
+                          className={`${isInline 
+                            ? `px-1 py-0.5 rounded font-mono text-xs ${isUser ? 'bg-blue-700 text-blue-100' : 'bg-slate-100 text-slate-700'}` 
+                            : `block p-2 rounded-md font-mono text-xs overflow-x-auto my-2 border ${isUser ? 'bg-blue-800 border-blue-600' : 'bg-slate-50 border-slate-200'}`
+                          }`} 
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    },
+                    strong: ({node, ...props}) => <strong className="font-bold opacity-100" {...props} />
+                  }}
+                >
+                  {msg.text}
+                </ReactMarkdown>
               </div>
             </div>
-          ))}
+          );
+        })}
 
         {isTyping && (
           <div className="flex justify-start animate-in fade-in duration-300">
             <div className="bg-white border border-slate-200 px-3 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-2xl rounded-bl-sm sm:rounded-bl-md shadow-md flex items-center gap-2">
-              <div
-                className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0ms" }}
-              />
-              <div
-                className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce"
-                style={{ animationDelay: "150ms" }}
-              />
-              <div
-                className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce"
-                style={{ animationDelay: "300ms" }}
-              />
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <div className="w-2.5 h-2.5 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
           </div>
         )}

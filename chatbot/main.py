@@ -95,6 +95,7 @@ async def chat_endpoint(request: ChatRequest):
         "ticket_context":{request.ticketContext}
         """
         res = await run_session(
+            original_message=request.userMessage,
             user_query=user_query,
             session_id=request.ticketId,
             user_email=request.user_email,

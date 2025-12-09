@@ -526,7 +526,7 @@ export default function TicketDetail() {
                         Product
                       </p>
                       <p className="font-semibold text-slate-900 capitalize">
-                        {ticket.departmentRef?.product?.name || "Unknown Product"}
+                        {ticket.departmentRef?.product?.name=="Default Product"?"Legacy":ticket.departmentRef?.product?.name}
                       </p>
                     </div>
                   </div>
@@ -600,7 +600,7 @@ export default function TicketDetail() {
                         <button
                           onClick={() => setResolvePanel(true)}
                           disabled={buttonLoading.request}
-                          className={`inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.request
+                          className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.request
                             ? "opacity-50 cursor-not-allowed"
                             : ""
                             }`}

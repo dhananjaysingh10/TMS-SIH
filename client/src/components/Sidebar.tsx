@@ -163,7 +163,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
                       <Home size={18} />
                     </span>
-                    <span className="text-pretty">Home</span>
+                    <span className="text-pretty text-blue-600">Home</span>
                   </>
                 )}
               </NavLink>
@@ -190,7 +190,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
                     <Ticket size={18} />
                   </span>
-                  <span className="text-pretty flex-1 text-left">Tickets</span>
+                  <span className="text-pretty flex-1 text-left text-sm text-blue-600">Tickets</span>
                   {ticketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
 
@@ -245,7 +245,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
                     <User size={18} />
                   </span>
-                  <span className="text-pretty flex-1 text-left">Tickets Assigned to Me</span>
+                  <span className="text-pretty flex-1 text-left text-sm text-blue-600">Tickets Assigned to Me</span>
                   {myTicketsExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
                 </button>
 
@@ -313,7 +313,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                       >
                         <Icon size={18} />
                       </span>
-                      <span className="text-pretty">{label}</span>
+                      <span className="text-pretty text-blue-600">{label}</span>
                     </>
                   )}
                 </NavLink>
