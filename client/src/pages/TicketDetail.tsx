@@ -579,14 +579,12 @@ export default function TicketDetail() {
                       <button
                         onClick={handleAcceptTicket}
                         disabled={buttonLoading.accept}
-                        className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-medium shadow-sm hover:shadow ${buttonLoading.accept
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
+                        className={`inline-flex h-[50px] items-center gap-2 px-6 py-2.5 bg-[#388E84] text-white rounded-lg hover:bg-[#2F7A70] hover:shadow-md transition-all duration-200 font-medium shadow-sm ${buttonLoading.accept ? "opacity-60 cursor-not-allowed" : ""
                           }`}
                       >
                         {buttonLoading.accept ? (
                           <>
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={18} className="animate-spin text-teal-100" />
                             Accepting...
                           </>
                         ) : (
@@ -596,23 +594,20 @@ export default function TicketDetail() {
                           </>
                         )}
                       </button>
+
                       {!resolvepanel && !ticket.inreview && (
                         <button
                           onClick={() => setResolvePanel(true)}
                           disabled={buttonLoading.request}
-                          className={`inline-flex h-[50px] items-center gap-2 px-5 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-all font-medium shadow-sm hover:shadow w-full md:w-auto justify-center ${buttonLoading.request
-                            ? "opacity-50 cursor-not-allowed"
-                            : ""
+                          className={`inline-flex h-[50px] items-center gap-2 px-6 py-2.5 bg-[#4B5563] text-white rounded-lg hover:bg-[#374151] hover:shadow-md transition-all duration-200 font-medium shadow-sm w-full md:w-auto justify-center ${buttonLoading.request ? "opacity-60 cursor-not-allowed" : ""
                             }`}
                         >
                           {buttonLoading.request ? (
-                            <Loader2 size={18} className="animate-spin" />
+                            <Loader2 size={18} className="animate-spin text-gray-300" />
                           ) : (
                             <CheckCircle size={18} />
                           )}
-                          {buttonLoading.request
-                            ? "Requesting..."
-                            : "Change Department"}
+                          {buttonLoading.request ? "Requesting..." : "Request Change"}
                         </button>
                       )}
                       {resolvepanel && ( // STATE 2: The Expansion Panel

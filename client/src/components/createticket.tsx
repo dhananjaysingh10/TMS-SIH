@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
 import { X } from "lucide-react";
-import { ticketsApi } from "../lib/api";
-import type { NewTicketData } from "../lib/api";
+import type { FormEvent } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import type { NewTicketData } from "../lib/api";
+import { ticketsApi } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
 
 interface CreateTicketModalProps {
@@ -21,6 +22,7 @@ export default function CreateTicketModal({
   onTicketCreated,
 }: CreateTicketModalProps) {
   const user = useSelector(selectCurrentUser);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -52,9 +54,14 @@ export default function CreateTicketModal({
 
     try {
       console.log(ticketData);
-      const response=await ticketsApi.createFrontend(ticketData);
-      if(response.success) toast.success("Ticket created successfully!");
-      else toast.error(response.message);
+      const response = await ticketsApi.createFrontend(ticketData);
+      
+      if(response.success) {
+          onClose();
+          
+      } else {
+          toast.error(response.message || "Failed to create ticket");
+      }
       onTicketCreated();
     } catch (error) {
       toast.error("Failed to create ticket. Please try again.");

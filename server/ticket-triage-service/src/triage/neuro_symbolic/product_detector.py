@@ -8,7 +8,8 @@ PRODUCT_KEYWORDS = {
     "Product_1": [  # e-Tendering Portal
         "tender", "bid", "vendor", "dsc", "digital signature", "emd",
         "portal", "registration", "bidding", "rfx", "boq", "powergrid",
-        "certificate", "token", "dongle", "signer", "encryption"
+        "certificate", "token", "dongle", "signer", "encryption",
+        "pranit", "login", "password", "account", "access", "reset"
     ],
     "Product_2": [  # SAP ERP System
         "sap", "t-code", "tcode", "erp", "maintenance order", "maintenance",
