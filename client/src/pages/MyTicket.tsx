@@ -150,6 +150,7 @@ export default function MyTickets() {
                 key={ticket._id}
                 _id={ticket._id}
                 ticketId={ticket.ticketId}
+                displayId={ticket.displayId}
                 title={ticket.title}
                 status={ticket.status}
                 priority={ticket.priority}

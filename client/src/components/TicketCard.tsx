@@ -1,9 +1,10 @@
 import { Clock, User } from "lucide-react";
 import { Link } from "react-router-dom";
 interface TicketCardProps {
-  _id: string; 
+  _id: string;
   ticketId: string;
-  title: string; 
+  displayId?: string;
+  title: string;
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
   department: string;  // Dynamic team name
@@ -28,7 +29,7 @@ const priorityColors = {
 
 const statusColors = {
   open: "bg-green-100 text-green-700",
-  "in-progress": "bg-blue-100 text-blue-700", 
+  "in-progress": "bg-blue-100 text-blue-700",
   resolved: "bg-purple-100 text-purple-700",
   closed: "bg-gray-100 text-gray-600",
 };
@@ -81,6 +82,7 @@ function formatDate(dateString: string): string {
 export default function TicketCard({
   _id,
   ticketId,
+  displayId,
   title,
   status,
   priority,
@@ -98,16 +100,14 @@ export default function TicketCard({
   return (
     <Link
       to={`/ticket/${ticketId}`}
-      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${
-        isUnaccepted ? "border-l-4 border-l-orange-400" : ""
-      } ${isResolved ? "border-l-4 border-l-blue-400" : ""}${
-        progress ? "border-l-4 border-l-green-400" : ""
-      }`}
+      className={`block bg-white rounded-lg shadow-sm border border-gray-200 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 ${isUnaccepted ? "border-l-4 border-l-orange-400" : ""
+        } ${isResolved ? "border-l-4 border-l-blue-400" : ""}${progress ? "border-l-4 border-l-green-400" : ""
+        }`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-bold text-blue-600">#{ticketId}</span>
+            <span className="text-sm font-bold text-blue-600">#{displayId || ticketId}</span>
             {isUnaccepted && (
               <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
                 Unclaimed
@@ -133,7 +133,7 @@ export default function TicketCard({
         </span>
         {productName && (
           <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-violet-100 text-violet-700">
-            {productName=="Default Product" ? "Legacy" : productName}
+            {productName == "Default Product" ? "Legacy" : productName}
           </span>
         )}
         <span
@@ -168,4 +168,3 @@ export default function TicketCard({
     </Link>
   );
 }
-

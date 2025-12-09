@@ -393,7 +393,7 @@ export default function TicketDetail() {
   }
 
   return (
-    <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
+    <Layout pageTitle={ticket.title}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
@@ -435,7 +435,7 @@ export default function TicketDetail() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className="inline-flex items-center text-base font-bold text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">
-                        #{ticket.ticketId}
+                        #{ticket.displayId || ticket.ticketId}
                       </span>
                       <span
                         className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${statusColors[ticket.status]
