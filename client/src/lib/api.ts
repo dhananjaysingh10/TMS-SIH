@@ -642,3 +642,62 @@ export const departmentApi = {
     await fetchApi(`/departments/${id}/members/${memberId}`, { method: 'DELETE' });
   },
 };
+
+// ============== Temporary Tickets API (Helpdesk) ==============
+
+export interface ChatMessage {
+  role: 'user' | 'ai';
+  message: string;
+  timestamp: string;
+}
+
+export interface TemporaryTicket {
+  _id: string;
+  tempTicketId: string;
+  userId: string | { _id: string, name: string, email: string };
+  userEmail: string;
+  issueTitle: string;
+  issueContext: string;
+  chatHistory: ChatMessage[];
+  autoResolved: boolean;
+  escalatedToTicket: boolean;
+  permanentTicketId?: string;
+  lastActivityAt: string;
+  createdAt: string;
+}
+
+export const temporaryTicketsApi = {
+  getUserTickets: async (userId: string, includeResolved: boolean = false): Promise<TemporaryTicket[]> => {
+    const query = includeResolved ? '?includeResolved=true' : '';
+    const response = await fetchApi<ApiResponse<TemporaryTicket[]>>(`/temporary-ticket/user/${userId}${query}`);
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<TemporaryTicket> => {
+    const response = await fetchApi<ApiResponse<TemporaryTicket>>(`/temporary-ticket/${id}`);
+    return response.data;
+  },
+
+  addMessage: async (id: string, role: 'user' | 'ai', message: string): Promise<{ tempTicketId: string, messageCount: number, escalated?: boolean, resolved?: boolean, aiReply?: string, latestMessage?: ChatMessage }> => {
+    const response = await fetchApi<ApiResponse<{ tempTicketId: string, messageCount: number, escalated?: boolean, resolved?: boolean, aiReply?: string, latestMessage?: ChatMessage }>>(`/temporary-ticket/${id}/message`, {
+      method: 'POST',
+      body: JSON.stringify({ role, message }),
+    });
+    return response.data;
+  },
+
+  resolve: async (id: string): Promise<TemporaryTicket> => {
+    const response = await fetchApi<ApiResponse<TemporaryTicket>>(`/temporary-ticket/${id}/resolve`, {
+      method: 'POST',
+    });
+    return response.data;
+  },
+
+  escalate: async (id: string, issueTitle?: string, issueDescription?: string): Promise<{ tempTicketId: string, escalatedToTicket: boolean }> => {
+    const response = await fetchApi<ApiResponse<{ tempTicketId: string, escalatedToTicket: boolean }>>(`/temporary-ticket/${id}/escalate`, {
+      method: 'POST',
+      body: JSON.stringify({ issueTitle, issueDescription }),
+    });
+    return response.data;
+  }
+};

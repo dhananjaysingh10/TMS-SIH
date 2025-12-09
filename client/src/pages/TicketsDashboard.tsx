@@ -51,12 +51,14 @@ export default function TicketsDashboard() {
   }, [currentPage]);
 
   async function fetchTickets() {
-    if (!productId) return;
     try {
       setLoading(true);
-      let endpoint = `/ticket?productId=${productId}&page=${currentPage}&limit=${limit}`;
+      let endpoint = `/ticket?page=${currentPage}&limit=${limit}`;
+      if (productId) {
+        endpoint += `&productId=${productId}`;
+      }
       if (debouncedSearchTerm) {
-        endpoint += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
+         endpoint += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
       }
       const res = await ticketsApi.getAll(endpoint);
       setTickets(res);

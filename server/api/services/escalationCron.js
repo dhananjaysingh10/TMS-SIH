@@ -9,7 +9,7 @@ import Ticket from '../models/ticket.model.js';
 import Department from '../models/department.model.js';
 import User from '../models/user.model.js';
 import { nodemailerClient } from '../config/email.config.js';
-import { TICKET_ESCALATION_TEMPLATE } from './emailTemplate.js';
+import { TICKET_ESCALATION_TEMPLATE } from './escalationEmailTemplate.js';
 
 // Track tickets we've already escalated to avoid duplicate emails
 const escalatedTickets = new Set();

@@ -4,6 +4,7 @@ import logging
 import sys
 import os
 from pathlib import Path
+from datetime import datetime
 import requests
 
 # Add project root to path (where src/ is located)
@@ -35,6 +36,13 @@ def send_to_express_api(ticket_data):
     LOG.info("=" * 80)
     
     try:
+        # Handle null/missing user email - use a fallback for system-generated tickets
+        user_email = ticket_data.get("createdBy")
+        if not user_email:
+            # For anonymous or email-sourced tickets, use a system fallback
+            user_email = "system@ticketing.local"
+            LOG.warning(f"⚠️ No createdBy email found, using fallback: {user_email}")
+        
         payload = {
             "ticketId": ticket_data["ticketId"],
             "department": ticket_data["department"],
@@ -44,7 +52,7 @@ def send_to_express_api(ticket_data):
             "title": ticket_data.get("title", "Email Ticket"),
             "priority": ticket_data["priority"],
             "status": ticket_data.get("status", "open"),
-            "useremail": ticket_data.get("createdBy"),
+            "useremail": user_email,
             "assignedemail": ticket_data.get("assignedTo")
         }
         
@@ -198,11 +206,18 @@ def process_classification(job_data):
             {"ticketId": ticket_id},
             {"$set": {
                 "department": classification.department,
+                "product": triage_result.get("product"),
                 "type": classification.type,
-                "priority": classification.priority
+                "priority": classification.priority,
+                "confidence": triage_result.get("confidence"),
+                "classificationMeta": {
+                     "neuro_symbolic": triage_result,
+                     "llm_classification": classification.dict()
+                },
+                "updatedAt": datetime.utcnow()
             }}
         )
-        LOG.info(f"💾 Updated ticket in MongoDB")
+        LOG.info(f"✅ Updated Ticket {ticket_id} in MongoDB")
         
         LOG.info(f"\n{'*'*80}")
         LOG.info(f"🚀 NOW CALLING send_to_express_api() FOR {ticket_id}")

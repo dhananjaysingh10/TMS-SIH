@@ -15,7 +15,6 @@ import statsRoute from "./routes/stats.route.js";
 import analyticsRoute from "./routes/analytics.route.js";
 import productRoute from "./routes/product.route.js";
 import departmentRoute from "./routes/department.route.js";
-import temporaryTicketRoute from "./routes/temporaryTicket.route.js";
 import availabilityRoute from "./routes/availability.route.js";
 import Ticket from './models/ticket.model.js';
 import User from './models/user.model.js';
@@ -72,7 +71,6 @@ app.use('/api/stats', statsRoute);
 app.use('/api/analytics', analyticsRoute);
 app.use('/api/products', productRoute);
 app.use('/api/departments', departmentRoute);
-app.use('/api/temporary-ticket', temporaryTicketRoute);
 app.use('/api/availability', availabilityRoute);
 
 // Socket.IO connection handling
