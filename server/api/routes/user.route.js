@@ -14,7 +14,7 @@ router.get('/seen-notifications', (req, res, next) => {
 router.get("/my-products", authMiddleware, getMyProducts);
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
-router.put("/update/:id", updateUser);
+router.put("/:id", updateUser);
 // router.delete("/:id", deleteUser);
 router.post('/signout', signOut);
 router.put('/linkTelegram', linkTelegramAccount);

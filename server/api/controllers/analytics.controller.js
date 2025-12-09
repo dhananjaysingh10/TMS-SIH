@@ -86,6 +86,10 @@ export const getDepartmentAnalytics = async (req, res) => {
                     { department: dept.name }
                 ]
             };
+        } else if (user.role === 'super-admin') {
+            // Super-admin defaults to global view if no specific department requested
+            departmentName = "All Departments";
+            matchQuery = {};
         } else if (user.departments && user.departments.length > 0) {
             // User has new departments array - use first one
             const dept = await Department.findById(user.departments[0]);
@@ -177,8 +181,37 @@ export const getDepartmentAnalytics = async (req, res) => {
             { $match: resolutionMatchQuery },
             {
                 $project: {
-                    resolutionTime: { $subtract: ['$updatedAt', '$createdAt'] },
-                },
+                    // Progress is Newest -> Oldest
+                    // First Log (Creation) is the LAST element (-1)
+                    firstLog: { $arrayElemAt: ["$progress", -1] },
+                    // Final Resolution is the NEWEST (First) matching log
+                    lastResolvedLog: {
+                        $first: {
+                            $filter: {
+                                input: "$progress",
+                                as: "log",
+                                cond: { $eq: ["$$log.description", "Ticket Resolved"] }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $match: {
+                    firstLog: { $exists: true },
+                    lastResolvedLog: { $exists: true }
+                }
+            },
+            // STRICT FILTERING: Only count if resolution happened in the window
+            ...(startDate ? [{
+                $match: {
+                    "lastResolvedLog.timestamp": { $gte: startDate, $lte: endDate }
+                }
+            }] : []),
+            {
+                $project: {
+                    resolutionTime: { $subtract: ["$lastResolvedLog.timestamp", "$firstLog.timestamp"] }
+                }
             },
             {
                 $group: {
@@ -191,57 +224,125 @@ export const getDepartmentAnalytics = async (req, res) => {
         const avgResolutionTimeMs = resolutionStats[0]?.avgResolutionTime || 0;
         const avgResolutionTimeHours = Math.round(avgResolutionTimeMs / (1000 * 60 * 60) * 10) / 10;
 
-        // 4. SLA Compliance (tickets resolved before dueDate)
-        const slaMatchQuery = {
+        // 4. Resolution Time Distribution
+        const resolutionDistMatchQuery = {
             ...baseMatchQuery,
             status: { $in: ['resolved', 'closed'] },
-            dueDate: { $exists: true, $ne: null },
         };
         if (startDate) {
-            slaMatchQuery.updatedAt = { $gte: startDate, $lte: endDate };
+            resolutionDistMatchQuery.updatedAt = { $gte: startDate, $lte: endDate };
         }
-        const slaStats = await Ticket.aggregate([
-            { $match: slaMatchQuery },
+
+        const resolutionDistributionStats = await Ticket.aggregate([
+            { $match: resolutionDistMatchQuery },
             {
                 $project: {
-                    metSLA: { $lte: ['$updatedAt', '$dueDate'] },
+                    firstLog: { $arrayElemAt: ["$progress", -1] }, // Oldest
+                    lastResolvedLog: {
+                        $first: { // Newest
+                            $filter: {
+                                input: "$progress",
+                                as: "log",
+                                cond: { $eq: ["$$log.description", "Ticket Resolved"] }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $match: {
+                    firstLog: { $exists: true },
+                    lastResolvedLog: { $exists: true }
+                }
+            },
+            // STRICT FILTERING: Only count if resolution happened in the window
+            ...(startDate ? [{
+                $match: {
+                    "lastResolvedLog.timestamp": { $gte: startDate, $lte: endDate }
+                }
+            }] : []),
+            {
+                $project: {
+                    duration: { $subtract: ["$lastResolvedLog.timestamp", "$firstLog.timestamp"] },
                 },
             },
             {
-                $group: {
-                    _id: null,
-                    totalWithDueDate: { $sum: 1 },
-                    metSLACount: { $sum: { $cond: ['$metSLA', 1, 0] } },
-                },
-            },
+                $bucket: {
+                    groupBy: "$duration",
+                    boundaries: [0, 4 * 60 * 60 * 1000, 24 * 60 * 60 * 1000, 72 * 60 * 60 * 1000, Infinity],
+                    default: "other",
+                    output: {
+                        count: { $sum: 1 }
+                    }
+                }
+            }
         ]);
 
-        const slaTotal = slaStats[0]?.totalWithDueDate || 0;
-        const slaMetCount = slaStats[0]?.metSLACount || 0;
-        const slaCompliancePercent = slaTotal > 0 ? Math.round((slaMetCount / slaTotal) * 100) : null;
+        const resolutionDistribution = {
+            under4h: 0,
+            under24h: 0,
+            under3d: 0,
+            over3d: 0
+        };
 
-        // 5. Average Rating (CSAT)
-        const ratingMatchQuery = {
+        resolutionDistributionStats.forEach(bucket => {
+            if (bucket._id === 0) resolutionDistribution.under4h = bucket.count;
+            else if (bucket._id === 4 * 60 * 60 * 1000) resolutionDistribution.under24h = bucket.count;
+            else if (bucket._id === 24 * 60 * 60 * 1000) resolutionDistribution.under3d = bucket.count;
+            else if (bucket._id === 72 * 60 * 60 * 1000) resolutionDistribution.over3d = bucket.count;
+        });
+
+        // 5. Average Acceptance Time (Time from creation to "Employee accepted ticket")
+        const acceptanceMatchQuery = {
             ...baseMatchQuery,
-            status: { $in: ['resolved', 'closed'] },
-            rating: { $gt: 0 },
         };
         if (startDate) {
-            ratingMatchQuery.updatedAt = { $gte: startDate, $lte: endDate };
+            acceptanceMatchQuery.updatedAt = { $gte: startDate, $lte: endDate };
         }
-        const ratingStats = await Ticket.aggregate([
-            { $match: ratingMatchQuery },
+        
+        const acceptanceStats = await Ticket.aggregate([
+            { $match: acceptanceMatchQuery },
+            {
+                $project: {
+                    firstLog: { $arrayElemAt: ["$progress", -1] }, // Oldest
+                    acceptedLog: {
+                        $last: { // Oldest Acceptance (First Response)
+                            $filter: {
+                                input: "$progress",
+                                as: "log",
+                                cond: { $eq: ["$$log.description", "Employee accepted ticket"] }
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $match: {
+                    firstLog: { $exists: true }, // Ensure both are found
+                    acceptedLog: { $exists: true }
+                }
+            },
+            // STRICT FILTERING: Only count if acceptance happened in the window
+            ...(startDate ? [{
+                $match: {
+                    "acceptedLog.timestamp": { $gte: startDate, $lte: endDate }
+                }
+            }] : []),
+            {
+                $project: {
+                    acceptanceTime: { $subtract: ["$acceptedLog.timestamp", "$firstLog.timestamp"] }
+                }
+            },
             {
                 $group: {
                     _id: null,
-                    avgRating: { $avg: '$rating' },
-                    totalRated: { $sum: 1 },
-                },
-            },
+                    avgAcceptanceTime: { $avg: '$acceptanceTime' }
+                }
+            }
         ]);
 
-        const avgRating = ratingStats[0]?.avgRating ? Math.round(ratingStats[0].avgRating * 10) / 10 : null;
-        const totalRated = ratingStats[0]?.totalRated || 0;
+        const avgAcceptanceTimeMs = acceptanceStats[0]?.avgAcceptanceTime || 0;
+        const avgAcceptanceTimeHours = Math.round(avgAcceptanceTimeMs / (1000 * 60 * 60) * 10) / 10;
 
         // 6. Type Breakdown
         const typeStats = await Ticket.aggregate([
@@ -271,15 +372,8 @@ export const getDepartmentAnalytics = async (req, res) => {
                 priorityBreakdown: priorityResult,
                 typeBreakdown: typeResult,
                 avgResolutionTimeHours,
-                slaCompliance: {
-                    percent: slaCompliancePercent,
-                    metCount: slaMetCount,
-                    total: slaTotal,
-                },
-                customerSatisfaction: {
-                    avgRating,
-                    totalRated,
-                },
+                avgAcceptanceTimeHours,
+                resolutionDistribution, // Replaced slaCompliance
             },
         });
     } catch (error) {
@@ -311,10 +405,19 @@ export const getEmployeeAnalytics = async (req, res) => {
 
         const range = req.query.range || '1m';
         const { startDate, endDate } = getDateRange(range);
-        const department = user.department;
+        
+        let employees;
+        let departmentName = user.department;
 
-        // Get all employees in the department
-        const employees = await User.find({ department, role: 'user' }).select('_id name email profilePicture');
+        if (user.role === 'super-admin') {
+            // Super admin sees all employees if no specific department logic (currently global)
+            // Ideally should support department filtering here too, but for now global
+            employees = await User.find({ role: 'user' }).select('_id name email profilePicture');
+            departmentName = "All Departments";
+        } else {
+             const department = user.department;
+             employees = await User.find({ department, role: 'user' }).select('_id name email profilePicture');
+        }
 
         const employeeStats = await Promise.all(
             employees.map(async (employee) => {
@@ -424,7 +527,7 @@ export const getEmployeeAnalytics = async (req, res) => {
         res.status(200).json({
             success: true,
             data: {
-                department,
+                department: departmentName,
                 range,
                 startDate,
                 endDate,
@@ -620,6 +723,95 @@ export const getSingleEmployeeAnalytics = async (req, res) => {
         });
     } catch (error) {
         console.error('Error in getSingleEmployeeAnalytics:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+/**
+ * GET /api/analytics/products
+ * Query params: range (1h, 24h, 10d, 1m, 1y, all)
+ * Returns ticket counts aggregated by product.
+ */
+export const getProductAnalytics = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'Unauthorized' });
+        }
+
+        const user = await User.findById(userId).select('role');
+        if (!user || (user.role !== 'admin' && user.role !== 'super-admin')) {
+            return res.status(403).json({ success: false, message: 'Access denied' });
+        }
+
+        const range = req.query.range || '1m';
+        const { startDate, endDate } = getDateRange(range);
+
+        // Build date filter
+        const dateFilter = {};
+        if (startDate) {
+            dateFilter.createdAt = { $gte: startDate, $lte: endDate };
+        }
+
+        // Aggregate tickets by product
+        // 1. Match tickets within date range
+        // 2. Lookup department to get product reference
+        // 3. Lookup product to get product name
+        // 4. Group by product
+        const productStats = await Ticket.aggregate([
+            { $match: dateFilter },
+            {
+                $lookup: {
+                    from: 'departments',
+                    localField: 'departmentRef',
+                    foreignField: '_id',
+                    as: 'dept'
+                }
+            },
+            { $unwind: '$dept' },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'dept.product',
+                    foreignField: '_id',
+                    as: 'prod'
+                }
+            },
+            { $unwind: '$prod' },
+            {
+                $group: {
+                    _id: '$prod.name',
+                    total: { $sum: 1 },
+                    open: { $sum: { $cond: [{ $eq: ['$status', 'open'] }, 1, 0] } },
+                    inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
+                    resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } },
+                    closed: { $sum: { $cond: [{ $eq: ['$status', 'closed'] }, 1, 0] } }
+                }
+            },
+            { $sort: { total: -1 } }
+        ]);
+
+        const formattedStats = productStats.map(stat => ({
+            product: stat._id,
+            total: stat.total,
+            open: stat.open,
+            inProgress: stat.inProgress,
+            resolved: stat.resolved,
+            closed: stat.closed
+        }));
+
+        res.status(200).json({
+            success: true,
+            data: {
+                range,
+                startDate,
+                endDate,
+                products: formattedStats
+            }
+        });
+
+    } catch (error) {
+        console.error('Error in getProductAnalytics:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };

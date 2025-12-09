@@ -4,6 +4,7 @@ import {
     getDepartmentAnalytics,
     getEmployeeAnalytics,
     getSingleEmployeeAnalytics,
+    getProductAnalytics
 } from '../controllers/analytics.controller.js';
 import { authMiddleware } from '../utils/verifyUser.js';
 
@@ -20,5 +21,9 @@ router.get('/employees', authMiddleware, getEmployeeAnalytics);
 // Single employee detailed analytics (admin only)
 // GET /api/analytics/employee/:employeeId?range=1m
 router.get('/employee/:employeeId', authMiddleware, getSingleEmployeeAnalytics);
+
+// Product-wise aggregated stats (admin only)
+// GET /api/analytics/products?range=1m
+router.get('/products', authMiddleware, getProductAnalytics);
 
 export default router;
