@@ -1,8 +1,23 @@
-import { AlertCircle, Check, CheckCircle, Menu, MessageSquare, Send } from 'lucide-react';
+import {
+    AlertCircle,
+    Bot,
+    Check,
+    CheckCircle,
+    ChevronLeft,
+    Menu,
+    MessageSquare,
+    MoreVertical,
+    Search,
+    Send,
+    User,
+    X
+} from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import remarkGfm from 'remark-gfm';
 import Layout from '../components/Layout';
 import type { TemporaryTicket } from '../lib/api';
 import { temporaryTicketsApi } from '../lib/api';
@@ -13,390 +28,438 @@ const Helpdesk: React.FC = () => {
     const [searchParams] = useSearchParams();
     
     const [tickets, setTickets] = useState<TemporaryTicket[]>([]);
+    const [filteredTickets, setFilteredTickets] = useState<TemporaryTicket[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    
     const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
     const [selectedTicket, setSelectedTicket] = useState<TemporaryTicket | null>(null);
     const [messageInput, setMessageInput] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Initial Load & URL Param Handling
+    // Initial Load
     useEffect(() => {
         if (!currentUser) return;
-
         const loadTickets = async () => {
             setIsLoading(true);
             try {
-                // Fetch unresolved tickets by default
                 const userId = currentUser.id || '';
-                if (!userId) {
-                     toast.error("User ID missing");
-                     return;
-                }
+                if (!userId) return;
+                
                 const data = await temporaryTicketsApi.getUserTickets(userId, false);
                 setTickets(data);
+                setFilteredTickets(data);
 
-                // LOCAL STORAGE LOGIC: Store IDs with 24h expiry
-                const LS_KEY = 'temp_tickets_store';
-                const now = Date.now();
-                const ONE_DAY = 24 * 60 * 60 * 1000;
-                
-                // 1. Clean expired
-                let localStore = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-                localStore = localStore.filter((item: any) => now - item.timestamp < ONE_DAY);
-                
-                // 2. Add new from API (refresh timestamps of active ones?)
-                // Or just ensure current ones are there.
-                data.forEach(t => {
-                    if (!localStore.find((item: any) => item.id === t.tempTicketId)) {
-                        localStore.push({ id: t.tempTicketId, timestamp: now });
-                    }
-                });
-                
-                localStorage.setItem(LS_KEY, JSON.stringify(localStore));
-
-
-                // Check URL for ticketId to auto-select and fetch FULL details
+                // URL Param Handling
                 const urlTicketId = searchParams.get('ticketId');
                 if (urlTicketId) {
                     setSelectedTicketId(urlTicketId);
                     try {
                         const specific = await temporaryTicketsApi.getById(urlTicketId);
-                        if (specific) {
+                        if(specific) {
                             setSelectedTicket(specific);
-                            // Update or Add to list
-                            setTickets(prev => {
-                                const exists = prev.find(p => p.tempTicketId === specific.tempTicketId);
-                                if (exists) return prev.map(p => p.tempTicketId === specific.tempTicketId ? specific : p);
-                                return [specific, ...prev];
-                            });
+                            // Ensure it's in the list
+                             if (!data.find(t => t.tempTicketId === specific.tempTicketId)) {
+                                setTickets(prev => [specific, ...prev]);
+                                setFilteredTickets(prev => [specific, ...prev]);
+                            }
                         }
-                    } catch (err) {
-                        console.error("Could not fetch specific ticket details", err);
-                        // Fallback to local data if available
-                        const found = data.find(t => t.tempTicketId === urlTicketId);
-                        if (found) setSelectedTicket(found);
-                        else toast.error("Ticket details could not be loaded");
-                    }
+                    } catch (e) { console.error(e); }
                 } else if (data.length > 0 && !selectedTicketId) {
-                    // Auto select first if none selected, but fetch details too!
-                    const firstId = data[0].tempTicketId;
-                    setSelectedTicketId(firstId);
-                    // Fetch details for first one
-                    try {
-                         const specific = await temporaryTicketsApi.getById(firstId);
-                         setSelectedTicket(specific);
-                    } catch (e) {
-                         setSelectedTicket(data[0]);
+                    // Mobile: Don't auto-select to show list first? 
+                    // Desktop: Auto-select first
+                    if (window.innerWidth > 1024) {
+                        handleSelectTicket(data[0]);
                     }
                 }
             } catch (error) {
-                console.error("Failed to load helpdesk tickets", error);
-                toast.error("Failed to load chat history");
+                console.error("Failed to load tickets", error);
+                toast.error("Could not load chats.");
             } finally {
                 setIsLoading(false);
             }
         };
-
         loadTickets();
-    }, [currentUser, searchParams]); // Re-run if URL params change
+    }, [currentUser, searchParams]);
 
-    // Auto-scroll to bottom of chat
+    // Search Filter
+    useEffect(() => {
+        if (!searchTerm.trim()) {
+            setFilteredTickets(tickets);
+        } else {
+            const lower = searchTerm.toLowerCase();
+            setFilteredTickets(tickets.filter(t => 
+                (t.issueTitle || "").toLowerCase().includes(lower) || 
+                (t.tempTicketId || "").toLowerCase().includes(lower)
+            ));
+        }
+    }, [searchTerm, tickets]);
+
+    // Auto-scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedTicket?.chatHistory]);
 
     const handleSelectTicket = async (ticket: TemporaryTicket) => {
         setSelectedTicketId(ticket.tempTicketId);
-        // Optimistically set selected ticket from list mostly, but maybe fetch fresh?
-        // For now, let's use what we have or fetch specific to be safe about history
+        // Optimistic switch
+        setSelectedTicket(ticket);
+        setIsSidebarOpen(false); // Close mobile sidebar
+        
+        // Fetch fresh details in background
         try {
-            const freshTicket = await temporaryTicketsApi.getById(ticket.tempTicketId);
-            setSelectedTicket(freshTicket);
-            // Update list version too
-            setTickets(prev => prev.map(t => t.tempTicketId === freshTicket.tempTicketId ? freshTicket : t));
-        } catch (error) {
-            console.error(error);
-            setSelectedTicket(ticket); // Fallback
+            const fresh = await temporaryTicketsApi.getById(ticket.tempTicketId);
+            setSelectedTicket(fresh);
+            // Update list item
+            setTickets(prev => prev.map(t => t.tempTicketId === fresh.tempTicketId ? fresh : t));
+        } catch (e) {
+            console.error("Bg fetch failed", e);
         }
-        setIsSidebarOpen(false); // Close mobile sidebar on selection
     };
 
     const handleSendMessage = async (e?: React.FormEvent) => {
         e?.preventDefault();
         if (!messageInput.trim() || !selectedTicketId) return;
-
         const content = messageInput.trim();
         setMessageInput('');
         setIsSending(true);
 
+        // Optimistic UI Append
+        const tempMsg = { role: 'user', message: content, timestamp: new Date().toISOString() };
+        setSelectedTicket(prev => prev ? { ...prev, chatHistory: [...prev.chatHistory, tempMsg as any] } : null);
+
         try {
-            // Optimistic UI update? 
-            // Better to wait for server response since it might contain AI reply immediately
             const result = await temporaryTicketsApi.addMessage(selectedTicketId, 'user', content);
             
+            // Handle Auto-Resolution / Escalation responses
             if (result.resolved) {
-                // 1. Manually append the messages locally so user sees the "Close" sequence
-                const userMsg = { role: 'user', message: content, timestamp: new Date().toISOString() };
                 const aiMsg = { role: 'ai', message: result.aiReply || "Ticket resolved.", timestamp: new Date().toISOString() };
+                setSelectedTicket(prev => prev ? { 
+                    ...prev, 
+                    chatHistory: [...prev.chatHistory, aiMsg as any],
+                    autoResolved: true 
+                } : null);
                 
-                // Update the SELECTED ticket state to show these messages
-                setSelectedTicket(prev => {
-                    if(!prev) return null;
-                    return {
-                        ...prev,
-                        chatHistory: [...prev.chatHistory, userMsg as any, aiMsg as any], // Cast because ChatMessage might differ slightly locally
-                        autoResolved: true // Mark as resolved to disable input
-                    };
-                });
-                
-                toast.success(result.aiReply || "Ticket resolved and closed.");
-
-                // 2. Remove from the Sidebar List (since backend deleted it)
+                toast.success("Ticket resolved!");
+                // Remove from active list after short delay? Or keep as closed?
+                // For now, remove from list to clean up
                 setTickets(prev => prev.filter(t => t.tempTicketId !== selectedTicketId));
-                
-                // 3. DO NOT clear selectedTicketId/selectedTicket immediately. 
-                // Let user read the "Goodbye" message.
-                // It stays open until they click something else.
-                return; 
+                setFilteredTickets(prev => prev.filter(t => t.tempTicketId !== selectedTicketId));
+                return;
             }
 
-            if (result.escalated) {
-                toast.success("Ticket has been auto-escalated to an agent.");
-                // Refresh ticket to show escalation status
-            }
-
-            // Ideally we just fetch the ticket again to sync everything (AI reply, etc)
-            const updatedTicket = await temporaryTicketsApi.getById(selectedTicketId);
-            setSelectedTicket(updatedTicket);
-            setTickets(prev => prev.map(t => t.tempTicketId === updatedTicket.tempTicketId ? updatedTicket : t));
+            // Sync full state
+            const updated = await temporaryTicketsApi.getById(selectedTicketId);
+            setSelectedTicket(updated);
+            
+            // Re-order list to show latest at top
+            setTickets(prev => {
+                const others = prev.filter(t => t.tempTicketId !== updated.tempTicketId);
+                return [updated, ...others];
+            });
 
         } catch (error) {
-            console.error("Failed to send message", error);
-            toast.error("Failed to send message");
-            setMessageInput(content); // Restore input
+            console.error(error);
+            toast.error("Failed to send.");
+            setMessageInput(content); // Revert
         } finally {
             setIsSending(false);
         }
     };
 
     const handleResolve = async () => {
-        if (!selectedTicketId) return;
-        if (!window.confirm("Are you sure you want to mark this issue as resolved?")) return;
-
+        if (!selectedTicketId || !window.confirm("Mark as resolved?")) return;
         try {
             await temporaryTicketsApi.resolve(selectedTicketId);
-            toast.success("Ticket resolved and removed.");
-            
-            // Remove from State
-            const ticketIdToRemove = selectedTicketId;
-            setTickets(prev => prev.filter(t => t.tempTicketId !== ticketIdToRemove));
+            toast.success("Resolved");
+            setTickets(prev => prev.filter(t => t.tempTicketId !== selectedTicketId));
             setSelectedTicketId(null);
             setSelectedTicket(null);
-
-            // Remove from LocalStorage
-            const LS_KEY = 'temp_tickets_store';
-            try {
-                const localStore = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-                const newStore = localStore.filter((item: any) => item.id !== ticketIdToRemove);
-                localStorage.setItem(LS_KEY, JSON.stringify(newStore));
-            } catch (e) {
-                console.error("LS Error", e);
-            }
-
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to resolve ticket");
-        }
+        } catch (e) { toast.error("Error resolving."); }
     };
 
     const handleEscalate = async () => {
-        if (!selectedTicketId) return;
-        if (!window.confirm("Escalate this to a human agent? A permanent ticket will be created.")) return;
-
+        if (!selectedTicketId || !window.confirm("Escalate to human agent?")) return;
         try {
             await temporaryTicketsApi.escalate(selectedTicketId);
-            toast.success("Ticket escalated successfully!");
-            // Refresh to show escalated status
-            const updatedTicket = await temporaryTicketsApi.getById(selectedTicketId);
-            setSelectedTicket(updatedTicket);
-            setTickets(prev => prev.map(t => t.tempTicketId === updatedTicket.tempTicketId ? updatedTicket : t));
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to escalate ticket");
-        }
+            toast.success("Escalated to agent");
+            const updated = await temporaryTicketsApi.getById(selectedTicketId);
+            setSelectedTicket(updated);
+        } catch (e) { toast.error("Error escalating."); }
     };
 
-    if (!currentUser) return <div className="p-8">Please log in to access Helpdesk.</div>;
+    const handleBackToTasks = () => {
+        setSelectedTicketId(null);
+        setSelectedTicket(null);
+        setIsSidebarOpen(true); // Show list on mobile essentially
+    };
+
+    if (!currentUser) return <div className="p-10 text-center">Please log in.</div>;
 
     return (
         <Layout pageTitle="Helpdesk">
-        <div className="flex h-[calc(100vh-120px)] bg-gray-50 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-            {/* Mobile Sidebar Toggle */}
-            <button 
-                className="lg:hidden fixed top-20 left-4 z-20 p-2 bg-white rounded shadow"
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            >
-                <Menu size={20} />
-            </button>
-
-            {/* Sidebar (Ticket List) */}
-            <div className={`
-                fixed inset-y-0 left-0 z-10 w-80 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0
-                ${isSidebarOpen ? 'translate-x-0 pt-16' : '-translate-x-full lg:pt-0'}
-            `}>
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                    <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2">
-                        <MessageSquare size={20} /> Helpdesk Chats
-                    </h2>
-                </div>
-                <div className="overflow-y-auto h-full pb-20">
-                    {isLoading ? (
-                        <div className="p-4 text-center text-gray-500">Loading chats...</div>
-                    ) : tickets.length === 0 ? (
-                        <div className="p-8 text-center text-gray-500">
-                            <p>No active helpdesk chats.</p>
-                            <p className="text-sm mt-2">Start a new ticket to chat with our AI assistant.</p>
+            <div className="flex h-[calc(100vh-100px)] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative">
+                
+                {/* --- SIDEBAR (Ticket List) --- */}
+                <div className={`
+                    absolute inset-y-0 left-0 z-30 w-full md:w-80 bg-white border-r border-gray-100 flex flex-col transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+                    ${isSidebarOpen || !selectedTicketId ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                `}>
+                    {/* Sidebar Header */}
+                    <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-col gap-3">
+                        <div className="flex justify-between items-center">
+                            <h2 className="font-bold text-gray-800 text-lg flex items-center gap-2">
+                                <MessageSquare className="w-5 h-5 text-indigo-600" />
+                                Chats
+                            </h2>
+                            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full font-medium">
+                                {tickets.length}
+                            </span>
                         </div>
-                    ) : (
-                        tickets.map(ticket => (
-                            <div 
-                                key={ticket.tempTicketId}
-                                onClick={() => handleSelectTicket(ticket)}
-                                className={`cursor-pointer p-4 border-b border-gray-100 hover:bg-blue-50 transition-colors ${selectedTicketId === ticket.tempTicketId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}`}
-                            >
-                                <div className="flex justify-between items-start mb-1">
-                                    <span className="font-medium text-gray-900 truncate w-3/4">
-                                        {ticket.issueTitle || "Untitled Issue"}
-                                    </span>
-                                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                                        {new Date(ticket.lastActivityAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <p className="text-sm text-gray-500 truncate">
-                                    {ticket.chatHistory && ticket.chatHistory.length > 0 
-                                        ? ticket.chatHistory[ticket.chatHistory.length - 1].message 
-                                        : "No messages"}
-                                </p>
-                                {ticket.escalatedToTicket && (
-                                    <span className="inline-flex mt-2 items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        Escalated
-                                    </span>
-                                )}
+                        {/* Search Bar */}
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input 
+                                type="text"
+                                placeholder="Search conversations..."
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Ticket List */}
+                    <div className="flex-1 overflow-y-auto">
+                        {isLoading ? (
+                            <div className="flex justify-center p-8"><div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div></div>
+                        ) : filteredTickets.length === 0 ? (
+                            <div className="text-center p-8 text-gray-400">
+                                <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                                <p className="text-sm">No chats found.</p>
                             </div>
-                        ))
+                        ) : (
+                            <div className="divide-y divide-gray-50">
+                                {filteredTickets.map(ticket => (
+                                    <button
+                                        key={ticket.tempTicketId}
+                                        onClick={() => handleSelectTicket(ticket)}
+                                        className={`w-full text-left p-4 hover:bg-gray-50 transition-colors relative group
+                                            ${selectedTicketId === ticket.tempTicketId ? 'bg-indigo-50/60' : ''}
+                                        `}
+                                    >
+                                        {selectedTicketId === ticket.tempTicketId && (
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600 rounded-r-full" />
+                                        )}
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h3 className={`font-semibold text-sm truncate pr-2 ${selectedTicketId === ticket.tempTicketId ? 'text-indigo-900' : 'text-gray-800'}`}>
+                                                {ticket.issueTitle || "Untitled Inquiry"}
+                                            </h3>
+                                            <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                                                {new Date(ticket.lastActivityAt).toLocaleDateString(undefined, {month:'short', day:'numeric'})}
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-gray-500 truncate line-clamp-1 h-4">
+                                            {ticket.chatHistory?.[ticket.chatHistory.length-1]?.message || "No messages"}
+                                        </p>
+                                        
+                                        <div className="flex gap-2 mt-2">
+                                            {ticket.escalatedToTicket && (
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
+                                                    <AlertCircle className="w-3 h-3" /> Escalated
+                                                </span>
+                                            )}
+                                            {ticket.autoResolved && (
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-100 text-green-700">
+                                                    <CheckCircle className="w-3 h-3" /> Resolved
+                                                </span>
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* --- MAIN CHAT AREA --- */}
+                
+                {/* Mobile Overlay Background */}
+                {isSidebarOpen && (
+                    <div 
+                        className="md:hidden absolute inset-0 z-20 bg-black/20 backdrop-blur-sm"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
+                <div className="flex-1 flex flex-col bg-slate-50 relative w-full">
+                    {selectedTicket ? (
+                        <>
+                            {/* Chat Header */}
+                            <div className="bg-white border-b border-gray-200 px-4 py-3 flex justify-between items-center shadow-sm z-10">
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        onClick={handleBackToTasks} 
+                                        className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </button>
+                                    
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-sm shrink-0">
+                                        <Bot className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-800 leading-tight line-clamp-1">{selectedTicket.issueTitle}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                            <span>ID: {selectedTicket.tempTicketId.split('-')[1]}</span>
+                                            {selectedTicket.escalatedToTicket && (
+                                                <span className="flex items-center text-amber-600 font-medium bg-amber-50 px-1 rounded">
+                                                    Escalated
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-1">
+                                    {/* Actions */}
+                                    {!selectedTicket.autoResolved && !selectedTicket.escalatedToTicket && (
+                                        <>
+                                            <button 
+                                                onClick={handleResolve}
+                                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-green-700 border border-green-200 hover:bg-green-50 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                                                title="Mark as Resolved"
+                                            >
+                                                <Check className="w-3.5 h-3.5" /> Resolve
+                                            </button>
+                                            <button 
+                                                onClick={handleEscalate}
+                                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white text-amber-700 border border-amber-200 hover:bg-amber-50 rounded-lg text-xs font-semibold transition-all shadow-sm"
+                                                title="Escalate to Human"
+                                            >
+                                                <User className="w-3.5 h-3.5" /> Escalate
+                                            </button>
+                                            
+                                            {/* Mobile Menu for Actions */}
+                                            <div className="sm:hidden relative group">
+                                                <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+                                                    <MoreVertical className="w-5 h-5" />
+                                                </button>
+                                                <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 hidden group-hover:block z-20">
+                                                    <button onClick={handleResolve} className="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50 flex items-center gap-2">
+                                                        <Check className="w-4 h-4" /> Resolve
+                                                    </button>
+                                                    <button onClick={handleEscalate} className="w-full text-left px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 flex items-center gap-2">
+                                                        <User className="w-4 h-4" /> Escalate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Chat Messages */}
+                            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+                                {(selectedTicket.chatHistory || []).map((msg, idx) => {
+                                    const isAi = msg.role === 'ai';
+                                    return (
+                                        <div key={idx} className={`flex gap-3 max-w-3xl ${isAi ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}>
+                                            {/* Avatar */}
+                                            <div className={`
+                                                w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm mt-1
+                                                ${isAi ? 'bg-white border border-gray-100 text-indigo-600' : 'bg-indigo-600 text-white'}
+                                            `}>
+                                                {isAi ? <Bot className="w-5 h-5" /> : <User className="w-4 h-4" />}
+                                            </div>
+                                            
+                                            {/* Bubble */}
+                                            <div className={`
+                                                relative px-5 py-3.5 shadow-sm text-sm sm:text-base leading-relaxed
+                                                ${isAi 
+                                                    ? 'bg-white border border-gray-100 text-gray-800 rounded-2xl rounded-tl-sm' 
+                                                    : 'bg-gradient-to-br from-indigo-600 to-indigo-700 text-white rounded-2xl rounded-tr-sm'
+                                                }
+                                            `}>
+                                                {isAi ? (
+                                                     <div className="prose prose-sm max-w-none prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1 prose-li:my-0 prose-a:text-indigo-600 hover:prose-a:text-indigo-500">
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                            {msg.message}
+                                                        </ReactMarkdown>
+                                                    </div>
+                                                ) : (
+                                                    <div className="whitespace-pre-wrap">{msg.message}</div>
+                                                )}
+                                                
+                                                <div className={`text-[10px] mt-2 opacity-70 ${isAi ? 'text-gray-400' : 'text-indigo-200 text-right'}`}>
+                                                    {new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                                
+                                <div ref={messagesEndRef} className="h-4" />
+                            </div>
+
+                            {/* Input Area */}
+                            {!selectedTicket.autoResolved && !selectedTicket.escalatedToTicket ? (
+                                <div className="p-4 bg-white border-t border-gray-100 sticky bottom-0 z-10">
+                                    <form 
+                                        onSubmit={handleSendMessage} 
+                                        className="max-w-4xl mx-auto relative flex items-center gap-2"
+                                    >
+                                        <input
+                                            value={messageInput}
+                                            onChange={(e) => setMessageInput(e.target.value)}
+                                            placeholder="Type your message..."
+                                            className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-full pl-5 pr-12 py-3 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all shadow-sm"
+                                            disabled={isSending}
+                                        />
+                                        <button 
+                                            type="submit" 
+                                            disabled={!messageInput.trim() || isSending}
+                                            className="absolute right-2 p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:bg-gray-300 transition-all shadow-md group"
+                                        >
+                                            <Send className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                                        </button>
+                                    </form>
+                                    <div className="text-center mt-2">
+                                        <p className="text-[10px] text-gray-400">AI can make mistakes. Please verify important information.</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-4 bg-gray-50 border-t border-gray-200 text-center">
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-full text-sm text-gray-500 shadow-sm">
+                                        {selectedTicket.escalatedToTicket ? "Ticket escalated to human agent" : "Conversation marked as resolved"}
+                                    </div>
+                                </div>
+                            )}
+
+                        </>
+                    ) : (
+                         /* Empty State */
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-slate-50">
+                            <div className="w-20 h-20 bg-white rounded-full shadow-sm flex items-center justify-center mb-6">
+                                <Bot className="w-10 h-10 text-indigo-200" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome to Helpdesk</h2>
+                            <p className="text-gray-500 max-w-sm mb-8">
+                                Select an existing conversation from the list or create a new ticket to start chatting with our AI assistant.
+                            </p>
+                            <button 
+                                onClick={() => setIsSidebarOpen(true)}
+                                className="md:hidden px-6 py-2.5 bg-indigo-600 text-white rounded-full font-medium shadow-md shadow-indigo-200 hover:shadow-lg transition-all"
+                            >
+                                View Chats
+                            </button>
+                        </div>
                     )}
                 </div>
             </div>
-
-            {/* Main Chat Area */}
-            <div className="flex-1 flex flex-col h-full overflow-hidden w-full">
-                {selectedTicket ? (
-                    <>
-                        {/* Header */}
-                        <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm z-[5]">
-                            <div>
-                                <h3 className="text-lg font-bold text-gray-800">{selectedTicket.issueTitle}</h3>
-                                <p className="text-sm text-gray-500">ID: {selectedTicket.tempTicketId}</p>
-                            </div>
-                            <div className="flex gap-2">
-                                {!selectedTicket.escalatedToTicket && !selectedTicket.autoResolved && (
-                                    <>
-                                        <button 
-                                            onClick={handleResolve}
-                                            className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-green-50 text-green-700 rounded-md hover:bg-green-100 border border-green-200 text-sm font-medium transition-colors"
-                                        >
-                                            <CheckCircle size={16} /> Mark Resolved
-                                        </button>
-                                        <button 
-                                            onClick={handleEscalate}
-                                            className="hidden sm:flex items-center gap-1 px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-md hover:bg-yellow-100 border border-yellow-200 text-sm font-medium transition-colors"
-                                        >
-                                            <AlertCircle size={16} /> Escalate to Agent
-                                        </button>
-                                    </>
-                                )}
-                                {selectedTicket.escalatedToTicket && (
-                                    <span className="flex items-center gap-1 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-md font-medium text-sm">
-                                        Escalated to Agent
-                                    </span>
-                                )}
-                                {selectedTicket.autoResolved && (
-                                     <span className="flex items-center gap-1 px-4 py-2 bg-green-100 text-green-800 rounded-md font-medium text-sm">
-                                        <Check size={16} /> Resolved
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Messages Area */}
-                        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                            {(selectedTicket.chatHistory || []).map((msg, idx) => {
-                                const isAi = msg.role === 'ai';
-                                return (
-                                    <div key={idx} className={`flex ${isAi ? 'justify-start' : 'justify-end'}`}>
-                                        <div 
-                                            className={`max-w-[85%] sm:max-w-[70%] rounded-lg px-4 py-3 shadow-sm ${
-                                                isAi 
-                                                    ? 'bg-white text-gray-800 border border-gray-100' 
-                                                    : 'bg-blue-600 text-white'
-                                            }`}
-                                        >
-                                            <div className="text-sm md:text-base whitespace-pre-wrap">{msg.message}</div>
-                                            <div className={`text-[10px] mt-1 text-right ${isAi ? 'text-gray-400' : 'text-blue-100'}`}>
-                                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                            <div ref={messagesEndRef} />
-                        </div>
-
-                        {/* Input Area */}
-                        {!selectedTicket.autoResolved && !selectedTicket.escalatedToTicket && (
-                            <div className="bg-white border-t border-gray-200 p-4">
-                                <form onSubmit={handleSendMessage} className="flex gap-2 max-w-4xl mx-auto">
-                                    <input
-                                        type="text"
-                                        value={messageInput}
-                                        onChange={(e) => setMessageInput(e.target.value)}
-                                        placeholder="Type your message..."
-                                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                        disabled={isSending}
-                                    />
-                                    <button 
-                                        type="submit" 
-                                        disabled={isSending || !messageInput.trim()}
-                                        className="bg-blue-600 text-white rounded-lg px-4 py-2 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                    >
-                                        <Send size={20} />
-                                    </button>
-                                </form>
-                                <div className="mt-2 flex sm:hidden justify-center gap-2">
-                                     {/* Mobile Action Buttons */}
-                                     <button onClick={handleResolve} className="flex-1 py-2 bg-green-50 text-green-700 text-xs rounded border border-green-200">Mark Resolved</button>
-                                     <button onClick={handleEscalate} className="flex-1 py-2 bg-yellow-50 text-yellow-700 text-xs rounded border border-yellow-200">Escalate</button>
-                                </div>
-                            </div>
-                        )}
-                         {(selectedTicket.autoResolved || selectedTicket.escalatedToTicket) && (
-                            <div className="bg-gray-100 border-t border-gray-200 p-4 text-center text-gray-500 text-sm">
-                                This conversation is closed.
-                            </div>
-                         )}
-                    </>
-                ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
-                        <MessageSquare size={64} className="mb-4 text-gray-200" />
-                        <h3 className="text-xl font-medium text-gray-600">Select a ticket to chat</h3>
-                        <p className="mt-2">Or create a new ticket to start a conversation with our AI.</p>
-                    </div>
-                )}
-            </div>
-        </div>
         </Layout>
     );
 };
