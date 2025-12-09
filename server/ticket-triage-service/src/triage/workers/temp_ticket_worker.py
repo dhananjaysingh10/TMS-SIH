@@ -59,21 +59,31 @@ def process_escalation(escalation_data: dict):
         # Generate a permanent ticket ID
         permanent_ticket_id = str(uuid.uuid4())
 
-        # Build the description with chat history context
-        full_description = issue_description
+        # Use only the original issue description (first user message)
+        # Do NOT append chat history - keep description clean and focused
+        # ALWAYS extract from chat_history to avoid any corrupted issueDescription
+        original_description = ""
+        
         if chat_history:
-            chat_summary = "\n\n--- Chat History ---\n"
-            for msg in chat_history[:10]:  # Limit to last 10 messages
-                # Handle possible dict or object structure
-                role = "User" if msg.get("role") == "user" else "AI"
-                chat_summary += f"{role}: {msg.get('message', '')}\n"
-            full_description += chat_summary
+            # Get the FIRST user message - this is the original issue
+            first_user_msg = next((msg.get("message", "") for msg in chat_history if msg.get("role") == "user"), "")
+            original_description = first_user_msg
+        
+        # Fallback to issue_description only if no chat history exists
+        if not original_description:
+            # If issueDescription contains "--- Chat History ---", strip it
+            if issue_description and "--- Chat History ---" in issue_description:
+                original_description = issue_description.split("--- Chat History ---")[0].strip()
+            else:
+                original_description = issue_description or "Issue from Chatbot"
+        
+        LOG.info(f"📝 Using original description: {original_description[:100]}...")
 
         # Create permanent ticket payload (matching the expected schema)
         permanent_ticket = {
             "ticketId": permanent_ticket_id,
             "title": issue_title,
-            "description": full_description,
+            "description": original_description,
             "priority": "medium",
             "department": "IT",  # Default, will be classified by the classifier
             "product": "Unknown Product", # Default, will be updated by classifier
