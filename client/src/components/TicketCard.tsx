@@ -133,7 +133,7 @@ export default function TicketCard({
         </span>
         {productName && (
           <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-violet-100 text-violet-700">
-            {productName}
+            {productName=="Default Product" ? "Legacy" : productName}
           </span>
         )}
         <span

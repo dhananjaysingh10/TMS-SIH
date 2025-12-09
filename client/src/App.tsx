@@ -14,6 +14,7 @@ import NotificationsPage from "./pages/Notifications";
 import ProfilePage from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProductManagement from "./pages/ProductManagement";
+import PendingDepartmentChanges from "./pages/PendingDepartmentChanges";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -36,6 +37,7 @@ const App: React.FC = () => {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/product-management" element={<ProductManagement />} />
+        <Route path="/pending-department-changes" element={<PendingDepartmentChanges />} />
         {/* Add dashboard route later */}
       </Routes>
     </Router>
