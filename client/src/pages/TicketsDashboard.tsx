@@ -58,7 +58,7 @@ export default function TicketsDashboard() {
         endpoint += `&productId=${productId}`;
       }
       if (debouncedSearchTerm) {
-         endpoint += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
+        endpoint += `&search=${encodeURIComponent(debouncedSearchTerm)}`;
       }
       const res = await ticketsApi.getAll(endpoint);
       setTickets(res);
@@ -147,6 +147,7 @@ export default function TicketsDashboard() {
                 key={ticket._id}
                 _id={ticket._id}
                 ticketId={ticket.ticketId}
+                displayId={ticket.displayId}
                 title={ticket.title}
                 status={ticket.status}
                 priority={ticket.priority}
