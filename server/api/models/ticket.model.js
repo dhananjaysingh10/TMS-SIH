@@ -62,6 +62,7 @@ const commentSchema = new mongoose.Schema({
 const ticketSchema = new mongoose.Schema(
   {
     ticketId: { type: String, required: true, unique: true },
+    displayId: { type: String, unique: true, sparse: true }, // TKT000001, TKT000002, etc.
     department: {
       type: String,
       default: null, // Legacy field, kept for migration compatibility

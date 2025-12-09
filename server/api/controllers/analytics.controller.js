@@ -299,7 +299,7 @@ export const getDepartmentAnalytics = async (req, res) => {
         if (startDate) {
             acceptanceMatchQuery.updatedAt = { $gte: startDate, $lte: endDate };
         }
-        
+
         const acceptanceStats = await Ticket.aggregate([
             { $match: acceptanceMatchQuery },
             {
@@ -404,19 +404,35 @@ export const getEmployeeAnalytics = async (req, res) => {
         }
 
         const range = req.query.range || '1m';
+        const productId = req.query.productId; // Optional product filter
         const { startDate, endDate } = getDateRange(range);
-        
+
         let employees;
         let departmentName = user.department;
 
         if (user.role === 'super-admin') {
-            // Super admin sees all employees if no specific department logic (currently global)
-            // Ideally should support department filtering here too, but for now global
-            employees = await User.find({ role: 'user' }).select('_id name email profilePicture');
-            departmentName = "All Departments";
+            // Super admin can filter by product or see all
+            if (productId) {
+                // Get departments under this product, then find users in those departments
+                const Department = (await import('../models/department.model.js')).default;
+                const Product = (await import('../models/product.model.js')).default;
+                const product = await Product.findById(productId).select('name');
+                const departments = await Department.find({ product: productId }).select('_id');
+                const departmentIds = departments.map(d => d._id);
+
+                employees = await User.find({
+                    departments: { $in: departmentIds },
+                    role: 'employee'
+                }).select('_id name email profilePicture');
+                departmentName = product?.name || "Selected Product";
+            } else {
+                // No product filter - show all employees
+                employees = await User.find({ role: 'employee' }).select('_id name email profilePicture');
+                departmentName = "All Products";
+            }
         } else {
-             const department = user.department;
-             employees = await User.find({ department, role: 'user' }).select('_id name email profilePicture');
+            const department = user.department;
+            employees = await User.find({ department, role: 'employee' }).select('_id name email profilePicture');
         }
 
         const employeeStats = await Promise.all(
