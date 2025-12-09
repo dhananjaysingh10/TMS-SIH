@@ -148,6 +148,11 @@ Detailed Answer:"""
             if len(llm_response.strip()) < 25:
                 llm_response = "I couldn't find a solution in the documentation. I will escalate this to a human agent for you."
 
+        # Apply Post-Processing for Markdown
+        from src.triage.chatbot_server.text_processor import format_response_to_markdown
+        llm_response = format_response_to_markdown(llm_response)
+
+
         return SuggestionResponse(
             answer=llm_response,
             context_used=context_texts,
