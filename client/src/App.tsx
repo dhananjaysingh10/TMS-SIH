@@ -14,8 +14,7 @@ import UserTicket from "./pages/userticket";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AdminDashboard from "./pages/AdminDashboard";
-import PendingDepartmentChanges from "./pages/PendingDepartmentChanges";
-
+import Helpdesk from "./pages/Helpdesk";
 import ProductManagement from "./pages/ProductManagement";
 import ProfilePage from "./pages/Profile";
 
@@ -27,6 +26,7 @@ const App: React.FC = () => {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/" element={<Home />} />
+        <Route path="/helpdesk" element={<Helpdesk />} />
         <Route path="/tickets" element={<TicketsDashboard />} />
         <Route path="/tickets/:productId" element={<TicketsDashboard />} />
         <Route path="/my-tickets/:productId" element={<MyTickets />} />
@@ -39,7 +39,6 @@ const App: React.FC = () => {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/product-management" element={<ProductManagement />} />
-        <Route path="/pending-department-changes" element={<PendingDepartmentChanges />} />
         {/* Add dashboard route later */}
       </Routes>
     </Router>

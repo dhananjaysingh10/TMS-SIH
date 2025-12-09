@@ -8,6 +8,8 @@ import { productApi, usersApi } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
 import CreateTicketModal from "./createticket";
 
+import CreateTicketModal from "./createticket";
+
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,6 +26,8 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [myProducts, setMyProducts] = useState<UserProduct[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
 
@@ -84,6 +88,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   const navItems = [
     { path: "/", icon: Home, label: "Home" },
+    { path: "/helpdesk", icon: MessageSquare, label: "Helpdesk" },
     { path: "/created-by-me", icon: User, label: "Tickets Created by Me" },
     ...(currentUser?.role === "admin" || currentUser?.role === "super-admin"
       ? [
@@ -324,3 +329,4 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     </>
   );
 }
+```
