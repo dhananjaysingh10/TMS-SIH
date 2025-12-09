@@ -311,15 +311,19 @@ export const getAllTickets = async (req, res) => {
         console.log(`getAllTickets: User ${userId} is admin of product ${productId}? ${isAdminOfThisProduct}`);
       }
 
-      // If NOT admin of this product, filter to only user's departments
+      // If NOT admin of this product, filter to only user's departments (as member OR lead)
       if (!isAdminOfThisProduct && userId) {
-        const user = await User.findById(userId).select('departments');
-        if (user && user.departments) {
-          // Intersect user's departments with product's departments
-          const userDeptIds = user.departments.map(d => d.toString());
-          departmentIds = departmentIds.filter(d => userDeptIds.includes(d.toString()));
-          console.log(`getAllTickets: User ${userId} filtered to ${departmentIds.length} departments in product ${productId}`);
-        }
+        // Query Department collection directly for reliability
+        const userAuthorizedDepts = await Department.find({
+          product: productId,
+          $or: [
+            { members: userId },
+            { lead: userId }
+          ]
+        }).select('_id');
+
+        departmentIds = userAuthorizedDepts.map(d => d._id);
+        console.log(`getAllTickets: User ${userId} authorized for departments: ${departmentIds.join(', ')}`);
       }
 
       query.departmentRef = { $in: departmentIds };
