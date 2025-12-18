@@ -4,6 +4,7 @@ from fastembed import TextEmbedding
 from ..config import settings
 from ..schemas.models import ClassificationOutput
 import json
+import os 
 from dotenv import load_dotenv
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
