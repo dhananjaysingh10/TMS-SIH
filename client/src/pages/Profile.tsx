@@ -25,13 +25,21 @@ interface User {
   profilePicture: string;
   role: "user" | "admin" | "super-admin";
   department:
-    | "IT"
-    | "DevOps"
-    | "Software"
-    | "Networking"
-    | "Cybersecurity"
-    | "Other"
-    | "NA";
+  | "IT"
+  | "DevOps"
+  | "Software"
+  | "Networking"
+  | "Cybersecurity"
+  | "Other"
+  | "NA";
+  departments?: {
+    _id: string;
+    name: string;
+    product?: {
+      _id: string;
+      name: string;
+    }
+  }[];
   telegramId?: string;
   createdAt: string;
 }
@@ -426,6 +434,23 @@ export default function ProfilePage() {
                       label="Department"
                       value={user.department}
                     />
+                    <div className="space-y-2 md:col-span-2">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Briefcase className="h-4 w-4" />
+                        <span>Teams</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {user.departments && user.departments.length > 0 ? (
+                          user.departments.map((dept) => (
+                            <span key={dept._id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border">
+                              {dept.name} {dept.product?.name ? `[${dept.product.name}]` : ''}
+                            </span>
+                          ))
+                        ) : (
+                          <p className="text-foreground font-medium">No teams assigned</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -452,9 +477,8 @@ function InfoField({ icon, label, value, capitalize }: InfoFieldProps) {
         <span>{label}</span>
       </div>
       <p
-        className={`text-foreground font-medium ${
-          capitalize ? "capitalize" : ""
-        }`}
+        className={`text-foreground font-medium ${capitalize ? "capitalize" : ""
+          }`}
       >
         {value || "Not provided"}
       </p>

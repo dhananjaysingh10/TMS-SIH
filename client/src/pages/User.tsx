@@ -12,6 +12,14 @@ interface User {
   email: string;
   role: "user" | "employee" | "admin" | "super-admin";
   department: string;
+  departments?: {
+    _id: string;
+    name: string;
+    product?: {
+      _id: string;
+      name: string;
+    }
+  }[];
   primaryPhone?: string;
   profilePicture?: string;
 }
@@ -105,7 +113,7 @@ export default function Users() {
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
+                    Teams
                   </th>
                 </tr>
               </thead>
@@ -128,8 +136,18 @@ export default function Users() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {user.role}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.department}
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      <div className="flex flex-wrap gap-1">
+                        {user.departments && user.departments.length > 0 ? (
+                          user.departments.map((dept) => (
+                            <span key={dept._id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              {dept.name} {dept.product?.name ? `[${dept.product.name}]` : ''}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-400 italic">No teams</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

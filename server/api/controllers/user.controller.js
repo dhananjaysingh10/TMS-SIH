@@ -49,7 +49,16 @@ export const getSeenNotifications = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find()
+      .select("-password")
+      .populate({
+        path: "departments",
+        select: "name product",
+        populate: {
+          path: "product",
+          select: "name"
+        }
+      });
     res.status(200).json({
       success: true,
       count: users.length,
@@ -94,7 +103,16 @@ export const getMyProducts = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .populate({
+        path: "departments",
+        select: "name product",
+        populate: {
+          path: "product",
+          select: "name"
+        }
+      });
     if (!user) {
       return res.status(404).json({
         success: false,

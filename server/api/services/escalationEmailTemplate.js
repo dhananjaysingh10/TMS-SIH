@@ -1,30 +1,30 @@
 /**
  * Email template for ticket escalation alerts
- * Sent to department leads when tickets are open for 2+ hours without assignment
+ * Sent to department leads when in-progress tickets haven't been resolved within threshold
  */
 
 import dotenv from "dotenv";
 dotenv.config();
 
 export const TICKET_ESCALATION_TEMPLATE = (
-    ticketId,
-    displayId,
-    title,
-    department,
-    priority,
-    createdAt,
-    hoursOpen
+  ticketId,
+  displayId,
+  title,
+  department,
+  priority,
+  createdAt,
+  hoursOpen
 ) => {
-    const appUrl = process.env.CORS_ORIGIN || "http://localhost:3000";
-    const priorityColors = {
-        urgent: "#EF4444",
-        high: "#F97316",
-        medium: "#F59E0B",
-        low: "#10B981"
-    };
-    const priorityColor = priorityColors[priority?.toLowerCase()] || "#3B82F6";
+  const appUrl = process.env.CORS_ORIGIN || "http://localhost:3000";
+  const priorityColors = {
+    urgent: "#EF4444",
+    high: "#F97316",
+    medium: "#F59E0B",
+    low: "#10B981"
+  };
+  const priorityColor = priorityColors[priority?.toLowerCase()] || "#3B82F6";
 
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,15 +55,15 @@ export const TICKET_ESCALATION_TEMPLATE = (
               <!-- Alert Banner -->
               <div style="background-color: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
                 <h1 style="margin: 0; font-size: 20px; font-weight: 600; color: #DC2626;">
-                  ⚠️ Urgent: Ticket Requires Immediate Attention
+                  ⚠️ Urgent: Ticket Pending Resolution
                 </h1>
                 <p style="margin: 8px 0 0 0; font-size: 14px; color: #991B1B;">
-                  This ticket has been open for <strong>${hoursOpen} hours</strong> without being assigned.
+                  This ticket has been in-progress for <strong>${hoursOpen} hours</strong> without being resolved.
                 </p>
               </div>
               
               <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6;">
-                Dear Team Lead, a ticket in your department requires urgent assignment.
+                Dear Team Lead, a ticket in your department requires urgent resolution.
               </p>
 
               <!-- Ticket Details -->
@@ -88,11 +88,11 @@ export const TICKET_ESCALATION_TEMPLATE = (
                   <td style="padding: 8px 0; font-size: 14px; color: #6B7280;">Created At</td>
                   <td align="right" style="padding: 8px 0; font-size: 14px; color: #111827;">
                     ${new Date(createdAt).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    })}
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
                   </td>
                 </tr>
               </table>
@@ -102,14 +102,14 @@ export const TICKET_ESCALATION_TEMPLATE = (
                 <tr>
                   <td align="center" style="padding-bottom: 24px;">
                     <a href="${appUrl}/ticket/${ticketId}" style="display: inline-block; background-color: #DC2626; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: bold; padding: 12px 24px; border-radius: 6px; box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);">
-                      Assign This Ticket Now
+                      Resolve This Ticket Now
                     </a>
                   </td>
                 </tr>
               </table>
 
               <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #6B7280;">
-                Please assign this ticket to an available team member on an urgent basis to ensure timely resolution.
+                Please ensure this ticket is resolved urgently to meet service level expectations.
               </p>
 
             </td>
