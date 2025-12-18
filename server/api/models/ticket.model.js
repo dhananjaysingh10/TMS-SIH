@@ -141,6 +141,14 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    escalationThresholdHours: {
+      type: Number,
+      default: null, // Will be set based on priority: low=2, medium=1, high=0.5, urgent=0.5
+    },
+    escalatedAt: {
+      type: Date,
+      default: null, // Last escalation time
+    },
   },
   { timestamps: true }
 );

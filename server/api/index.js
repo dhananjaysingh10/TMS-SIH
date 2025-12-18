@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 10000;
 
 // Start the escalation cron job
-startEscalationCron();
+// startEscalationCron();
 
 // Routes
 app.use('/api/auth', authRoutes);

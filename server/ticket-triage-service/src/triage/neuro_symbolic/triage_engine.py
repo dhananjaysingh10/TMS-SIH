@@ -230,8 +230,9 @@ Reasoning:
 FINAL DECISION (Team Name Only):'''
 
         try:
+            OLLAMA_API="http://0.0.0.0:5001/ask"
             print(f"\n🤖 LAYER C: Calling Gemma LLM...", flush=True)
-            response = requests.get("http://172.17.0.168:5001/ask", params={"q": prompt}, timeout=15)
+            response = requests.get(OLLAMA_API, params={"prompt": prompt}, timeout=30)
             if response.status_code == 200:
                 llm_output = response.text.strip()
                 print(f"🤖 LAYER C: Gemma Response: {llm_output[:150]}...", flush=True)

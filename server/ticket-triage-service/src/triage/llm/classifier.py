@@ -4,12 +4,13 @@ from fastembed import TextEmbedding
 from ..config import settings
 from ..schemas.models import ClassificationOutput
 import json
-
-client = Groq(api_key=settings.GROQ_API_KEY)
+from dotenv import load_dotenv
+load_dotenv()
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Initialize Qdrant for retrieval
 try:
-    qdrant = QdrantClient(url=settings.VECTOR_DB_URL)
+    qdrant = QdrantClient(url=os.getenv("VECTOR_DB_URL"))
     embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
 except Exception as e:
     print(f"⚠️ Warning: Qdrant/Embedding not initialized in classifier: {e}")
