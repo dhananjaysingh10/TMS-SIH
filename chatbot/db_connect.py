@@ -70,12 +70,12 @@ async def log_conversation(
             upsert=True,
         )
         if result.upserted_id:
-            logging.info(f"📝 Created new chat log for Ticket {ticket_id}")
+            print(f"📝 Created new chat log for Ticket {ticket_id}")
         else:
-            logging.info(f"📝 Appended message to Ticket {ticket_id}")
+            print(f"📝 Appended message to Ticket {ticket_id}")
 
     except Exception as e:
-        logging.error(f"❌ Failed to log to MongoDB: {str(e)}")
+        print(f"❌ Failed to log to MongoDB: {str(e)}")
 
 
 async def get_chat_history(ticket_id: str) -> Optional[Dict[str, Any]]:
