@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
 import { productApi, usersApi } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
-
+import CreateTicketModal from "./createticket";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,7 +22,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [myProducts, setMyProducts] = useState<UserProduct[]>([]);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -140,36 +140,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <ul className="space-y-1">
             {/* Home link */}
             <li>
-              <NavLink
-                to="/"
-                end
-                onClick={onClose}
-                className={({ isActive }) =>
-                  [
-                    "group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none",
-                    isActive
-                      ? "bg-blue-50 text-blue-700 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100",
-                  ].join(" ")
-                }
+              <button
+                onClick={() => {
+                  setIsModalOpen(true);
+                  onClose(); // Close sidebar on mobile
+                }}
+                className="group relative flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition-colors outline-none w-full text-gray-700 hover:bg-gray-100"
               >
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span
-                        className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r bg-blue-600"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
-                      <Home size={18} />
-                    </span>
-                    <span className="text-pretty">Home</span>
-                  </>
-                )}
-              </NavLink>
+                <span className="rounded-md p-2 bg-gray-100 text-gray-600 group-hover:bg-gray-200" aria-hidden="true">
+                  <Ticket size={18} />
+                </span>
+                <span className="text-pretty text-blue-600 font-medium">Create Ticket</span>
+              </button>
             </li>
-
             {/* Tickets expandable menu - only for employees, admins, super-admins */}
             {(currentUser?.role === 'employee' || currentUser?.role === 'admin' || currentUser?.role === 'super-admin') && (
               <li>
@@ -328,6 +311,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </nav>
       </aside>
+      <CreateTicketModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onTicketCreated={() => setIsModalOpen(false)}
+      />
     </>
   );
 }

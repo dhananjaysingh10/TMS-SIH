@@ -54,6 +54,7 @@ async function fetchApi<T>(
 export interface Ticket {
   _id: string;
   ticketId: string;
+  displayId: string;
   department: string;  // Dynamic team name (e.g., "Vendor Onboarding & Reg")
   departmentRef?: {
     _id: string;
@@ -62,6 +63,11 @@ export interface Ticket {
       _id: string;
       name: string;
     };
+  };
+  product?: string;
+  productRef?: {
+    _id: string;
+    name: string;
   };
   subject: string;
   description: string;
@@ -83,6 +89,11 @@ export interface Ticket {
   createdAt: string;
   updatedAt: string;
   inreview: boolean;
+  declinedBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  }[];
 }
 
 export interface Message {

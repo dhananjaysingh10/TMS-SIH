@@ -79,6 +79,14 @@ def process_escalation(escalation_data: dict):
         
         LOG.info(f"📝 Using original description: {original_description[:100]}...")
 
+        # Look up user to get ObjectId for createdBy
+        user = db.users.find_one({"email": user_email})
+        created_by_value = user["_id"] if user else user_email
+        if user:
+            LOG.info(f"👤 Found user for escalation: {user_email} -> {created_by_value}")
+        else:
+            LOG.warning(f"⚠️ User not found for email: {user_email}. Using email string for createdBy.")
+
         # Create permanent ticket payload (matching the expected schema)
         permanent_ticket = {
             "ticketId": permanent_ticket_id,
@@ -89,7 +97,7 @@ def process_escalation(escalation_data: dict):
             "product": "Unknown Product", # Default, will be updated by classifier
             "type": "support",
             "status": "open",
-            "createdBy": user_email,
+            "createdBy": created_by_value,
             "source": "chatbot_escalation",
             "tempTicketId": temp_ticket_id,  # Reference to original temp ticket
             "createdAt": datetime.utcnow(),

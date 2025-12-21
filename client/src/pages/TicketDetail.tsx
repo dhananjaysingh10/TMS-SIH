@@ -3,19 +3,19 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatMessage } from "@/components/chat/ChatMessage";
 import { TicketChatbot } from "@/components/chatbot";
 import {
-  AlertCircle,
-  ArrowLeft,
-  Calendar,
-  CheckCircle,
-  Clock,
-  Loader2,
-  MessageSquare,
-  Send,
-  Sparkles,
-  Tag,
-  User,
-  UserCheck,
-  X,
+    AlertCircle,
+    ArrowLeft,
+    Calendar,
+    CheckCircle,
+    Clock,
+    Loader2,
+    MessageSquare,
+    Send,
+    Sparkles,
+    Tag,
+    User,
+    UserCheck,
+    X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -25,12 +25,12 @@ import "react-toastify/dist/ReactToastify.css";
 import { io, Socket } from "socket.io-client";
 import Layout from "../components/Layout";
 import {
-  activitiesApi,
-  commentsApi,
-  ticketsApi,
-  type Activity,
-  type Message,
-  type Ticket,
+    activitiesApi,
+    commentsApi,
+    ticketsApi,
+    type Activity,
+    type Message,
+    type Ticket,
 } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
 
@@ -101,6 +101,7 @@ export default function TicketDetail() {
     request: false,
   });
   const currentUser = useSelector(selectCurrentUser);
+  const userRole = currentUser?.role;
   const useremail = currentUser ? currentUser.email : "";
   const userId = currentUser ? currentUser.id || (currentUser as any)._id : "";
 
@@ -393,7 +394,7 @@ export default function TicketDetail() {
   }
 
   return (
-    <Layout pageTitle={`Ticket ${ticket.ticketId}`}>
+    <Layout pageTitle={`${ticket?.title}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
@@ -435,7 +436,7 @@ export default function TicketDetail() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className="inline-flex items-center text-base font-bold text-slate-900 bg-slate-100 px-3 py-1 rounded-lg">
-                        #{ticket.ticketId}
+                        #{ticket.displayId}
                       </span>
                       <span
                         className={`text-xs px-3 py-1.5 rounded-lg font-semibold border ${statusColors[ticket.status]
@@ -526,7 +527,7 @@ export default function TicketDetail() {
                         Product
                       </p>
                       <p className="font-semibold text-slate-900 capitalize">
-                        {ticket.departmentRef?.product?.name || "Unknown Product"}
+                        {ticket.productRef?.name || ticket.departmentRef?.product?.name || ticket.product || "Unknown Product"}
                       </p>
                     </div>
                   </div>
@@ -664,6 +665,28 @@ export default function TicketDetail() {
                       )}
                     </div>
                   )}
+
+                  {/* Team Lead - Declined History View */}
+                  {userRole === "admin" &&
+                    ticket.declinedBy &&
+                    ticket.declinedBy.length > 0 && (
+                      <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-md">
+                        <h4 className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">
+                          <AlertCircle size={14} />
+                          Declined By History
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {ticket.declinedBy.map((u: any) => (
+                            <span
+                              key={u._id}
+                              className="inline-flex items-center px-2 py-1 rounded bg-white border border-red-200 text-xs text-red-700 shadow-sm"
+                            >
+                              {u.name} ({u.email})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
                     (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) && (

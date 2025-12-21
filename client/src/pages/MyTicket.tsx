@@ -150,11 +150,12 @@ export default function MyTickets() {
                 key={ticket._id}
                 _id={ticket._id}
                 ticketId={ticket.ticketId}
+                displayId={ticket.displayId}
                 title={ticket.title}
                 status={ticket.status}
                 priority={ticket.priority}
                 department={ticket.department}
-                productName={ticket.departmentRef?.product?.name}
+                productName={ticket.productRef?.name || ticket.departmentRef?.product?.name || ticket.product || "Unknown Product"}
                 createdBy={ticket.createdBy}
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}

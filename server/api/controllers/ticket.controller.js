@@ -2,13 +2,30 @@
 import crypto from "crypto";
 import mongoose from "mongoose";
 import { createClient } from "redis";
+import Counter from "../models/counter.model.js";
 import Department from "../models/department.model.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
+import { findLeastLoadedAgent, findNextAgentForReassignment } from "../services/assignment.service.js";
 import { sendAIResponseEmail, sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const TICKET_QUEUE_NAME = "tickets_queue";
 const FEEDBACK_QUEUE_NAME = "feedback_queue";
+
+const generateUniqueDisplayId = async () => {
+  let isUnique = false;
+  let displayId = "";
+  while (!isUnique) {
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    displayId = `TKT${randomNum}`;
+
+    const existing = await Ticket.findOne({ displayId });
+    if (!existing) {
+      isUnique = true;
+    }
+  }
+  return displayId;
+};
 
 const getRedisClient = async () => {
   const client = createClient({
@@ -60,6 +77,7 @@ const paginateTickets = async (query, page, limit, sortOptions) => {
           select: "name"
         }
       })
+      .populate("productRef", "name")
       .sort(sortOptions)
       .skip(skip)
       .limit(limitNum),
@@ -116,7 +134,16 @@ export const createTicket = async (req, res) => {
       title,
     } = req.body;
     console.log(req.body);
-    const finalTicketId = ticketId || crypto.randomUUID();
+    
+    let finalTicketId = ticketId;
+    if (!finalTicketId) {
+      const counter = await Counter.findByIdAndUpdate(
+        { _id: "ticketId" },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      finalTicketId = counter.seq.toString();
+    }
     
     // Robust user lookup with fallback for system-generated tickets
     let createdBy = await User.findOne({ email: useremail });
@@ -142,29 +169,46 @@ export const createTicket = async (req, res) => {
     }
     
     console.log(createdBy);
-    const assignedTo = await User.findOne({ email: assignedemail });
+    console.log(createdBy);
+    let assignedTo = await User.findOne({ email: assignedemail });
+    // Enforce Role Check for Manual Assignment
+    if (assignedTo && !["employee", "admin", "super-admin"].includes(assignedTo.role)) {
+        console.warn(`Attempted to assign ticket to non-agent user: ${assignedemail} (${assignedTo.role}). Ignoring assignment.`);
+        assignedTo = null;
+    }
     console.log(assignedTo);
 
     // Resolve departmentRef from departmentId or department name
+    // Resolve departmentRef from departmentId or department name
     let departmentRef = null;
     let departmentName = department;
+    let productRef = null;
+    let normalizedProductName = productName;
+
+    // Normalize product name aliases immediately so it's available for fallback
+    if (productName === "e-Tendering Portal") normalizedProductName = "E-Tendering";
+    if (productName === "SAP ERP System") normalizedProductName = "SAP";
 
     if (departmentId) {
       // If departmentId is provided, use it directly
-      const dept = await Department.findById(departmentId);
+      const dept = await Department.findById(departmentId).populate('product');
       if (dept) {
         departmentRef = dept._id;
         departmentName = dept.name;
+        // Also set product info if available
+        if (dept.product) {
+            productRef = dept.product._id;
+            normalizedProductName = dept.product.name;
+        }
       }
     } else if (department) {
-     //now it accepts the department name and product name
-      let productRef = null;
-      if (productName) {
+      // now it accepts the department name and product name
+      if (normalizedProductName) {
         const Product = (await import('../models/product.model.js')).default;
-        const prod = await Product.findOne({ name: productName, isActive: true });
+        const prod = await Product.findOne({ name: normalizedProductName, isActive: true });
         if (prod) {
           productRef = prod._id;
-          console.log(`Found product: ${productName} -> ${productRef}`);
+          console.log(`Found product: ${normalizedProductName} -> ${productRef}`);
         }
       }
       
@@ -180,17 +224,44 @@ export const createTicket = async (req, res) => {
       }
     }
 
+    // --- AUTO-ASSIGNMENT LOGIC ---
+    let isAutoAssigned = false;
+    if (!assignedTo && departmentRef) {
+      console.log(`Auto-assigning ticket in department: ${departmentRef}`);
+      const excludeIds = createdBy ? [createdBy._id] : [];
+      const bestAgentId = await findLeastLoadedAgent(departmentRef, excludeIds);
+      if (bestAgentId) {
+        assignedTo = await User.findById(bestAgentId);
+        isAutoAssigned = true;
+        console.log(`Auto-assigned ticket to user: ${assignedTo?.email}`);
+      } else {
+        console.log("No suitable agent found for auto-assignment.");
+      }
+    }
+    // -----------------------------
+
+    // Determine final status and accepted state
+    // If assigned (either manually or auto), mark as accepted and in-progress? 
+    // User requested specifically for auto-assignment, but generally if assigned it's claimed.
+    // Let's apply it if assignedTo is present.
+    const finalStatus = (assignedTo || status === 'in-progress') ? 'in-progress' : (status || 'open');
+    const finalAccepted = !!assignedTo; // If assigned, it is accepted/claimed
+    const displayId = await generateUniqueDisplayId();
     const newTicket = new Ticket({
       ticketId: finalTicketId,
       department: departmentName,
       departmentRef,
+      product: normalizedProductName,
+      productRef,
       type,
       description,
+      displayId,
       createdBy,
       assignedTo,
-      status,
+      status: finalStatus,
       priority,
       title,
+      accepted: finalAccepted
     });
 
     const savedTicket = await newTicket.save();
@@ -348,7 +419,7 @@ export const createTicketFrontend = async (req, res) => {
                 // Add System Message about Escalation
                 newTempTicket.chatHistory.push({
                      role: "ai",
-                     message: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
+                     message: "The context does not provide a solution to your query. I am automatically escalating this to a human agent for further assistance."
                 });
                 await newTempTicket.save();
 
@@ -542,12 +613,20 @@ export const getTicketById = async (req, res) => {
       },
       {
         path: "departmentRef",
-        select: "name product",
-        populate: {
-          path: "product",
-          select: "name"
-        }
+        select: "name product lead",
+        populate: [
+            { path: "product", select: "name" },
+            { path: "lead", select: "name email" }
+        ]
       },
+      {
+        path: "declinedBy",
+        select: "name email"
+      },
+      {
+        path: "productRef",
+        select: "name"
+      }
     ]);
     if (!ticket) {
       return res.status(404).json({
@@ -575,9 +654,21 @@ export const updateTicket = async (req, res) => {
     const updateData = {
       type,
       description,
-      assignedTo,
+      description,
       status,
     };
+    
+    // Validate assignedTo role if changing assignment
+    if (assignedTo) {
+        const agentUser = await User.findById(assignedTo);
+        if (agentUser && !["employee", "admin", "super-admin"].includes(agentUser.role)) {
+             return res.status(400).json({
+                success: false,
+                message: `Cannot assign ticket to user with role '${agentUser.role}'. Must be employee/admin.`
+             });
+        }
+        updateData.assignedTo = assignedTo; // Only set if valid
+    }
 
     // Handle department update with new system
     if (departmentId) {
@@ -648,6 +739,14 @@ export const acceptTicket = async (req, res) => {
       });
     }
 
+    // Enforce Role Check
+    if (!["employee", "admin", "super-admin"].includes(userToAssign.role)) {
+      return res.status(400).json({
+        success: false,
+        message: `User '${useremail}' has role '${userToAssign.role}'. Only employees or admins can accept tickets.`,
+      });
+    }
+
     const updatedTicket = await Ticket.findByIdAndUpdate(
       ticketId,
       {
@@ -693,53 +792,90 @@ export const acceptTicket = async (req, res) => {
 };
 
 export const unacceptTicket = async (req, res) => {
-  try {
-    const { id: ticketId } = req.params;
-    const { useremail } = req.body;
-    const updatedTicket = await Ticket.findByIdAndUpdate(
-      ticketId,
-      {
-        accepted: false,
-        status: "open",
-        assignedTo: null,
-      },
-      { new: true, runValidators: true }
-    ).populate("assignedTo createdBy", "name email");
+    try {
+      const { id: ticketId } = req.params;
+      const { useremail } = req.body;
+      
+      const ticket = await Ticket.findById(ticketId);
+      if (!ticket) {
+         return res.status(404).json({ success: false, message: "Ticket not found." });
+      }
 
-    if (!updatedTicket) {
-      return res.status(404).json({
+      const user = await User.findOne({ email: useremail });
+      if (!user) {
+         return res.status(404).json({ success: false, message: "User not found." });
+      }
+
+      // Add to declined list if not already there
+      if (!ticket.declinedBy.includes(user._id)) {
+        ticket.declinedBy.push(user._id);
+      }
+      
+      // Save first to update declinedBy count
+      await ticket.save();
+
+      // Find NEXT agent
+      // Note: assignment.service.js must be imported
+      const excludeIds = ticket.createdBy ? [ticket.createdBy] : [];
+      const { agentId, resetDeclined } = await findNextAgentForReassignment(ticket.departmentRef, ticket.declinedBy, excludeIds);
+
+      let updateData = {};
+      if (resetDeclined) {
+         updateData.declinedBy = []; // Reset if everyone declined
+      }
+
+      if (agentId) {
+         updateData.assignedTo = agentId;
+         updateData.status = "in-progress"; // Keep it active
+         updateData.accepted = true; // Auto-accepted/Assigned
+         
+         // Notify new agent
+         const newAgent = await User.findById(agentId);
+         if (newAgent) {
+            console.log(`Re-assigning ticket ${ticket.ticketId} from ${useremail} to ${newAgent.email}`);
+             try {
+                await sendTicketStatusUpdateEmail(
+                    newAgent.email,
+                    ticket.ticketId,
+                    "assigned",
+                    `Ticket reassigned to you after being declined by ${user.name}.`,
+                    Date.now()
+                );
+             } catch (e) {
+                 console.error("Failed to email new agent", e);
+             }
+         }
+      } else {
+         // No agent found (rare fallback)
+         updateData.assignedTo = null;
+         updateData.status = "open";
+         updateData.accepted = false;
+         console.log(`No agent found for re-assignment of ticket ${ticket.ticketId}. Setting to OPEN.`);
+      }
+
+      const updatedTicket = await Ticket.findByIdAndUpdate(
+        ticketId,
+        updateData,
+        { new: true, runValidators: true }
+      ).populate("assignedTo createdBy declinedBy", "name email");
+
+      await logProgress(ticketId, useremail, "Employee declined/unclaimed ticket");
+
+      res.status(200).json({
+        success: true,
+        message: agentId ? "Ticket reassigned successfully." : "Ticket unassigned (no agents available).",
+        data: updatedTicket,
+      });
+
+    } catch (error) {
+      console.error("Error unaccepting ticket:", error);
+      res.status(500).json({
         success: false,
-        message: "Ticket not found.",
+        message: "Server error while unaccepting ticket.",
+        error: error.message,
       });
     }
-
-    await logProgress(ticketId, useremail, "Employee unclaimed ticket");
-    const remark = "Employee uncalimed ticket";
-    try {
-      await sendTicketStatusUpdateEmail(
-        updatedTicket.createdBy.email,
-        updatedTicket.ticketId,
-        updatedTicket.status,
-        remark,
-        Date.now()
-      );
-    } catch (emailError) {
-      console.error("Failed to send status update email:", emailError);
-    }
-    res.status(200).json({
-      success: true,
-      message: "Ticket accepted and assigned successfully.",
-      data: updatedTicket,
-    });
-  } catch (error) {
-    console.error("Error accepting ticket:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server error while accepting ticket.",
-      error: error.message,
-    });
-  }
-};
+  };
 
 export const openTicket = async (req, res) => {
   try {

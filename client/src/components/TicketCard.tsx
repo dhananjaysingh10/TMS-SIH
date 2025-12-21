@@ -4,6 +4,7 @@ interface TicketCardProps {
   _id: string; 
   ticketId: string;
   title: string; 
+  displayId : string;
   status: "open" | "in-progress" | "resolved" | "closed";
   priority: "low" | "medium" | "high";
   department: string;  // Dynamic team name
@@ -81,6 +82,7 @@ function formatDate(dateString: string): string {
 export default function TicketCard({
   _id,
   ticketId,
+  displayId,
   title,
   status,
   priority,
@@ -107,7 +109,7 @@ export default function TicketCard({
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm font-bold text-blue-600">#{ticketId}</span>
+            <span className="text-sm font-bold text-blue-600">#{displayId}</span>
             {isUnaccepted && (
               <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
                 Unclaimed

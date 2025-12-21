@@ -150,4 +150,12 @@ def main():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    main()
+    print("🚀 Email Fetcher Worker Started...")
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print(f"CRITICAL WORKER ERROR: {e}")
+        
+        print("💤 Sleeping for 10 seconds...")
+        time.sleep(10)

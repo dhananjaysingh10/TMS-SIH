@@ -1,12 +1,5 @@
 import User from "../models/user.model.js";
-import Ticket from "../models/ticket.model.js";
-
-const countActiveTickets = async (userId) => {
-    return await Ticket.countDocuments({
-        assignedTo: userId,
-        status: { $in: ["open", "in-progress"] },
-    });
-};
+import { countUserActiveTickets } from "../services/assignment.service.js";
 
 export const getUserAvailability = async (req, res) => {
     try {
@@ -17,7 +10,7 @@ export const getUserAvailability = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        const ticketCount = await countActiveTickets(userId);
+        const ticketCount = await countUserActiveTickets(userId);
 
         res.status(200).json({
             ...user.toObject(),
@@ -37,7 +30,7 @@ export const getProductAvailability = async (req, res) => {
 
         const availabilityData = await Promise.all(
             users.map(async (user) => {
-                const ticketCount = await countActiveTickets(user._id);
+                const ticketCount = await countUserActiveTickets(user._id);
                 return {
                     ...user.toObject(),
                     activeTicketCount: ticketCount,
@@ -60,7 +53,7 @@ export const getDepartmentAvailability = async (req, res) => {
 
         const availabilityData = await Promise.all(
             users.map(async (user) => {
-                const ticketCount = await countActiveTickets(user._id);
+                const ticketCount = await countUserActiveTickets(user._id);
                 return {
                     ...user.toObject(),
                     activeTicketCount: ticketCount,

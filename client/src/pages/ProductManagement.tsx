@@ -1,30 +1,30 @@
-import { useEffect, useState } from "react";
-import Layout from "../components/Layout";
-import { useSelector } from "react-redux";
-import { selectCurrentUser } from "../redux/user/userSlice";
-import { Navigate } from "react-router-dom";
 import {
-    productApi,
-    departmentApi,
-    usersApi,
-    type Product,
-    type Department,
-    type UserBasic,
-} from "../lib/api";
-import {
-    Plus,
-    Edit2,
-    Trash2,
-    Users,
     Building2,
+    Check,
+    ChevronRight,
+    Edit2,
     FolderKanban,
     Loader2,
-    ChevronRight,
-    X,
-    Check,
+    Plus,
     Tag,
+    Trash2,
     UserMinus,
+    Users,
+    X,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
+import Layout from "../components/Layout";
+import {
+    departmentApi,
+    productApi,
+    usersApi,
+    type Department,
+    type Product,
+    type UserBasic,
+} from "../lib/api";
+import { selectCurrentUser } from "../redux/user/userSlice";
 
 export default function ProductManagement() {
     const currentUser = useSelector(selectCurrentUser);

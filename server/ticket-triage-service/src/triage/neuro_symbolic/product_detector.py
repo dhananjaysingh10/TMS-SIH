@@ -21,8 +21,8 @@ PRODUCT_KEYWORDS = {
 
 # Human-readable product names
 PRODUCT_NAMES = {
-    "Product_1": "e-Tendering Portal",
-    "Product_2": "SAP ERP System"
+    "Product_1": "E-Tendering",
+    "Product_2": "SAP"
 }
 
 

@@ -70,6 +70,14 @@ const ticketSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
     },
+    product: {
+        type: String,
+        default: null,
+    },
+    productRef: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+    },
     type: {
       type: String,
       enum: ["bug", "feature", "task", "improvement", "support"],
@@ -135,6 +143,17 @@ const ticketSchema = new mongoose.Schema(
     autoResolve: {
       type: Boolean,
       default: false,
+    },
+    declinedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    displayId: {
+      type: String,
+      required: true,
+
     },
   },
   { timestamps: true }
