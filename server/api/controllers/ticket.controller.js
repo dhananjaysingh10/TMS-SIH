@@ -134,7 +134,7 @@ export const createTicket = async (req, res) => {
       title,
     } = req.body;
     console.log(req.body);
-    
+
     let finalTicketId = ticketId;
     if (!finalTicketId) {
       const counter = await Counter.findByIdAndUpdate(
@@ -144,37 +144,37 @@ export const createTicket = async (req, res) => {
       );
       finalTicketId = counter.seq.toString();
     }
-    
+
     // Robust user lookup with fallback for system-generated tickets
     let createdBy = await User.findOne({ email: useremail });
-    
+
     // If no user found and email is a system fallback, create/find system user
     if (!createdBy && useremail) {
-        // Check if this is a system-generated ticket (fallback email)
-        if (useremail === "system@ticketing.local") {
-            // Find or create a system user for anonymous/email-sourced tickets
-            createdBy = await User.findOne({ email: "system@ticketing.local" });
-            if (!createdBy) {
-                createdBy = await User.create({
-                    email: "system@ticketing.local",
-                    name: "System Bot",
-                    password: crypto.randomBytes(32).toString('hex'), // Random password
-                    role: "system",
-                    department: "IT",
-                    profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                });
-                console.log("Created system user for anonymous tickets");
-            }
+      // Check if this is a system-generated ticket (fallback email)
+      if (useremail === "system@ticketing.local") {
+        // Find or create a system user for anonymous/email-sourced tickets
+        createdBy = await User.findOne({ email: "system@ticketing.local" });
+        if (!createdBy) {
+          createdBy = await User.create({
+            email: "system@ticketing.local",
+            name: "System Bot",
+            password: crypto.randomBytes(32).toString('hex'), // Random password
+            role: "system",
+            department: "IT",
+            profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+          });
+          console.log("Created system user for anonymous tickets");
         }
+      }
     }
-    
+
     console.log(createdBy);
     console.log(createdBy);
     let assignedTo = await User.findOne({ email: assignedemail });
     // Enforce Role Check for Manual Assignment
     if (assignedTo && !["employee", "admin", "super-admin"].includes(assignedTo.role)) {
-        console.warn(`Attempted to assign ticket to non-agent user: ${assignedemail} (${assignedTo.role}). Ignoring assignment.`);
-        assignedTo = null;
+      console.warn(`Attempted to assign ticket to non-agent user: ${assignedemail} (${assignedTo.role}). Ignoring assignment.`);
+      assignedTo = null;
     }
     console.log(assignedTo);
 
@@ -197,8 +197,8 @@ export const createTicket = async (req, res) => {
         departmentName = dept.name;
         // Also set product info if available
         if (dept.product) {
-            productRef = dept.product._id;
-            normalizedProductName = dept.product.name;
+          productRef = dept.product._id;
+          normalizedProductName = dept.product.name;
         }
       }
     } else if (department) {
@@ -211,7 +211,7 @@ export const createTicket = async (req, res) => {
           console.log(`Found product: ${normalizedProductName} -> ${productRef}`);
         }
       }
-      
+
       // Find department with product context
       const query = { name: department, isActive: true };
       if (productRef) {
@@ -298,7 +298,7 @@ export const createTicket = async (req, res) => {
 import fetch from "node-fetch";
 import TemporaryTicket from "../models/temporaryTicket.model.js";
 
-const CHATBOT_SERVICE_URL = "http://localhost:8001/suggest";
+const CHATBOT_SERVICE_URL = "http://localhost:8000/suggest";
 const TEMP_TICKET_ESCALATE_QUEUE = "temp_ticket_escalate_queue";
 
 export const createTicketFrontend = async (req, res) => {
@@ -316,29 +316,29 @@ export const createTicketFrontend = async (req, res) => {
     // BUT IGNORE if Negative keywords are present (e.g. "not satisfied")
     const resolutionKeywords = ["thank", "thanks", "i am satisfied", "satisfied", "issue is solved", "solved", "goodbye", "bye", "ok bye", "close ticket"];
     const negativeKeywords = ["not satisfied", "unsatisfied", "didn't", "fail", "not work", "problem"];
-    
+
     const lowerDesc = description.toLowerCase();
-    
+
     const isNegative = negativeKeywords.some(kw => lowerDesc.includes(kw));
-    
+
     // Only resolve if POSITIVE keywords exist AND NO NEGATIVE keywords exist
     if (!isNegative && resolutionKeywords.some(kw => lowerDesc.includes(kw))) {
-         return res.status(200).json({
-            success: true,
-            message: "Ticket resolved (not created)",
-            data: {
-                aiReply: "Thank you! I'm glad I could help."
-            }
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Ticket resolved (not created)",
+        data: {
+          aiReply: "Thank you! I'm glad I could help."
+        }
+      });
     }
 
     // 1. Find User (Required for Temporary Ticket)
     const user = await User.findOne({ email: useremail });
     if (!user) {
-        // If user doesn't exist, we can't create a temp ticket easily linked to them.
-        // For now, fallback to error or creating a user? 
-        // Assuming user exists for now as they are logged in.
-        return res.status(404).json({ success: false, message: "User not found" });
+      // If user doesn't exist, we can't create a temp ticket easily linked to them.
+      // For now, fallback to error or creating a user? 
+      // Assuming user exists for now as they are logged in.
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     // 2. Create Temporary Ticket
@@ -353,11 +353,11 @@ export const createTicketFrontend = async (req, res) => {
 
     // 3. Add User's Initial Message
     newTempTicket.chatHistory.push({
-        role: "user",
-        message: description,
-        timestamp: new Date()
+      role: "user",
+      message: description,
+      timestamp: new Date()
     });
-    
+
     // Save initially to get an ID
     await newTempTicket.save();
 
@@ -367,96 +367,96 @@ export const createTicketFrontend = async (req, res) => {
     let foundSolution = true;
 
     try {
-        const historyForAi = [{ role: "user", message: description }];
-        
-        const aiRes = await fetch(CHATBOT_SERVICE_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                query: description,
-                chat_history: historyForAi // Only the current message as history
-            })
-        });
+      const historyForAi = [{ role: "user", message: description }];
 
-        if (aiRes.ok) {
-            const contentType = aiRes.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-                const aiData = await aiRes.json();
-                aiResponseText = aiData.answer;
-                foundSolution = aiData.found_solution;
-            } else {
-                console.warn("[Chatbot] Warning: Received non-JSON response. Using raw text.");
-                aiResponseText = await aiRes.text();
-                // Fallback check for failure token in raw text
-                foundSolution = !aiResponseText.includes("NO_SOLUTION_FOUND");
-            }
+      const aiRes = await fetch(CHATBOT_SERVICE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: description,
+          chat_history: historyForAi // Only the current message as history
+        })
+      });
 
-            if (foundSolution) {
-                newTempTicket.chatHistory.push({
-                    role: "ai",
-                    message: aiResponseText
-                });
-                await newTempTicket.save();
-
-                // Send email response if ticket came from email
-                if (isFromEmail && aiResponseText) {
-                    try {
-                        await sendAIResponseEmail(
-                            useremail,
-                            tempTicketId,
-                            description,
-                            aiResponseText
-                        );
-                        console.log(`📧 Sent AI response email to ${useremail}`);
-                    } catch (emailErr) {
-                        console.error("Failed to send AI response email:", emailErr);
-                    }
-                }
-            } else {
-                // 5. Check Logic: If No Solution -> Auto Escalate
-                console.log(`[CreateTicket] Chatbot found no solution. Auto-escalating Temp Ticket ${tempTicketId}`);
-                
-                // Add System Message about Escalation
-                newTempTicket.chatHistory.push({
-                     role: "ai",
-                     message: "The context does not provide a solution to your query. I am automatically escalating this to a human agent for further assistance."
-                });
-                await newTempTicket.save();
-
-                // Trigger Escalation (Inline Logic to avoid circular deps)
-                try {
-                    const redisClient = await getRedisClient();
-                    const escalationPayload = {
-                        ticketId: newTempTicket.tempTicketId, 
-                        issueTitle: title,
-                        issueDescription: description
-                    };
-                    await redisClient.lPush(
-                        TEMP_TICKET_ESCALATE_QUEUE,
-                        JSON.stringify(escalationPayload)
-                    );
-                    await redisClient.disconnect();
-                    
-                    newTempTicket.escalatedToTicket = true;
-                    newTempTicket.issueContext = description;
-                    newTempTicket.issueTitle = title;
-                    await newTempTicket.save();
-
-                } catch (escError) {
-                    console.error("Inline Escalation Failed:", escError);
-                }
-                autoEscalated = true;
-            }
-
+      if (aiRes.ok) {
+        const contentType = aiRes.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const aiData = await aiRes.json();
+          aiResponseText = aiData.answer;
+          foundSolution = aiData.found_solution;
         } else {
-            console.error("Chatbot Service Error:", aiRes.statusText);
-            // Fallback: Just save ticket, maybe escalate? 
-            // For safety, let's auto-escalate if bot fails? OR just return temp ticket.
-            // Let's return temp ticket, user can try chatting or escalate manually.
+          console.warn("[Chatbot] Warning: Received non-JSON response. Using raw text.");
+          aiResponseText = await aiRes.text();
+          // Fallback check for failure token in raw text
+          foundSolution = !aiResponseText.includes("NO_SOLUTION_FOUND");
         }
 
+        if (foundSolution) {
+          newTempTicket.chatHistory.push({
+            role: "ai",
+            message: aiResponseText
+          });
+          await newTempTicket.save();
+
+          // Send email response if ticket came from email
+          if (isFromEmail && aiResponseText) {
+            try {
+              await sendAIResponseEmail(
+                useremail,
+                tempTicketId,
+                description,
+                aiResponseText
+              );
+              console.log(`📧 Sent AI response email to ${useremail}`);
+            } catch (emailErr) {
+              console.error("Failed to send AI response email:", emailErr);
+            }
+          }
+        } else {
+          // 5. Check Logic: If No Solution -> Auto Escalate
+          console.log(`[CreateTicket] Chatbot found no solution. Auto-escalating Temp Ticket ${tempTicketId}`);
+
+          // Add System Message about Escalation
+          newTempTicket.chatHistory.push({
+            role: "ai",
+            message: "The context does not provide a solution to your query. I am automatically escalating this to a human agent for further assistance."
+          });
+          await newTempTicket.save();
+
+          // Trigger Escalation (Inline Logic to avoid circular deps)
+          try {
+            const redisClient = await getRedisClient();
+            const escalationPayload = {
+              ticketId: newTempTicket.tempTicketId,
+              issueTitle: title,
+              issueDescription: description
+            };
+            await redisClient.lPush(
+              TEMP_TICKET_ESCALATE_QUEUE,
+              JSON.stringify(escalationPayload)
+            );
+            await redisClient.disconnect();
+
+            newTempTicket.escalatedToTicket = true;
+            newTempTicket.issueContext = description;
+            newTempTicket.issueTitle = title;
+            await newTempTicket.save();
+
+          } catch (escError) {
+            console.error("Inline Escalation Failed:", escError);
+          }
+          autoEscalated = true;
+        }
+
+      } else {
+        console.error("Chatbot Service Error:", aiRes.statusText);
+        // Fallback: Just save ticket, maybe escalate? 
+        // For safety, let's auto-escalate if bot fails? OR just return temp ticket.
+        // Let's return temp ticket, user can try chatting or escalate manually.
+      }
+
     } catch (botErr) {
-        console.error("Chatbot Connection Error:", botErr);
+      console.error("Chatbot Connection Error:", botErr);
     }
 
     // 6. Return Result
@@ -464,10 +464,10 @@ export const createTicketFrontend = async (req, res) => {
       success: true,
       message: autoEscalated ? "Ticket created and auto-escalated to agent." : "Ticket started as temporary chat.",
       data: {
-          tempTicketId: tempTicketId,
-          aiResponse: aiResponseText || "Chatbot is offline, but ticket created.",
-          autoEscalated: autoEscalated,
-          foundSolution: foundSolution
+        tempTicketId: tempTicketId,
+        aiResponse: aiResponseText || "Chatbot is offline, but ticket created.",
+        autoEscalated: autoEscalated,
+        foundSolution: foundSolution
       }
       // Note: We are NOT returning 'ticket_id' (Permanent ID) unless we want to look it up from escalation.
       // The frontend expects 'ticket_id' usually. If autoEscalated, the temp ticket has 'permanentTicketId' (async update).
@@ -615,8 +615,8 @@ export const getTicketById = async (req, res) => {
         path: "departmentRef",
         select: "name product lead",
         populate: [
-            { path: "product", select: "name" },
-            { path: "lead", select: "name email" }
+          { path: "product", select: "name" },
+          { path: "lead", select: "name email" }
         ]
       },
       {
@@ -657,17 +657,17 @@ export const updateTicket = async (req, res) => {
       description,
       status,
     };
-    
+
     // Validate assignedTo role if changing assignment
     if (assignedTo) {
-        const agentUser = await User.findById(assignedTo);
-        if (agentUser && !["employee", "admin", "super-admin"].includes(agentUser.role)) {
-             return res.status(400).json({
-                success: false,
-                message: `Cannot assign ticket to user with role '${agentUser.role}'. Must be employee/admin.`
-             });
-        }
-        updateData.assignedTo = assignedTo; // Only set if valid
+      const agentUser = await User.findById(assignedTo);
+      if (agentUser && !["employee", "admin", "super-admin"].includes(agentUser.role)) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot assign ticket to user with role '${agentUser.role}'. Must be employee/admin.`
+        });
+      }
+      updateData.assignedTo = assignedTo; // Only set if valid
     }
 
     // Handle department update with new system
@@ -792,90 +792,90 @@ export const acceptTicket = async (req, res) => {
 };
 
 export const unacceptTicket = async (req, res) => {
-    try {
-      const { id: ticketId } = req.params;
-      const { useremail } = req.body;
-      
-      const ticket = await Ticket.findById(ticketId);
-      if (!ticket) {
-         return res.status(404).json({ success: false, message: "Ticket not found." });
-      }
+  try {
+    const { id: ticketId } = req.params;
+    const { useremail } = req.body;
 
-      const user = await User.findOne({ email: useremail });
-      if (!user) {
-         return res.status(404).json({ success: false, message: "User not found." });
-      }
-
-      // Add to declined list if not already there
-      if (!ticket.declinedBy.includes(user._id)) {
-        ticket.declinedBy.push(user._id);
-      }
-      
-      // Save first to update declinedBy count
-      await ticket.save();
-
-      // Find NEXT agent
-      // Note: assignment.service.js must be imported
-      const excludeIds = ticket.createdBy ? [ticket.createdBy] : [];
-      const { agentId, resetDeclined } = await findNextAgentForReassignment(ticket.departmentRef, ticket.declinedBy, excludeIds);
-
-      let updateData = {};
-      if (resetDeclined) {
-         updateData.declinedBy = []; // Reset if everyone declined
-      }
-
-      if (agentId) {
-         updateData.assignedTo = agentId;
-         updateData.status = "in-progress"; // Keep it active
-         updateData.accepted = true; // Auto-accepted/Assigned
-         
-         // Notify new agent
-         const newAgent = await User.findById(agentId);
-         if (newAgent) {
-            console.log(`Re-assigning ticket ${ticket.ticketId} from ${useremail} to ${newAgent.email}`);
-             try {
-                await sendTicketStatusUpdateEmail(
-                    newAgent.email,
-                    ticket.ticketId,
-                    "assigned",
-                    `Ticket reassigned to you after being declined by ${user.name}.`,
-                    Date.now()
-                );
-             } catch (e) {
-                 console.error("Failed to email new agent", e);
-             }
-         }
-      } else {
-         // No agent found (rare fallback)
-         updateData.assignedTo = null;
-         updateData.status = "open";
-         updateData.accepted = false;
-         console.log(`No agent found for re-assignment of ticket ${ticket.ticketId}. Setting to OPEN.`);
-      }
-
-      const updatedTicket = await Ticket.findByIdAndUpdate(
-        ticketId,
-        updateData,
-        { new: true, runValidators: true }
-      ).populate("assignedTo createdBy declinedBy", "name email");
-
-      await logProgress(ticketId, useremail, "Employee declined/unclaimed ticket");
-
-      res.status(200).json({
-        success: true,
-        message: agentId ? "Ticket reassigned successfully." : "Ticket unassigned (no agents available).",
-        data: updatedTicket,
-      });
-
-    } catch (error) {
-      console.error("Error unaccepting ticket:", error);
-      res.status(500).json({
-        success: false,
-        message: "Server error while unaccepting ticket.",
-        error: error.message,
-      });
+    const ticket = await Ticket.findById(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ success: false, message: "Ticket not found." });
     }
-  };
+
+    const user = await User.findOne({ email: useremail });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Add to declined list if not already there
+    if (!ticket.declinedBy.includes(user._id)) {
+      ticket.declinedBy.push(user._id);
+    }
+
+    // Save first to update declinedBy count
+    await ticket.save();
+
+    // Find NEXT agent
+    // Note: assignment.service.js must be imported
+    const excludeIds = ticket.createdBy ? [ticket.createdBy] : [];
+    const { agentId, resetDeclined } = await findNextAgentForReassignment(ticket.departmentRef, ticket.declinedBy, excludeIds);
+
+    let updateData = {};
+    if (resetDeclined) {
+      updateData.declinedBy = []; // Reset if everyone declined
+    }
+
+    if (agentId) {
+      updateData.assignedTo = agentId;
+      updateData.status = "in-progress"; // Keep it active
+      updateData.accepted = true; // Auto-accepted/Assigned
+
+      // Notify new agent
+      const newAgent = await User.findById(agentId);
+      if (newAgent) {
+        console.log(`Re-assigning ticket ${ticket.ticketId} from ${useremail} to ${newAgent.email}`);
+        try {
+          await sendTicketStatusUpdateEmail(
+            newAgent.email,
+            ticket.ticketId,
+            "assigned",
+            `Ticket reassigned to you after being declined by ${user.name}.`,
+            Date.now()
+          );
+        } catch (e) {
+          console.error("Failed to email new agent", e);
+        }
+      }
+    } else {
+      // No agent found (rare fallback)
+      updateData.assignedTo = null;
+      updateData.status = "open";
+      updateData.accepted = false;
+      console.log(`No agent found for re-assignment of ticket ${ticket.ticketId}. Setting to OPEN.`);
+    }
+
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      ticketId,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate("assignedTo createdBy declinedBy", "name email");
+
+    await logProgress(ticketId, useremail, "Employee declined/unclaimed ticket");
+
+    res.status(200).json({
+      success: true,
+      message: agentId ? "Ticket reassigned successfully." : "Ticket unassigned (no agents available).",
+      data: updatedTicket,
+    });
+
+  } catch (error) {
+    console.error("Error unaccepting ticket:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while unaccepting ticket.",
+      error: error.message,
+    });
+  }
+};
 
 export const openTicket = async (req, res) => {
   try {

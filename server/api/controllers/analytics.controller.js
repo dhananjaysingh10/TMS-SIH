@@ -314,7 +314,7 @@ export const getEmployeeAnalytics = async (req, res) => {
         const department = user.department;
 
         // Get all employees in the department
-        const employees = await User.find({ department, role: 'user' }).select('_id name email profilePicture');
+        const employees = await User.find({ department, role: 'employee' }).select('_id name email profilePicture');
 
         const employeeStats = await Promise.all(
             employees.map(async (employee) => {

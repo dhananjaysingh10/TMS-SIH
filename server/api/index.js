@@ -19,6 +19,7 @@ import temporaryTicketRoute from "./routes/temporaryTicket.route.js";
 import availabilityRoute from "./routes/availability.route.js";
 import Ticket from './models/ticket.model.js';
 import User from './models/user.model.js';
+import { startEscalationCron } from './services/escalationCron.js';
 
 dotenv.config();
 connectDB();
@@ -137,6 +138,8 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).json({ success: false, message: 'Route not found' });
 });
+
+startEscalationCron();
 
 // Use server.listen instead of app.listen for Socket.IO
 server.listen(PORT, () => {

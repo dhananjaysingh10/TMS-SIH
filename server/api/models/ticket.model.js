@@ -71,12 +71,12 @@ const ticketSchema = new mongoose.Schema(
       ref: "Department",
     },
     product: {
-        type: String,
-        default: null,
+      type: String,
+      default: null,
     },
     productRef: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
     },
     type: {
       type: String,
@@ -113,6 +113,14 @@ const ticketSchema = new mongoose.Schema(
       default: "open",
     },
     progress: [progressSchema],
+    escalationThresholdHours: {
+      type: Number,
+      default: null,
+    },
+    escalatedAt: {
+      type: Date,
+      default: null,
+    },
     chat: {
       type: [messageSchema], // it contain chats between assigned_to and created_by , it is array of message which is like {userId, content, img_url, time}
       default: [],

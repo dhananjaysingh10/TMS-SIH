@@ -6,7 +6,7 @@ import os
 QUERY = "How do I do vendor registration?"
 
 
-SERVER_URL = "http://localhost:8001/suggest"
+SERVER_URL = "http://localhost:8000/suggest"
 # Always save to the root of the workspace
 OUTPUT_FILE = "/Users/thisisaman408/TMS-SIH/output.txt"
 

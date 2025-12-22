@@ -3,7 +3,7 @@ import requests
 import json
 import unittest
 
-URL = "http://localhost:8001/suggest"
+URL = "http://localhost:8000/suggest"
 
 class TestChatbotFlow(unittest.TestCase):
     def test_basic_query(self):

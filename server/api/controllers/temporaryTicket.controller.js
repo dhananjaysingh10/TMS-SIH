@@ -6,7 +6,7 @@ import TemporaryTicket from "../models/temporaryTicket.model.js";
 import User from "../models/user.model.js";
 
 const TEMP_TICKET_ESCALATE_QUEUE = "temp_ticket_escalate_queue";
-const CHATBOT_SERVICE_URL = "http://localhost:8001/suggest";
+const CHATBOT_SERVICE_URL = "http://localhost:8000/suggest";
 
 /**
  * Get Redis client with connection
@@ -79,61 +79,61 @@ export const createTemporaryTicket = async (req, res) => {
  * Helper function to escalate a temporary ticket
  */
 export const escalateInternal = async (ticket, issueTitle, issueDescription) => {
-    // Avoid double escalation
-    if (ticket.escalatedToTicket) return { success: false, message: "Already escalated" };
-    if (ticket.autoResolved) return { success: false, message: "Already resolved" };
+  // Avoid double escalation
+  if (ticket.escalatedToTicket) return { success: false, message: "Already escalated" };
+  if (ticket.autoResolved) return { success: false, message: "Already resolved" };
 
-    try {
-        const chatHistory = ticket.exportChatHistory();
-        
-        // Robust Title Logic: 
-        // 1. Use provided title
-        // 2. Use existing title (if not empty)
-        // 3. Generate from first user message
-        // 4. Fallback to generic
-        let finalTitle = issueTitle;
-        if (!finalTitle) {
-             if (ticket.issueTitle && ticket.issueTitle.trim().length > 0) {
-                 finalTitle = ticket.issueTitle;
-             } else {
-                 const firstMsg = chatHistory.find(m => m.role === 'user');
-                 if (firstMsg && firstMsg.message) {
-                     finalTitle = firstMsg.message.substring(0, 60);
-                     if (firstMsg.message.length > 60) finalTitle += "...";
-                 }
-             }
+  try {
+    const chatHistory = ticket.exportChatHistory();
+
+    // Robust Title Logic: 
+    // 1. Use provided title
+    // 2. Use existing title (if not empty)
+    // 3. Generate from first user message
+    // 4. Fallback to generic
+    let finalTitle = issueTitle;
+    if (!finalTitle) {
+      if (ticket.issueTitle && ticket.issueTitle.trim().length > 0) {
+        finalTitle = ticket.issueTitle;
+      } else {
+        const firstMsg = chatHistory.find(m => m.role === 'user');
+        if (firstMsg && firstMsg.message) {
+          finalTitle = firstMsg.message.substring(0, 60);
+          if (firstMsg.message.length > 60) finalTitle += "...";
         }
-        finalTitle = finalTitle || "Support Request";
-
-        const escalationPayload = {
-            tempTicketId: ticket.tempTicketId,
-            userId: ticket.userId.toString(),
-            userEmail: ticket.userEmail,
-            issueTitle: finalTitle,
-            issueDescription: issueDescription || generateDescriptionFromChat(chatHistory),
-            chatHistory: chatHistory,
-            createdAt: new Date().toISOString(),
-        };
-
-        const redisClient = await getRedisClient();
-        await redisClient.lPush(
-            TEMP_TICKET_ESCALATE_QUEUE,
-            JSON.stringify(escalationPayload)
-        );
-        await redisClient.disconnect();
-
-        // Update DB
-        ticket.escalatedToTicket = true;
-        ticket.issueContext = issueDescription || ticket.issueContext || "";
-        ticket.issueTitle = finalTitle;
-        ticket.lastActivityAt = new Date();
-        await ticket.save();
-
-        return { success: true, tempTicketId: ticket.tempTicketId };
-    } catch (error) {
-        console.error("Escalation Internal Error: ", error);
-        throw error;
+      }
     }
+    finalTitle = finalTitle || "Support Request";
+
+    const escalationPayload = {
+      tempTicketId: ticket.tempTicketId,
+      userId: ticket.userId.toString(),
+      userEmail: ticket.userEmail,
+      issueTitle: finalTitle,
+      issueDescription: issueDescription || generateDescriptionFromChat(chatHistory),
+      chatHistory: chatHistory,
+      createdAt: new Date().toISOString(),
+    };
+
+    const redisClient = await getRedisClient();
+    await redisClient.lPush(
+      TEMP_TICKET_ESCALATE_QUEUE,
+      JSON.stringify(escalationPayload)
+    );
+    await redisClient.disconnect();
+
+    // Update DB
+    ticket.escalatedToTicket = true;
+    ticket.issueContext = issueDescription || ticket.issueContext || "";
+    ticket.issueTitle = finalTitle;
+    ticket.lastActivityAt = new Date();
+    await ticket.save();
+
+    return { success: true, tempTicketId: ticket.tempTicketId };
+  } catch (error) {
+    console.error("Escalation Internal Error: ", error);
+    throw error;
+  }
 };
 
 /**
@@ -178,128 +178,128 @@ export const addChatMessage = async (req, res) => {
     // 2. Check for Negative Keywords (Auto-Escalation) - PRIORITIZE NEGATIVE TO AVOID FALSE POSITIVE RESOLUTION
     const escalationKeywords = ["not satisfied", "unsatisfied", "didn't help", "useless", "still active", "not resolved", "not working", "fail"];
     const lowerMessage = message.toLowerCase(); // Define lowerMessage here first
-    
+
     if (escalationKeywords.some(kw => lowerMessage.includes(kw))) {
-         console.log(`[Escalation] User is NOT satisfied. Escalating ticket ${id}`);
-         
-         // Get the ORIGINAL first user message as the description (not the "not satisfied" message)
-         const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
-         const escalationResult = await escalateInternal(ticket, ticket.issueTitle || "Issue from Helpdesk", originalDescription);
-         
-         if (escalationResult.success) {
-             return res.status(200).json({
-                success: true,
-                message: "Ticket escalated",
-                data: {
-                    tempTicketId: id,
-                    escalated: true,
-                    aiReply: "I apologize that I couldn't help. I have escalated this ticket to a human agent who will contact you shortly."
-                }
-            });
-         }
+      console.log(`[Escalation] User is NOT satisfied. Escalating ticket ${id}`);
+
+      // Get the ORIGINAL first user message as the description (not the "not satisfied" message)
+      const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
+      const escalationResult = await escalateInternal(ticket, ticket.issueTitle || "Issue from Helpdesk", originalDescription);
+
+      if (escalationResult.success) {
+        return res.status(200).json({
+          success: true,
+          message: "Ticket escalated",
+          data: {
+            tempTicketId: id,
+            escalated: true,
+            aiReply: "I apologize that I couldn't help. I have escalated this ticket to a human agent who will contact you shortly."
+          }
+        });
+      }
     }
 
     // 2.5 Check for Resolution Keywords (User Satisfaction)
     const resolutionKeywords = ["thank", "thanks", "i am satisfied", "satisfied", "issue is solved", "solved", "goodbye", "bye", "ok bye", "close ticket"];
     // lowerMessage already defined above
-    
+
     if (resolutionKeywords.some(kw => lowerMessage.includes(kw))) {
-        console.log(`[Resolution] User is satisfied. Deleting ticket ${id}`);
-        // Delete the ticket immediately
-        await TemporaryTicket.findOneAndDelete({ tempTicketId: id });
-        
-        return res.status(200).json({
-            success: true,
-            message: "Ticket resolved and deleted",
-            data: {
-                tempTicketId: id,
-                resolved: true,
-                aiReply: "Thank you! I'm glad I could help. The ticket has been closed."
-            }
-        });
+      console.log(`[Resolution] User is satisfied. Deleting ticket ${id}`);
+      // Delete the ticket immediately
+      await TemporaryTicket.findOneAndDelete({ tempTicketId: id });
+
+      return res.status(200).json({
+        success: true,
+        message: "Ticket resolved and deleted",
+        data: {
+          tempTicketId: id,
+          resolved: true,
+          aiReply: "Thank you! I'm glad I could help. The ticket has been closed."
+        }
+      });
     }
 
 
 
     // 3. If it's a USER message, Call Chatbot Service
     if (role === 'user') {
-        try {
-            // Prepare chat history for context
-            // Map mongoose subdocuments to plain objects expected by python service
-            const historyForAi = ticket.chatHistory.map(msg => ({
-                role: msg.role,
-                message: msg.message
-            }));
+      try {
+        // Prepare chat history for context
+        // Map mongoose subdocuments to plain objects expected by python service
+        const historyForAi = ticket.chatHistory.map(msg => ({
+          role: msg.role,
+          message: msg.message
+        }));
 
-            const response = await fetch(CHATBOT_SERVICE_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    query: message,
-                    chat_history: historyForAi
-                })
-            });
+        const response = await fetch(CHATBOT_SERVICE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: message,
+            chat_history: historyForAi
+          })
+        });
 
-            if (!response.ok) {
-                console.error("Chatbot Service Failed:", response.statusText);
-                // Fallback: Just let the user's message sit there? Or send a "Service Unavailable" message?
-                // For now, we continue.
-            } else {
-                const aiData = await response.json();
-                
-                // 3. Check if Solution Found
-                if (aiData.found_solution === false) {
-                    
-                    if (!ticket.escalatedToTicket) {
-                        // AUTO-ESCALATE (First time)
-                        console.log(`[Auto-Escalate] No solution found for ${id}`);
-                        
-                        // Add AI explanation message
-                        ticket.chatHistory.push({
-                            role: "ai",
-                            message: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
-                        });
-                        
-                        await ticket.save();
+        if (!response.ok) {
+          console.error("Chatbot Service Failed:", response.statusText);
+          // Fallback: Just let the user's message sit there? Or send a "Service Unavailable" message?
+          // For now, we continue.
+        } else {
+          const aiData = await response.json();
 
-                        // Trigger Escalation - use ORIGINAL first user message, not current message
-                        const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
-                        await escalateInternal(ticket, ticket.issueTitle || "Auto-Escalated: No Solution Found", originalDescription);
-                        
-                        return res.status(200).json({
-                            success: true,
-                            message: "Message added and ticket auto-escalated",
-                            data: {
-                                tempTicketId: ticket.tempTicketId,
-                                messageCount: ticket.chatHistory.length,
-                                escalated: true,
-                                aiReply: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
-                            }
-                        });
-                    } else {
-                         // ALREADY ESCALATED - Just chat appropriately
-                         console.log(`[Chat] Ticket ${id} already escalated. No new escalation.`);
-                         
-                         ticket.chatHistory.push({
-                            role: "ai",
-                            message: aiData.answer || "I cannot help further, a human agent will be with you shortly."
-                        });
-                        await ticket.save();
-                    }
+          // 3. Check if Solution Found
+          if (aiData.found_solution === false) {
 
-                } else {
-                    // Normal Response (Solution Found)
-                    ticket.chatHistory.push({
-                        role: "ai",
-                        message: aiData.answer
-                    });
-                    await ticket.save();
+            if (!ticket.escalatedToTicket) {
+              // AUTO-ESCALATE (First time)
+              console.log(`[Auto-Escalate] No solution found for ${id}`);
+
+              // Add AI explanation message
+              ticket.chatHistory.push({
+                role: "ai",
+                message: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
+              });
+
+              await ticket.save();
+
+              // Trigger Escalation - use ORIGINAL first user message, not current message
+              const originalDescription = generateDescriptionFromChat(ticket.chatHistory);
+              await escalateInternal(ticket, ticket.issueTitle || "Auto-Escalated: No Solution Found", originalDescription);
+
+              return res.status(200).json({
+                success: true,
+                message: "Message added and ticket auto-escalated",
+                data: {
+                  tempTicketId: ticket.tempTicketId,
+                  messageCount: ticket.chatHistory.length,
+                  escalated: true,
+                  aiReply: "I couldn't find a solution in the documentation. I am automatically escalating this to a human agent."
                 }
+              });
+            } else {
+              // ALREADY ESCALATED - Just chat appropriately
+              console.log(`[Chat] Ticket ${id} already escalated. No new escalation.`);
+
+              ticket.chatHistory.push({
+                role: "ai",
+                message: aiData.answer || "I cannot help further, a human agent will be with you shortly."
+              });
+              await ticket.save();
             }
-        } catch (botError) {
-            console.error("Chatbot Error:", botError);
-            // Don't fail the request, just log it. 
+
+          } else {
+            // Normal Response (Solution Found)
+            ticket.chatHistory.push({
+              role: "ai",
+              message: aiData.answer
+            });
+            await ticket.save();
+          }
         }
+      } catch (botError) {
+        console.error("Chatbot Error:", botError);
+        // Don't fail the request, just log it. 
+      }
     }
 
     // Return current state (re-fetch to be sure)
@@ -312,7 +312,7 @@ export const addChatMessage = async (req, res) => {
         tempTicketId: finalTicket.tempTicketId,
         messageCount: finalTicket.chatHistory.length,
         // Return latest message to help frontend
-        latestMessage: finalTicket.chatHistory[finalTicket.chatHistory.length - 1] 
+        latestMessage: finalTicket.chatHistory[finalTicket.chatHistory.length - 1]
       },
     });
   } catch (error) {
@@ -377,10 +377,10 @@ export const escalateToTicket = async (req, res) => {
     const result = await escalateInternal(tempTicket, issueTitle, issueDescription);
 
     if (!result.success && result.message) {
-         return res.status(400).json({
-            success: false,
-            message: result.message
-         });
+      return res.status(400).json({
+        success: false,
+        message: result.message
+      });
     }
 
     res.status(200).json({
@@ -482,7 +482,7 @@ export const getTemporaryTicketsByUser = async (req, res) => {
     const { includeResolved } = req.query;
 
     const query = { userId };
-    
+
     if (includeResolved !== "true") {
       query.autoResolved = false;
       // We want to see escalated tickets so user can continue chatting
@@ -526,7 +526,7 @@ export function generateDescriptionFromChat(chatHistory) {
 
   // Get the first user message as the original issue description
   const firstUserMessage = chatHistory.find((msg) => msg.role === "user");
-  
+
   // Return only the first user message - this is the original issue
   return firstUserMessage ? firstUserMessage.message : "User issue from chatbot";
 }
