@@ -11,7 +11,7 @@ from pypdf import PdfReader
 # Configuration
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DOCS_DIR = os.path.join(SCRIPT_DIR, "../documents")
-COLLECTION_NAME = "auto_suggestion_collection"
+COLLECTION_NAME = "kb_docs"
 CHUNK_SIZE = 500
 OVERLAP = 50
 QDRANT_HOST = "localhost"

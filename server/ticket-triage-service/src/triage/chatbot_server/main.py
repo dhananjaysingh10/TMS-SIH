@@ -1,3 +1,9 @@
+import sys
+from pathlib import Path
+
+# Add project root to path
+sys.path.append(str(Path(__file__).parent.parent.parent.parent))
+
 import os
 # Set environment variables to avoid OpenMP deadlock/runtime errors on macOS
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -10,14 +16,20 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from fastembed import TextEmbedding
+from groq import Groq
+from src.triage.config import settings
 
 # Configuration
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
-COLLECTION_NAME = "auto_suggestion_collection"
-LOCAL_LLM_URL = "http://172.17.0.168:5001/ask"
+COLLECTION_NAME = "kb_docs" # Unified collection
+LOCAL_LLM_URL = settings.LOCAL_LLM_BASE_URL or "http://172.17.0.168:5001/ask"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 MAX_CONTEXT_CHUNKS = 5
+
+# Feature Flag: Use Groq by default if LOCAL_LLM_URL is not explicitly set or reachable
+# You can toggle this via environment variable if needed
+USE_GROQ = os.getenv("USE_GROQ", "true").lower() == "true"
 
 app = FastAPI(title="Ticket Triage Suggestion Service")
 
@@ -38,6 +50,7 @@ class SuggestionResponse(BaseModel):
 # Global Objects (Lazy initialization)
 qdrant_client = None
 embedding_model = None
+groq_client = None
 
 def get_qdrant_client():
     global qdrant_client
@@ -51,6 +64,12 @@ def get_embedding_model():
         # Load model with specific cache text to reuse what script downloaded if possible
         embedding_model = TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
     return embedding_model
+
+def get_groq_client():
+    global groq_client
+    if groq_client is None:
+        groq_client = Groq(api_key=settings.GROQ_API_KEY)
+    return groq_client
 
 def get_embedding(text: str) -> List[float]:
     model = get_embedding_model()
@@ -77,6 +96,21 @@ def query_local_llm(prompt: str) -> str:
         print(f"Error querying LLM: {e}")
         return "Sorry, I could not generate a response at this time."
 
+def query_groq_llm(messages: List[dict]) -> str:
+    """Sends the prompt to Groq API."""
+    try:
+        client = get_groq_client()
+        response = client.chat.completions.create(
+            model="openai/gpt-oss-120b", # Keeping consistent with other workers
+            messages=messages,
+            temperature=0.3,
+            max_tokens=1024
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error querying Groq: {e}")
+        return "Sorry, I encountered an issue connecting to the AI service."
+
 @app.post("/suggest", response_model=SuggestionResponse)
 async def suggest(request: QueryRequest):
     """
@@ -84,7 +118,7 @@ async def suggest(request: QueryRequest):
     1. Vectorize query
     2. Search Qdrant
     3. Construct Prompt (with history)
-    4. Call Local LLM
+    4. Call LLM (Groq or Local)
     """
     try:
         print("DEBUG: Request received", flush=True)
@@ -108,7 +142,7 @@ async def suggest(request: QueryRequest):
         context_str = "\n\n".join(context_texts)
         print(f"DEBUG: Retrieved Context:\n{context_str}", flush=True)
         
-        # Build Chat History String
+        # Build Chat History String for Local LLM
         history_str = ""
         if request.chat_history:
             history_str = "\nCHAT HISTORY:\n"
@@ -116,7 +150,33 @@ async def suggest(request: QueryRequest):
                 role_label = "User" if msg.role == "user" else "Assistant"
                 history_str += f"{role_label}: {msg.message}\n"
         
-        prompt = f"""You are a helpful support assistant.
+        # 4. Call LLM
+        llm_response = ""
+        
+        if USE_GROQ:
+            print("Querying Groq LLM...")
+            # Construct messages for Groq
+            messages = [
+                {"role": "system", "content": "You are a helpful support assistant. Use the provided context to answer the user's question in GREAT DETAIL. If the answer is not in the context, say 'NO_SOLUTION_FOUND'."}
+            ]
+            
+            # Add context message
+            messages.append({
+                "role": "user", 
+                "content": f"Context:\n{context_str}\n\nQuestion: {request.query}"
+            })
+            
+            # Add chat history if supported in this simplistic flow, 
+            # ideally we'd append them as proper role messages, but sticking to context injection for robustness
+            if request.chat_history:
+                 # Flatten history into the user prompt for simplicity 
+                 messages[-1]["content"] = f"Context:\n{context_str}\n\nChat History:\n{history_str}\n\nQuestion: {request.query}"
+
+            llm_response = query_groq_llm(messages)
+            
+        else:
+            print("Querying Local LLM...")
+            prompt = f"""You are a helpful support assistant.
 Use the provided context to answer the user's question in GREAT DETAIL.
 
 Instructions:
@@ -135,10 +195,7 @@ Question:
 {request.query}
 
 Detailed Answer:"""
-        
-        # 4. Call Local LLM
-        print(f"Querying LLM with context length: {len(context_str)}")
-        llm_response = query_local_llm(prompt)
+            llm_response = query_local_llm(prompt)
         
         # Check for NO_SOLUTION_FOUND
         found_solution = True

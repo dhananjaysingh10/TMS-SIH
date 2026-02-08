@@ -91,63 +91,69 @@ def create_ticket_json(sender, subject, body, msg_id):
     return json.dumps(ticket)
 
 def main():
-    """Main function to fetch, process, and queue tickets."""
-    redis_client = connect_to_redis()
-    if not redis_client:
-        return
+    """Main function to fetch, process, and queue tickets continuously."""
+    print("🚀 Starting Email Fetcher Worker...")
+    
+    while True:
+        try:
+            redis_client = connect_to_redis()
+            if not redis_client:
+                print("⚠️ Redis connection failed. Retrying in 60 seconds...")
+                time.sleep(60)
+                continue
 
-    try:
-        # Connect to the mail server
-        mail = imaplib.IMAP4_SSL(IMAP_SERVER)
-        mail.login(EMAIL_ACCOUNT, APP_PASSWORD)
-        mail.select("inbox")
-        print("✅ Logged into email account successfully.")
+            # Connect to the mail server
+            mail = imaplib.IMAP4_SSL(IMAP_SERVER)
+            mail.login(EMAIL_ACCOUNT, APP_PASSWORD)
+            mail.select("inbox")
+            print("✅ Checked for new emails...")
 
-        # Search for all unseen emails
-        status, messages = mail.search(None, "(UNSEEN)")
-        if status != "OK":
-            print("❌ No new messages to process.")
-            return
+            # Search for all unseen emails
+            status, messages = mail.search(None, "(UNSEEN)")
+            if status != "OK":
+                print("❌ No new messages to process.")
+            else:
+                email_ids = messages[0].split()
+                if email_ids:
+                    print(f"📧 Found {len(email_ids)} new emails.")
 
-        email_ids = messages[0].split()
-        print(f"📧 Found {len(email_ids)} new emails.")
+                    for email_id in email_ids:
+                        # Fetch the email by ID
+                        status, msg_data = mail.fetch(email_id, "(RFC822)")
+                        for response_part in msg_data:
+                            if isinstance(response_part, tuple):
+                                msg = email.message_from_bytes(response_part[1])
+                                msg_id_header = msg['Message-ID']
 
-        for email_id in email_ids:
-            # Fetch the email by ID
-            status, msg_data = mail.fetch(email_id, "(RFC822)")
-            for response_part in msg_data:
-                if isinstance(response_part, tuple):
-                    msg = email.message_from_bytes(response_part[1])
-                    msg_id_header = msg['Message-ID']
+                                # 1. Parse Email
+                                sender, subject, body = process_email(msg)
 
-                    # 1. Parse Email
-                    sender, subject, body = process_email(msg)
+                                # 2. Validate Ticket (Simple validation)
+                                if not body or ".com" not in sender: # simplistic validation
+                                    print(f"⚠️ Skipping invalid or external email from {sender}.")
+                                    mail.store(email_id, '+FLAGS', '\\Seen') # Mark as seen and skip
+                                    continue
 
-                    # 2. Validate Ticket (Simple validation)
-                    if not body or ".com" not in sender:
-                        print(f"⚠️ Skipping invalid or external email from {sender}.")
-                        mail.store(email_id, '+FLAGS', '\\Seen') # Mark as seen and skip
-                        continue
+                                # 3. Create JSON
+                                ticket_json = create_ticket_json(sender, subject, body, msg_id_header)
+                                print(f"📄 Generated JSON for ticket from {sender}")
 
-                    # 3. Create JSON
-                    ticket_json = create_ticket_json(sender, subject, body, msg_id_header)
-                    print(f"📄 Generated JSON for ticket from {sender}")
+                                # 4. Push to Queue
+                                redis_client.lpush(TICKET_QUEUE_NAME, ticket_json)
+                                print(f"🚀 Pushed ticket {json.loads(ticket_json)['ticketId']} to queue.")
 
-                    # 4. Push to Queue
-                    redis_client.lpush(TICKET_QUEUE_NAME, ticket_json)
-                    print(f"🚀 Pushed ticket {json.loads(ticket_json)['ticketId']} to queue.")
+                                # 5. Mark as Processed (Important!)
+                                mail.store(email_id, '+FLAGS', '\\Seen')
+                
+            mail.close()
+            mail.logout()
 
-                    # 5. Mark as Processed (Important!)
-                    mail.store(email_id, '+FLAGS', '\\Seen')
-                    # Optional: Move to a 'Processed' folder
-                    # mail.copy(email_id, 'Processed')
-                    # mail.store(email_id, '+FLAGS', '\\Deleted')
-
-        mail.close()
-        mail.logout()
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        except Exception as e:
+            print(f"❌ An error occurred: {e}")
+        
+        # Wait before next iteration
+        print("Waiting 60 seconds before next check...")
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
