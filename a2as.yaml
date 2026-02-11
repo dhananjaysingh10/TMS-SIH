@@ -1,0 +1,174 @@
+manifest:
+  version: "0.1.3"
+  schema: https://a2as.org/cert/schema
+  subject:
+    name: dhananjaysingh10/tms-sih
+    source: https://github.com/dhananjaysingh10/tms-sih
+    branch: main
+    commit: "f3c498f6"
+    scope: [chatbot/agent.py, chatbot/db_connect.py, chatbot/rag_engine.py]
+  issued:
+    by: A2AS.org
+    at: '2026-02-11T16:43:50Z'
+    url: https://a2as.org/certified/agents/dhananjaysingh10/tms-sih
+  signatures:
+    digest: sha256:AmUdQ5jeseTy4vtk7bpXUAaepWDtVrO-q3GR_ai3meM
+    key: ed25519:OmSXjzetAGB7HVGAXWKQtVF_eLfvH_a_7MlJH2CE2gM
+    sig: ed25519:Os53r5WdLGwzmco7v37k_5p42Ov3-QQNT9YPjtX2oECwfkzqETPKOTpXdDbph4yruyWMCte6zFdpSIoDfCJzCg
+
+agents:
+  root_agent:
+    type: instance
+    models: [gemini-2.5-flash]
+    tools: [rag_tool]
+    params:
+      name: assistant
+      instruction: ['ROLE:', You are the personal AI Assistant for Power Grid Corporation of India Limited (POWERGRID)., You
+          assist internal IT employees in resolving support tickets efficiently., 'CONTEXT:', 'You are operating within the
+          internal ticketing system. The users are IT support staff,', 'so you can use technical jargon (LDAP, VPN, Switch
+          Config, SCADA).', 'KNOWLEDGE BASE:', You have access to a secure internal knowledge base containing PDFs of policies
+          and manuals., 'ALWAYS use the `query_knowledge_base` tool when the user asks about specific PowerGrid policies,',
+        'procedures, or technical configurations that might be documented.', 'OBJECTIVES:', 1. Analyze the Ticket Context
+          and User Message., '2. If the query requires specific internal knowledge, use `query_knowledge_base` through rag_tool.',
+        '3. Provide a concise, technical solution or troubleshooting step.', 4. Help the IT employee with any of their query.,
+        '5. strictly answer on the basis of user query. if it demands the context of ticket, only then refer to it.', '6.
+          IF the user asks a specific question (e.g., "What is my name?", "Hi"), answer ONLY that question.', 7. DO NOT blindly
+          output the ticket summary in every response., 8. Only provide technical steps if the user asks for help with the
+          issue., 'TONE:', 'Professional, decisive, safety-conscious (critical for PowerGrid), and efficient.', 'FORMATTING
+          RULES (STRICT):', Your response MUST be formatted in Markdown., '- Use ## Headings for sections.', '- Use - Bullets
+          for steps or lists.', '- Use **Bold** for emphasis (buttons, file paths).', '- Use ```code blocks``` for commands
+          or configs.', 'TONE: Professional, decisive, efficient.']
+
+models:
+  gemini-2.5-flash:
+    type: literal
+    agents: [root_agent]
+
+tools:
+  rag_tool:
+    type: function
+    agents: [root_agent]
+
+imports:
+  Agent: google.adk.agents.Agent
+  Any: typing.Any
+  asyncio: asyncio
+  AsyncIOMotorClient: motor.motor_asyncio.AsyncIOMotorClient
+  BaseModel: pydantic.BaseModel
+  certifi: certifi
+  chromadb: chromadb
+  CORSMiddleware: fastapi.middleware.cors.CORSMiddleware
+  DatabaseSessionService: google.adk.sessions.DatabaseSessionService
+  datetime: datetime.datetime
+  Dict: typing.Dict
+  embedding_functions: chromadb.utils.embedding_functions
+  FastAPI: fastapi.FastAPI
+  Field: pydantic.Field
+  FunctionTool: google.adk.tools.FunctionTool
+  Gemini: google.adk.models.google_llm.Gemini
+  get_chat_history: db_connect.get_chat_history
+  HTTPException: fastapi.HTTPException
+  InMemoryMemoryService: google.adk.memory.InMemoryMemoryService
+  List: typing.List
+  LiteLlm: google.adk.models.lite_llm.LiteLlm
+  load_dotenv: dotenv.load_dotenv
+  log_conversation: db_connect.log_conversation
+  logging: logging
+  Optional: typing.Optional
+  os: os
+  PdfReader: pypdf.PdfReader
+  query_knowledge_base: rag_engine.query_knowledge_base
+  Request: fastapi.Request
+  run_session: agent.run_session
+  Runner: google.adk.runners.Runner
+  sys: sys
+  time: time
+  timezone: datetime.timezone
+  types: google.genai.types
+  Union: typing.Union
+
+functions:
+  chat_endpoint:
+    type: async
+    module: chatbot.main
+    args: [request]
+  chunk_text:
+    type: sync
+    module: chatbot.rag_engine
+    args: [text, chunk_size, overlap]
+    params:
+      returns: List[str]
+  get_chat_history:
+    type: async
+    module: chatbot.db_connect
+    args: [ticket_id]
+    params:
+      returns: Optional[Dict]
+  get_ticket_history:
+    type: async
+    module: chatbot.main
+    args: [ticket_id]
+  health_check:
+    type: async
+    module: chatbot.main
+  ingest_documents:
+    type: sync
+    module: chatbot.rag_engine
+    args: [directory_path]
+  load_pdf_text:
+    type: sync
+    module: chatbot.rag_engine
+    args: [file_path]
+    params:
+      returns: str
+  log_conversation:
+    type: async
+    module: chatbot.db_connect
+    args: [ticket_id, user_email, user_message, ai_response]
+  query_knowledge_base:
+    type: sync
+    module: chatbot.rag_engine
+    args: [query, n_results]
+    params:
+      returns: str
+  run_session:
+    type: async
+    module: chatbot.agent
+    args: [original_message, user_query, user_email, session_id]
+    params:
+      returns: Dict
+
+variables:
+  DATABASE_URL:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [chatbot.agent]
+  MONGO_URI:
+    type: env
+    params:
+      caller: [os.getenv]
+      path: [chatbot.db_connect]
+
+files:
+  directory_path:
+    type: variable
+    actions: [read]
+    params:
+      caller: [os.path.exists, os.makedirs, os.listdir]
+  file_name:
+    type: pattern
+    actions: [read]
+    params:
+      caller: [os.path.join]
+      pattern: [directory_path, file_name]
+
+networks:
+  localhost:
+    type: api
+    actions: [GET]
+    urls: [/]
+    protocols: [http]
+    ports: ["11434"]
+    params:
+      caller: [LiteLlm]
