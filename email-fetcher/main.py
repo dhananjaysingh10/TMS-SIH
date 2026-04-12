@@ -144,6 +144,7 @@ def main():
                     # mail.store(email_id, '+FLAGS', '\\Deleted')
 
         mail.close()
+        
         mail.logout()
 
     except Exception as e:

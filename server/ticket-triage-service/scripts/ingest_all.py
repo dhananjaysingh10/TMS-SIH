@@ -35,7 +35,7 @@ EMBEDDING_MODEL = "BAAI/bge-large-en-v1.5"  # 1024 dimensions
 # Paths (relative to script location)
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-PDF_DIR = PROJECT_ROOT  # PDFs are in root
+PDF_DIR = os.path.join(PROJECT_ROOT, "src", "triage", "chatbot_server", "documents")
 PRODUCTS_DIR = os.path.join(PROJECT_ROOT, "Data", "Products")
 
 # Collections config

@@ -1,4 +1,4 @@
-name=Vendor Onboarding & Reg
+name=Vendor Onboarding & Reg.
 
 primary=[register, registration, sign up, signup, profile, user id, login, password, vendor code, mapping, new bidder, enroll, enrollment, onboard, forgotten, credential, reset]
 

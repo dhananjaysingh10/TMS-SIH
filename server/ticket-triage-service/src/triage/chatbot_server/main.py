@@ -1,4 +1,5 @@
 import os
+import logging
 # Set environment variables to avoid OpenMP deadlock/runtime errors on macOS
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["OMP_NUM_THREADS"] = "1"
@@ -11,11 +12,15 @@ from pydantic import BaseModel
 from qdrant_client import QdrantClient
 from fastembed import TextEmbedding
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # Configuration
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333
 COLLECTION_NAME = "auto_suggestion_collection"
-LOCAL_LLM_URL = "http://172.17.0.168:5001/ask"
+LOCAL_LLM_URL = "https://nonstabile-noncoplanar-dona.ngrok-free.dev/ask"
 EMBEDDING_MODEL_NAME = "BAAI/bge-large-en-v1.5"
 MAX_CONTEXT_CHUNKS = 5
 
@@ -64,8 +69,8 @@ def query_local_llm(prompt: str) -> str:
         # The LLM accepts GET requests with 'q' parameter
         payload = {"q": prompt} 
         response = requests.get(LOCAL_LLM_URL, params=payload, timeout=60)
-        print(f"DEBUG: LLM Status: {response.status_code}", flush=True)
-        print(f"DEBUG: LLM Response Text: '{response.text}'", flush=True)
+        logger.debug(f"LLM Status: {response.status_code}")
+        logger.debug(f"LLM Response Text: '{response.text}'")
         response.raise_for_status()
         try:
             data = response.json()
@@ -74,7 +79,7 @@ def query_local_llm(prompt: str) -> str:
             # Fallback for plain text response
             return response.text
     except Exception as e:
-        print(f"Error querying LLM: {e}")
+        logger.error(f"Error querying LLM: {e}")
         return "Sorry, I could not generate a response at this time."
 
 @app.post("/suggest", response_model=SuggestionResponse)
@@ -87,26 +92,27 @@ async def suggest(request: QueryRequest):
     4. Call Local LLM
     """
     try:
-        print("DEBUG: Request received", flush=True)
+        logger.info("Request received")
         # 1. Vectorize
-        print(f"DEBUG: Embedding query: {request.query}", flush=True)
+        logger.info(f"Embedding query: {request.query}")
         query_vector = get_embedding(request.query)
-        print("DEBUG: Embedding done", flush=True)
+        logger.info("Embedding done")
 
         # 2. Search Qdrant
-        print("DEBUG: Searching Qdrant...", flush=True)
+        # 2. Search Qdrant
+        logger.info("Searching Qdrant...")
         client = get_qdrant_client()
         search_results = client.search(
             collection_name=COLLECTION_NAME,
             query_vector=query_vector,
             limit=MAX_CONTEXT_CHUNKS
         )
-        print(f"DEBUG: Search done. Found {len(search_results)} results", flush=True)
+        logger.info(f"Search done. Found {len(search_results)} results")
 
         # 3. Construct Context
         context_texts = [hit.payload['text'] for hit in search_results]
         context_str = "\n\n".join(context_texts)
-        print(f"DEBUG: Retrieved Context:\n{context_str}", flush=True)
+        logger.debug(f"Retrieved Context:\n{context_str}")
         
         # Build Chat History String
         history_str = ""
@@ -137,7 +143,7 @@ Question:
 Detailed Answer:"""
         
         # 4. Call Local LLM
-        print(f"Querying LLM with context length: {len(context_str)}")
+        logger.info(f"Querying LLM with context length: {len(context_str)}")
         llm_response = query_local_llm(prompt)
         
         # Check for NO_SOLUTION_FOUND
