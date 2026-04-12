@@ -296,22 +296,22 @@
 import { AlertCircle, Grid3x3, List, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+
 import Layout from "../components/Layout";
 import TicketCard from "../components/TicketCard";
 import useDebounce from "../hooks/debounce";
 import { ticketsApi, type Ticket } from "../lib/api";
 import { selectCurrentUser } from "../redux/user/userSlice";
 
-interface Pagination {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+// interface Pagination {
+//   total: number;
+//   page: number;
+//   limit: number;
+//   totalPages: number;
+// }
 
 export default function TicketsCreatedByMe() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const xx = localStorage.getItem("viewMode")||"grid";
   const [viewMode, setViewMode] = useState(xx);
   const currentUser = useSelector(selectCurrentUser);
@@ -349,7 +349,7 @@ export default function TicketsCreatedByMe() {
             debouncedSearchTerm
           )}&page=${currentPage}&limit=${limit}`
         : `/ticket/createdBy/${currentUser.id}?page=${currentPage}&limit=${limit}`;
-      const res = await ticketsApi.getAll(endpoint);
+      const res = await ticketsApi.getCreatedBy(endpoint) as any;
       // Handle different API response formats
       const ticketsData = Array.isArray(res)
         ? res
@@ -454,7 +454,7 @@ export default function TicketsCreatedByMe() {
                 status={ticket.status}
                 priority={ticket.priority}
                 department={ticket.department}
-                productName={ticket.departmentRef?.product?.name}
+                productName={ticket.departmentRef?.product?.name || ticket.productName || undefined}
                 createdBy={ticket.createdBy}
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}

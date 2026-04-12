@@ -5,7 +5,7 @@ interface TicketCardProps {
   ticketId: string;
   title: string; 
   status: "open" | "in-progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high";
+  priority: "low" | "medium" | "high" | "urgent";
   department: string;  // Dynamic team name
   productName?: string;  // Product name (e.g., "e-Tendering Portal")
   createdBy: {
@@ -24,6 +24,7 @@ const priorityColors = {
   low: "bg-gray-100 text-gray-700",
   medium: "bg-blue-100 text-blue-700",
   high: "bg-orange-100 text-orange-700",
+  urgent: "bg-rose-100 text-rose-700",
 };
 
 const statusColors = {
@@ -169,4 +170,3 @@ export default function TicketCard({
     </Link>
   );
 }
-

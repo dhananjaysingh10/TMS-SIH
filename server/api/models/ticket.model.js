@@ -70,6 +70,11 @@ const ticketSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
     },
+    productName: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     type: {
       type: String,
       enum: ["bug", "feature", "task", "improvement", "support"],

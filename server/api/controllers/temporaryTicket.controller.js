@@ -105,7 +105,7 @@ export const escalateInternal = async (ticket, issueTitle, issueDescription) => 
         // Update DB
         ticket.escalatedToTicket = true;
         ticket.issueContext = issueDescription || "";
-        ticket.issueTitle = issueTitle || "";
+        ticket.issueTitle = issueTitle || ticket.issueTitle || "";
         ticket.lastActivityAt = new Date();
         await ticket.save();
 

@@ -1,3 +1,6 @@
+import { store } from "../redux/store";
+import { signoutSuccess } from "../redux/user/userSlice";
+
 //api.ts
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:10000/api";
@@ -20,6 +23,10 @@ async function fetchApi<T>(
         ...options?.headers,
       },
     });
+
+    if (response.status === 401) {
+      store.dispatch(signoutSuccess());
+    }
 
     if (!response.ok) {
       const error: ApiError = {
@@ -55,6 +62,7 @@ export interface Ticket {
   _id: string;
   ticketId: string;
   department: string;  // Dynamic team name (e.g., "Vendor Onboarding & Reg")
+  productName?: string | null;
   departmentRef?: {
     _id: string;
     name: string;
@@ -68,14 +76,14 @@ export interface Ticket {
   title: string;
   type: string;
   status: "open" | "in-progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high";
+  priority: "low" | "medium" | "high" | "urgent";
   createdBy: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
   };
   assignedTo?: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
   };

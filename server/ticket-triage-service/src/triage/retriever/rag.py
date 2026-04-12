@@ -20,11 +20,12 @@ def retrieve_docs(query: str, top_k: int = 5):
             
         query_vector = embeddings[0].tolist()
 
-        results = client.search(
+        query_result = client.query_points(
             collection_name="kb_docs",
-            query_vector=query_vector,
+            query=query_vector,
             limit=top_k
         )
+        results = query_result.points if hasattr(query_result, "points") else query_result
         
         return [
             {

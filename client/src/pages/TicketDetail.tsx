@@ -20,7 +20,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { io, Socket } from "socket.io-client";
 import Layout from "../components/Layout";
@@ -526,7 +526,7 @@ export default function TicketDetail() {
                         Product
                       </p>
                       <p className="font-semibold text-slate-900 capitalize">
-                        {ticket.departmentRef?.product?.name || "Unknown Product"}
+                        {ticket.departmentRef?.product?.name || ticket.productName || "Unknown Product"}
                       </p>
                     </div>
                   </div>
@@ -666,7 +666,7 @@ export default function TicketDetail() {
                   )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
-                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) && (
+                    (ticket.assignedTo?._id === userId || (ticket.assignedTo as any)?._id === userId) && (
                       <button
                         onClick={handleUnacceptTicket}
                         disabled={buttonLoading.unaccept}
@@ -690,7 +690,7 @@ export default function TicketDetail() {
                     )}
                   {ticket.accepted &&
                     ticket.status !== "resolved" &&
-                    (ticket.assignedTo?.id === userId || (ticket.assignedTo as any)?._id === userId) &&
+                    (ticket.assignedTo?._id === userId || (ticket.assignedTo as any)?._id === userId) &&
                     (!resolvepanel ? (
                       <button
                         onClick={() => setResolvePanel(true)}

@@ -54,8 +54,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           // Regular users/employees see only their assigned products
           products = await usersApi.getMyProducts();
         }
-        console.log("Fetched user products:", products);
-        setMyProducts(products || []);
+        const allowedProducts = ["SAP", "E-Tendering", "Default Product"];
+        const filteredProducts = (products || []).filter((p: any) => allowedProducts.includes(p.name));
+        console.log("Fetched user products:", filteredProducts);
+        setMyProducts(filteredProducts);
       } catch (err) {
         console.error("Failed to fetch user products", err);
         setMyProducts([]);

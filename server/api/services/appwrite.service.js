@@ -12,14 +12,22 @@ const client = new Client()
 
 if (process.env.APPWRITE_API_KEY) {
   client.setKey(process.env.APPWRITE_API_KEY);
-} else {
-  console.warn('Warning: APPWRITE_API_KEY is not set.');
 }
 
 const storage = new Storage(client);
 
+const ensureAppwriteReady = () => {
+  if (!process.env.APPWRITE_API_KEY) {
+    throw new Error('Missing APPWRITE_API_KEY environment variable');
+  }
+  if (!appwriteProject) {
+    throw new Error('Missing APPWRITE_PROJECT_ID environment variable');
+  }
+};
+
 export const uploadToAppwrite = async (file, fileType = 'file') => {
   try {
+    ensureAppwriteReady();
     const bucketId = process.env.APPWRITE_BUCKET_ID || process.env.VITE_APPWRITE_BUCKET_ID;
     
     if (!bucketId) {
@@ -61,6 +69,7 @@ export const uploadToAppwrite = async (file, fileType = 'file') => {
 
 export const deleteFromAppwrite = async (fileId) => {
   try {
+    ensureAppwriteReady();
     const bucketId = process.env.APPWRITE_BUCKET_ID;
     await storage.deleteFile(bucketId, fileId);
     return true;

@@ -79,6 +79,11 @@ def process_escalation(escalation_data: dict):
         
         LOG.info(f"📝 Using original description: {original_description[:100]}...")
 
+        created_by_email = (user_email or "").strip()
+        if not created_by_email:
+            created_by_email = "system@ticketing.local"
+            LOG.warning("⚠️ Missing userEmail in escalation payload; defaulting createdBy to system@ticketing.local")
+
         # Create permanent ticket payload (matching the expected schema)
         permanent_ticket = {
             "ticketId": permanent_ticket_id,
@@ -89,7 +94,7 @@ def process_escalation(escalation_data: dict):
             "product": "Unknown Product", # Default, will be updated by classifier
             "type": "support",
             "status": "open",
-            "createdBy": user_email,
+            "createdBy": created_by_email,
             "source": "chatbot_escalation",
             "tempTicketId": temp_ticket_id,  # Reference to original temp ticket
             "createdAt": datetime.utcnow(),
@@ -113,6 +118,9 @@ def process_escalation(escalation_data: dict):
         # Ensure backward compatibility for workers using snake_case
         if "ticket_id" not in queue_payload:
             queue_payload["ticket_id"] = permanent_ticket_id
+            
+        if "createdBy" in queue_payload:
+            queue_payload["createdBy"] = str(queue_payload["createdBy"])
         
         r.rpush(TICKETS_QUEUE, json.dumps(queue_payload))
         LOG.info(f"✅ Pushed permanent ticket {permanent_ticket_id} to classifier queue")

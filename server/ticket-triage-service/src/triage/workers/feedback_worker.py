@@ -23,7 +23,11 @@ except Exception as e:
 
 # Initialize Qdrant & Embedding Model
 try:
-    qdrant = QdrantClient(url=settings.VECTOR_DB_URL)
+    qdrant = QdrantClient(
+        url=settings.VECTOR_DB_URL,
+        check_compatibility=False,
+        prefer_grpc=False,
+    )
     embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
     
     # Ensure collection exists

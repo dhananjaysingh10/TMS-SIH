@@ -9,7 +9,11 @@ client = Groq(api_key=settings.GROQ_API_KEY)
 
 # Initialize Qdrant for retrieval
 try:
-    qdrant = QdrantClient(url=settings.VECTOR_DB_URL)
+    qdrant = QdrantClient(
+        url=settings.VECTOR_DB_URL,
+        check_compatibility=False,
+        prefer_grpc=False,
+    )
     embedding_model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
 except Exception as e:
     print(f"⚠️ Warning: Qdrant/Embedding not initialized in classifier: {e}")
@@ -22,11 +26,12 @@ def retrieve_similar_examples(text: str, limit: int = 3) -> str:
         
     try:
         embedding = list(embedding_model.embed([text]))[0]
-        results = qdrant.search(
+        query_result = qdrant.query_points(
             collection_name="classification_examples",
-            query_vector=embedding.tolist(),
+            query=embedding.tolist(),
             limit=limit
         )
+        results = query_result.points if hasattr(query_result, "points") else query_result
         
         if not results:
             return ""

@@ -72,19 +72,25 @@ Category: {classification['data'].get('department')}
 Context from knowledge base:
 {context}
 
-Provide a helpful solution in plain text, structured for a chat window without markdown support. Use simple formatting like line breaks, dashes, or numbered lists for clarity. The response should include:
-1. Immediate Acknowledgement: A brief, professional acknowledgment of the issue.
-2. Required Information: A list of details needed to process the request, with each item including what it is, why it's needed, and an example.
-3. Next Steps: A brief note on the expected timeline or process (e.g., warranty check, repair/replacement timeline).
-Exclude unrelated details (e.g., redis credentials).
+Provide a helpful solution in plain text, structured for a chat window. Use **Bold** for headers and bullet points for lists. 
+DO NOT use Markdown Tables.
+The response should include:
+1. Immediate Acknowledgement: A brief, professional acknowledgment.
+2. Required Information: Details needed.
+3. Next Steps: Expected timeline.
+
+FORMATTING RULES:
+- Use **Bold** for headers.
+- Use bullet points.
+- No tables.
 
 Example format:
-1. Required Information:
-- [Item 1]: [Why we need it]. Example: [Example]
-- [Item 2]: [Why we need it]. Example: [Example]
+**Required Information:**
+- [Item 1]: [Why we need it]
+- [Item 2]: [Why we need it]
 
-3. Next Steps:
-[Describe next steps, e.g., warranty check, expected timeline]."""
+**Next Steps:**
+[Describe next steps]"""
 
         response = client.chat.completions.create(
             model="openai/gpt-oss-120b",

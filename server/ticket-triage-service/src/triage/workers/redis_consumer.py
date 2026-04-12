@@ -25,7 +25,6 @@ def run():
     while True:
         try:
             result = r.blpop(["tickets_queue"], timeout=60)
-            print(f"ticket received from ticket queue: {result}")
             if result is None:
                 continue
             

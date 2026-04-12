@@ -5,10 +5,19 @@ import { createClient } from "redis";
 import Department from "../models/department.model.js";
 import Ticket from "../models/ticket.model.js";
 import User from "../models/user.model.js";
+import {
+    canonicalizeProductName,
+    ensureAICatalogSynced,
+    resolveProductAndDepartment,
+} from "../services/aiCatalog.service.js";
 import { sendAIResponseEmail, sendTicketStatusUpdateEmail } from "../services/email.service.js";
 
 const TICKET_QUEUE_NAME = "tickets_queue";
 const FEEDBACK_QUEUE_NAME = "feedback_queue";
+const SYSTEM_EMAIL = "system@ticketing.local";
+const SYSTEM_PROFILE_PICTURE =
+  "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+const ASSIGNABLE_ROLES = ["employee", "admin", "super-admin"];
 
 const getRedisClient = async () => {
   const client = createClient({
@@ -36,6 +45,96 @@ const sendFeedbackToQueue = async (ticket, action, oldDept, newDept) => {
   } catch (error) {
     console.error("Error sending feedback to Redis:", error);
   }
+};
+
+const ensureSystemUser = async () => {
+  let systemUser = await User.findOne({ email: SYSTEM_EMAIL });
+  if (systemUser) {
+    return systemUser;
+  }
+
+  systemUser = await User.create({
+    email: SYSTEM_EMAIL,
+    name: "System Bot",
+    password: crypto.randomBytes(32).toString("hex"),
+    role: "admin",
+    department: "IT",
+    profilePicture: SYSTEM_PROFILE_PICTURE,
+  });
+
+  return systemUser;
+};
+
+const pickRoundRobinUser = async (candidates, rrKey) => {
+  if (!candidates || candidates.length === 0) {
+    return null;
+  }
+
+  let redisClient;
+  let index = 0;
+
+  try {
+    redisClient = await getRedisClient();
+    const previous = await redisClient.get(rrKey);
+    if (previous !== null) {
+      index = (Number(previous) + 1) % candidates.length;
+    }
+    await redisClient.set(rrKey, String(index));
+  } catch (err) {
+    console.error("Round-robin key update failed, falling back to first candidate:", err);
+    index = 0;
+  } finally {
+    if (redisClient) {
+      try {
+        await redisClient.disconnect();
+      } catch (disconnectErr) {
+        console.error("Failed to disconnect Redis client:", disconnectErr);
+      }
+    }
+  }
+
+  return candidates[index];
+};
+
+const resolveAutoAssignee = async (departmentDoc, departmentName) => {
+  if (!departmentDoc && !departmentName) {
+    return null;
+  }
+
+  const sortOrder = { name: 1, email: 1 };
+  const roleQuery = { role: { $in: ASSIGNABLE_ROLES } };
+  let candidates = [];
+
+  if (departmentDoc && Array.isArray(departmentDoc.members) && departmentDoc.members.length > 0) {
+    candidates = await User.find({
+      _id: { $in: departmentDoc.members },
+      ...roleQuery,
+    }).sort(sortOrder);
+  }
+
+  if (candidates.length === 0 && departmentDoc?._id) {
+    candidates = await User.find({
+      departments: departmentDoc._id,
+      ...roleQuery,
+    }).sort(sortOrder);
+  }
+
+  if (candidates.length === 0 && departmentName) {
+    candidates = await User.find({
+      department: departmentName,
+      ...roleQuery,
+    }).sort(sortOrder);
+  }
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  const rrKey = departmentDoc?._id
+    ? `rr_index:department:${departmentDoc._id}`
+    : `rr_index:department_name:${departmentName}`;
+
+  return pickRoundRobinUser(candidates, rrKey);
 };
 
 
@@ -115,68 +214,75 @@ export const createTicket = async (req, res) => {
       priority,
       title,
     } = req.body;
-    console.log(req.body);
-    const finalTicketId = ticketId || crypto.randomUUID();
-    
-    // Robust user lookup with fallback for system-generated tickets
-    let createdBy = await User.findOne({ email: useremail });
-    
-    // If no user found and email is a system fallback, create/find system user
-    if (!createdBy && useremail) {
-        // Check if this is a system-generated ticket (fallback email)
-        if (useremail === "system@ticketing.local") {
-            // Find or create a system user for anonymous/email-sourced tickets
-            createdBy = await User.findOne({ email: "system@ticketing.local" });
-            if (!createdBy) {
-                createdBy = await User.create({
-                    email: "system@ticketing.local",
-                    name: "System Bot",
-                    password: crypto.randomBytes(32).toString('hex'), // Random password
-                    role: "system",
-                    department: "IT",
-                    profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
-                });
-                console.log("Created system user for anonymous tickets");
-            }
-        }
-    }
-    
-    console.log(createdBy);
-    const assignedTo = await User.findOne({ email: assignedemail });
-    console.log(assignedTo);
 
-    // Resolve departmentRef from departmentId or department name
+    const finalTicketId = ticketId || crypto.randomUUID();
+
+    const requesterEmail = (useremail || "").trim() || SYSTEM_EMAIL;
+    await ensureAICatalogSynced(false);
+
+    let createdBy = await User.findOne({ email: requesterEmail });
+    if (!createdBy && requesterEmail === SYSTEM_EMAIL) {
+      createdBy = await ensureSystemUser();
+    }
+
+    if (!createdBy) {
+      return res.status(404).json({
+        success: false,
+        message: `User not found for email: ${requesterEmail}`,
+      });
+    }
+
+    let resolvedDepartmentDoc = null;
     let departmentRef = null;
-    let departmentName = department;
+    let departmentName = department || null;
+    let resolvedProductName = canonicalizeProductName(productName) || "";
 
     if (departmentId) {
-      // If departmentId is provided, use it directly
-      const dept = await Department.findById(departmentId);
-      if (dept) {
-        departmentRef = dept._id;
-        departmentName = dept.name;
+      resolvedDepartmentDoc = await Department.findById(departmentId).populate(
+        "product",
+        "name"
+      );
+      if (resolvedDepartmentDoc) {
+        departmentRef = resolvedDepartmentDoc._id;
+        departmentName = resolvedDepartmentDoc.name;
+        resolvedProductName = resolvedDepartmentDoc.product?.name || resolvedProductName;
       }
-    } else if (department) {
-     //now it accepts the department name and product name
-      let productRef = null;
-      if (productName) {
-        const Product = (await import('../models/product.model.js')).default;
-        const prod = await Product.findOne({ name: productName, isActive: true });
-        if (prod) {
-          productRef = prod._id;
-          console.log(`Found product: ${productName} -> ${productRef}`);
-        }
+    } else {
+      const resolved = await resolveProductAndDepartment({
+        productName,
+        departmentName: department,
+        allowCreate: true,
+      });
+
+      if (resolved.departmentDoc?._id) {
+        resolvedDepartmentDoc = await Department.findById(
+          resolved.departmentDoc._id
+        ).populate("product", "name");
       }
-      
-      // Find department with product context
-      const query = { name: department, isActive: true };
-      if (productRef) {
-        query.product = productRef;  // Narrow search to specific product
+
+      if (resolvedDepartmentDoc) {
+        departmentRef = resolvedDepartmentDoc._id;
+        departmentName = resolvedDepartmentDoc.name;
+      } else if (resolved.departmentName) {
+        departmentName = resolved.departmentName;
       }
-      const dept = await Department.findOne(query);
-      if (dept) {
-        departmentRef = dept._id;
-        console.log(`Found department: ${department} -> ${departmentRef}`);
+
+      resolvedProductName = resolved.productName || resolvedProductName;
+    }
+
+    if (!resolvedProductName && resolvedDepartmentDoc?.product?.name) {
+      resolvedProductName = resolvedDepartmentDoc.product.name;
+    }
+
+    let assignedTo = null;
+    if (assignedemail) {
+      assignedTo = await User.findOne({ email: assignedemail.trim() });
+    }
+
+    if (!assignedTo && !assignedemail) {
+      assignedTo = await resolveAutoAssignee(resolvedDepartmentDoc, departmentName);
+      if (!assignedTo && departmentName) {
+        console.warn(`No eligible users found for department: ${departmentName}`);
       }
     }
 
@@ -184,22 +290,22 @@ export const createTicket = async (req, res) => {
       ticketId: finalTicketId,
       department: departmentName,
       departmentRef,
-      type,
+      productName: resolvedProductName || undefined,
+      type: type || "support",
       description,
-      createdBy,
-      assignedTo,
-      status,
-      priority,
+      createdBy: createdBy._id,
+      assignedTo: assignedTo?._id || null,
+      status: status || "open",
+      priority: priority || "medium",
       title,
     });
 
     const savedTicket = await newTicket.save();
-    console.log(savedTicket);
-    const remark = "Your ticket created Succesafuly";
-    await logProgress(newTicket._id, useremail, "Employee created ticket");
+    const remark = "Your ticket was created successfully";
+    await logProgress(newTicket._id, createdBy.email, "Employee created ticket");
     try {
       await sendTicketStatusUpdateEmail(
-        savedTicket.createdBy.email,
+        createdBy.email,
         savedTicket.ticketId,
         savedTicket.status,
         remark,
@@ -356,9 +462,14 @@ export const createTicketFrontend = async (req, res) => {
                 try {
                     const redisClient = await getRedisClient();
                     const escalationPayload = {
-                        ticketId: newTempTicket.tempTicketId, 
+                        ticketId: newTempTicket.tempTicketId,
+                        tempTicketId: newTempTicket.tempTicketId,
+                        userEmail: useremail,
+                        userId: user._id.toString(),
                         issueTitle: title,
-                        issueDescription: description
+                        issueDescription: description,
+                        chatHistory: newTempTicket.exportChatHistory(),
+                        createdAt: new Date().toISOString(),
                     };
                     await redisClient.lPush(
                         TEMP_TICKET_ESCALATE_QUEUE,
@@ -416,11 +527,19 @@ export const getAllTickets = async (req, res) => {
     const query = {};
     let sortOptions = { createdAt: -1 };
 
-    // Filter by productId - get all departments under this product
+    // Filter by productId - get all departments under this product or match by productName
     if (productId) {
+      const product = await mongoose.model('Product').findById(productId);
       const departments = await Department.find({ product: productId }).select('_id');
       const departmentIds = departments.map(d => d._id);
-      query.departmentRef = { $in: departmentIds };
+      
+      query.$or = [
+        { departmentRef: { $in: departmentIds } }
+      ];
+      
+      if (product && product.name) {
+        query.$or.push({ productName: product.name });
+      }
     }
 
     // Filter by assignedTo email - look up user first

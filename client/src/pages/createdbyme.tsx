@@ -65,7 +65,7 @@ export default function CreatedByMe() {
               status={ticket.status}
               priority={ticket.priority}
               department={ticket.department}
-              productName={ticket.departmentRef?.product?.name}
+              productName={ticket.departmentRef?.product?.name || ticket.productName || undefined}
               createdBy={ticket.createdBy}
               assignedTo={ticket.assignedTo}
               createdAt={ticket.createdAt}

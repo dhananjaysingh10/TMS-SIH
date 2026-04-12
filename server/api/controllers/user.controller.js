@@ -1,5 +1,5 @@
-import User from "../models/user.model.js";
 import jwt from 'jsonwebtoken';
+import User from "../models/user.model.js";
 
 export const markNotificationsAsSeen = async (req, res) => {
   try {
@@ -78,9 +78,21 @@ export const getMyProducts = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
+    let products = user.products || [];
+
+    // If no products explicitly assigned, try to find product via Department name
+    if (products.length === 0 && user.department) {
+      const Department = (await import('../models/department.model.js')).default;
+      const dept = await Department.findOne({ name: user.department }).populate('product', 'name _id');
+      if (dept && dept.product) {
+        console.log(`Inferred product for ${user.email} from department ${user.department}: ${dept.product.name}`);
+        products = [dept.product];
+      }
+    }
+
     res.status(200).json({
       success: true,
-      products: user.products || [],
+      products: products,
     });
   } catch (error) {
     console.error("getMyProducts error:", error);

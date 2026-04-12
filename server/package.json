@@ -8,7 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon api/index.js",
     "dev": "nodemon api/index.js",
-    "startbot": "node api/services/tgBot.service.js"
+    "startbot": "node api/services/tgBot.service.js",
+    "backfill:ticket-refs": "node backfill_ticket_product_refs.js"
   },
   "author": "Phoenix",
   "license": "ISC",

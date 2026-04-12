@@ -71,8 +71,8 @@ export default function TicketsDashboard() {
   }
 
   // All tickets for this product (no department filtering)
-  const openTickets = tickets.filter((t) => !t.accepted && t.createdBy.email !== currentUser?.email && !t.inreview);
-  const assignedTickets = tickets.filter((t) => t.accepted && t.status === "in-progress");
+  const openTickets = tickets.filter((t) => !t.accepted && !t.inreview);
+  const assignedTickets = tickets.filter((t) => t.accepted && (t.status === "in-progress" || t.inreview));
   const closedTickets = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
 
   const getPaginatedTickets = (ticketList: Ticket[], page: number) => {
@@ -151,7 +151,7 @@ export default function TicketsDashboard() {
                 status={ticket.status}
                 priority={ticket.priority}
                 department={ticket.department}
-                productName={ticket.departmentRef?.product?.name}
+                productName={ticket.departmentRef?.product?.name || ticket.productName || undefined}
                 createdBy={ticket.createdBy}
                 assignedTo={ticket.assignedTo}
                 createdAt={ticket.createdAt}

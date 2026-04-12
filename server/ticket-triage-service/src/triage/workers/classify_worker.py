@@ -7,6 +7,11 @@ from pathlib import Path
 from datetime import datetime
 import requests
 
+# Avoid tokenizer and OpenMP warnings/deadlocks on fork-heavy worker startup.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+
 # Add project root to path (where src/ is located)
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
@@ -120,18 +125,35 @@ def process_classification(job_data):
         product_name = get_product_name(product_scope)
         LOG.info(f"🏭 Detected Product: {product_name} ({product_scope})")
         
-        triage_result = triage_engine.classify(ticket_text, product=product_scope)
-        
-        # Map TriageEngine result to expected format
-        # TriageEngine now returns real team names!
-        triage_result = {
-            "department": triage_result["assigned_team"],  # Real name (e.g., "Vendor Onboarding & Reg")
-            "department_id": triage_result.get("assigned_team_id", triage_result["assigned_team"]),
-            "confidence": triage_result["confidence_score"],
-            "product": product_name,
-            "product_id": product_scope,
-            "details": triage_result["details"]
-        }
+        if product_scope == "General":
+            LOG.info("⚠️ Product is 'General', skipping Neuro-Symbolic classification.")
+            triage_result = {
+                "department": "General", 
+                "department_id": "General",
+                "confidence": 0.0,
+                "product": product_name,
+                "product_id": product_scope,
+                "details": {"reason": "General inquiry, skipping strict rules"},
+                "layer_c": {
+                    "triggered": False,
+                    "source": "skipped_general_product",
+                    "decision": "General",
+                    "score_gap": None,
+                },
+            }
+        else:
+            engine_result = triage_engine.classify(ticket_text, product=product_scope)
+            
+            # Map TriageEngine result to expected format
+            triage_result = {
+                "department": engine_result["assigned_team"],  
+                "department_id": engine_result.get("assigned_team_id", engine_result["assigned_team"]),
+                "confidence": engine_result["confidence_score"],
+                "product": product_name,
+                "product_id": product_scope,
+                "details": engine_result["details"],
+                "layer_c": engine_result.get("layer_c", {}),
+            }
         
         LOG.info(f"🧠 Neuro-Symbolic Dept: {triage_result['department']} (Conf: {triage_result['confidence']:.2f})")
         
@@ -150,12 +172,9 @@ def process_classification(job_data):
             "createdBy": ticket.get("createdBy")
         })
         
-        # OVERRIDE Department with Neuro-Symbolic Result
-        # This ensures our "95% accuracy" engine rules 
-        classification.department = triage_result['department']
-        
-        # If confidence is lower than engine's, update it? (Optional)
-        # classification.confidence = triage_result['confidence']
+        # OVERRIDE Department with Neuro-Symbolic Result ONLY if it's not General
+        if product_scope != "General":
+            classification.department = triage_result['department']
         
         db.classifications.insert_one({
             "ticketId": ticket_id,
@@ -183,12 +202,24 @@ def process_classification(job_data):
         print(f"   Layer B (Semantic): {details.get('layer_b', {})}")
         print(f"   Combined Scores:    {details.get('combined', {})}")
         print("-" * 70)
-        print(f"🤖 LAYER C (Gemma):    Decision made by LLM → {classification.department}")
+        layer_c_meta = triage_result.get("layer_c", {})
+        layer_c_source = layer_c_meta.get("source", "not_used")
+        print(f"🤖 LAYER C (Groq):     {layer_c_source} → {classification.department}")
         print("=" * 70 + "\n")
         sys.stdout.flush()  # Force output to display
         
         LOG.info(f"✅ Classified: {classification.department}/{classification.type} Priority: {classification.priority}")
         
+        # 3. Assignment is handled by Express backend (authoritative DB).
+        assigned_to_email = ticket.get("assignedTo")
+        if isinstance(assigned_to_email, dict):
+            assigned_to_email = assigned_to_email.get("email")
+        if assigned_to_email:
+            LOG.info(f"👤 Preserving upstream assignment: {assigned_to_email}")
+        else:
+            LOG.info("ℹ️ No upstream assignment found; Express API will auto-assign.")
+
+        # Update ticket data with assignment
         updated_ticket_data = {
             "ticketId": ticket["ticketId"],
             "department": classification.department,
@@ -199,7 +230,7 @@ def process_classification(job_data):
             "title": ticket.get("title"),
             "status": ticket.get("status", "open"),
             "createdBy": ticket.get("createdBy"),
-            "assignedTo": ticket.get("assignedTo")
+            "assignedTo": assigned_to_email
         }
         
         db.tickets.update_one(
@@ -209,6 +240,7 @@ def process_classification(job_data):
                 "product": triage_result.get("product"),
                 "type": classification.type,
                 "priority": classification.priority,
+                "assignedTo": assigned_to_email,
                 "confidence": triage_result.get("confidence"),
                 "classificationMeta": {
                      "neuro_symbolic": triage_result,
@@ -217,7 +249,7 @@ def process_classification(job_data):
                 "updatedAt": datetime.utcnow()
             }}
         )
-        LOG.info(f"✅ Updated Ticket {ticket_id} in MongoDB")
+        LOG.info(f"✅ Updated Ticket {ticket_id} in MongoDB (Assigned: {assigned_to_email})")
         
         LOG.info(f"\n{'*'*80}")
         LOG.info(f"🚀 NOW CALLING send_to_express_api() FOR {ticket_id}")
@@ -246,18 +278,13 @@ def run():
     
     while True:
         try:
-            print("[DEBUG] Waiting for job from classify_queue...", flush=True)
             result = r.blpop(["classify_queue"], timeout=60)
             if result is None:
-                print("[DEBUG] blpop timeout, no job", flush=True)
                 continue
             
-            print(f"[DEBUG] Got job from queue: {result}", flush=True)
             _, raw = result 
             job_data = json.loads(raw)
-            print(f"[DEBUG] Parsed job_data: {job_data}", flush=True)
             process_classification(job_data)
-            print("[DEBUG] process_classification completed", flush=True)
             
         except KeyboardInterrupt:
             LOG.info("\n👋 Classify worker stopped")

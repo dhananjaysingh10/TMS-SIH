@@ -20,12 +20,11 @@ from groq import Groq
 from src.triage.config import settings
 
 # Configuration
-QDRANT_HOST = "localhost"
-QDRANT_PORT = 6333
+QDRANT_URL = settings.VECTOR_DB_URL or "http://localhost:6333"
 COLLECTION_NAME = "kb_docs" # Unified collection
-LOCAL_LLM_URL = settings.LOCAL_LLM_BASE_URL or "http://172.17.0.168:5001/ask"
+LOCAL_LLM_URL = settings.LOCAL_LLM_BASE_URL or ""
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-MAX_CONTEXT_CHUNKS = 5
+MAX_CONTEXT_CHUNKS = 8
 
 # Feature Flag: Use Groq by default if LOCAL_LLM_URL is not explicitly set or reachable
 # You can toggle this via environment variable if needed
@@ -55,7 +54,11 @@ groq_client = None
 def get_qdrant_client():
     global qdrant_client
     if qdrant_client is None:
-        qdrant_client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+        qdrant_client = QdrantClient(
+            url=QDRANT_URL,
+            check_compatibility=False,
+            prefer_grpc=False,
+        )
     return qdrant_client
 
 def get_embedding_model():
@@ -79,6 +82,9 @@ def get_embedding(text: str) -> List[float]:
 
 def query_local_llm(prompt: str) -> str:
     """Sends the prompt to the local LLM."""
+    if not LOCAL_LLM_URL:
+        return "Local LLM URL is not configured. Enable USE_GROQ or set LOCAL_LLM_BASE_URL."
+
     try:
         # The LLM accepts GET requests with 'q' parameter
         payload = {"q": prompt} 
@@ -130,10 +136,13 @@ async def suggest(request: QueryRequest):
         # 2. Search Qdrant
         print("DEBUG: Searching Qdrant...", flush=True)
         client = get_qdrant_client()
-        search_results = client.search(
+        query_result = client.query_points(
             collection_name=COLLECTION_NAME,
-            query_vector=query_vector,
+            query=query_vector,
             limit=MAX_CONTEXT_CHUNKS
+        )
+        search_results = (
+            query_result.points if hasattr(query_result, "points") else query_result
         )
         print(f"DEBUG: Search done. Found {len(search_results)} results", flush=True)
 
@@ -157,7 +166,7 @@ async def suggest(request: QueryRequest):
             print("Querying Groq LLM...")
             # Construct messages for Groq
             messages = [
-                {"role": "system", "content": "You are a helpful support assistant. Use the provided context to answer the user's question in GREAT DETAIL. If the answer is not in the context, say 'NO_SOLUTION_FOUND'."}
+                {"role": "system", "content": "You are a helpful PowerGrid support assistant. Use the provided context to answer the user's question. If the answer is not explicitly in the context, try to provide helpful next steps based on the context. Only say 'NO_SOLUTION_FOUND' if the context is completely irrelevant.\n\nFORMATTING RULES:\n1. Use **Bold** for headers and key terms.\n2. Use Bullet Points or Numbered Lists for steps.\n3. START with a friendly summary.\n4. DO NOT use Markdown Tables. They display poorly. Use lists instead.\n5. Keep the response clean, spacious, and easy to read."}
             ]
             
             # Add context message

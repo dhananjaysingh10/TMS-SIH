@@ -1,25 +1,69 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useDispatch } from 'react-redux';
-import { signInStart, signInFailure, signInSuccess } from '../redux/user/userSlice';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { signInFailure, signInSuccess } from '../redux/user/userSlice';
+
+interface Department {
+  _id: string;
+  name: string;
+  product?: {
+    _id: string;
+    name: string;
+  };
+}
 
 const SignUp: React.FC = () => {
   const [name, setName] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [department, setDepartment] = useState<string>('NA');
+  const [department, setDepartment] = useState<string>('');
   const [primaryPhone, setPrimaryPhone] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  
+  const [groupedDepartments, setGroupedDepartments] = useState<Record<string, Department[]>>({});
+  const [legacyDepartments, setLegacyDepartments] = useState<string[]>([]);
+  const [loadingDepts, setLoadingDepts] = useState<boolean>(true);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/ticket/departments`);
+      if (response.data.success) {
+        const depts: Department[] = response.data.departments;
+        const legacy: string[] = response.data.legacyDepartments || [];
+
+        // Group by Product Name
+        const groups: Record<string, Department[]> = {};
+        depts.forEach((dept) => {
+          const prodName = dept.product?.name || "General";
+          if (!groups[prodName]) groups[prodName] = [];
+          groups[prodName].push(dept);
+        });
+
+        setGroupedDepartments(groups);
+        setLegacyDepartments(legacy);
+      }
+    } catch (error) {
+      console.error("Failed to fetch departments", error);
+      toast.error("Failed to load department list");
+    } finally {
+      setLoadingDepts(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,18 +113,35 @@ const SignUp: React.FC = () => {
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
-              <Select value={department} onValueChange={setDepartment}>
+              <Label htmlFor="department">Team</Label>
+              <Select value={department} onValueChange={setDepartment} required>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select department" />
+                  <SelectValue placeholder={loadingDepts ? "Loading teams..." : "Select your team"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="IT">IT</SelectItem>
-                  <SelectItem value="DevOps">DevOps</SelectItem>
-                  <SelectItem value="Software">Software</SelectItem>
-                  <SelectItem value="Networking">Networking</SelectItem>
-                  <SelectItem value="Cybersecurity">Cyber Security</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  {/* Dynamic Product Groups */}
+                  {Object.entries(groupedDepartments).map(([productName, depts]) => (
+                    <SelectGroup key={productName}>
+                      <SelectLabel>{productName}</SelectLabel>
+                      {depts.map((dept) => (
+                        <SelectItem key={dept._id} value={dept.name}>
+                          {dept.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  ))}
+
+                  {/* Legacy Departments (if any) */}
+                  {legacyDepartments.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>General / Other</SelectLabel>
+                      {legacyDepartments.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
                 </SelectContent>
               </Select>
             </div>
